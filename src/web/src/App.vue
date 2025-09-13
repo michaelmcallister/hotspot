@@ -1,29 +1,27 @@
 <template>
-  <main class="container">
-    <h1>Hotspot</h1>
-    <HelloWorld msg="Hello World!" />
-  </main>
+  <v-app>
+    <v-app-bar>
+      <v-app-bar-title>
+        <v-icon icon="mdi-motorbike" class="mr-2" />
+        Motorcycle Hotspot
+      </v-app-bar-title>
+    </v-app-bar>
+
+    <v-navigation-drawer v-model="drawer" permanent rail>
+      <v-list nav density="comfortable">
+        <v-list-item to="/" prepend-icon="mdi-view-dashboard" title="Dashboard" />
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { useTheme } from "vuetify";
+import { ref } from "vue";
+
+const drawer = ref(true);
 </script>
-
-<style>
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
-    Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
-  color-scheme: light dark;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  padding: 2rem;
-}
-</style>
-
