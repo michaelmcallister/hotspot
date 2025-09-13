@@ -2,12 +2,16 @@
   <main class="container">
     <h1>Hotspot</h1>
     <HelloWorld msg="Hello World!" />
+    <Homepage />
   </main>
 </template>
 
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+
+import Homepage from './Homepage.vue';
 </script>
+
+<!-- Keep the same styles -->
 
 <style>
 :root {
