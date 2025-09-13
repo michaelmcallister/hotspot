@@ -21,3 +21,11 @@ CREATE TABLE default_risk (
   model_default_risk DOUBLE PRECISION,
   postcode_default_risk DOUBLE PRECISION
 );
+
+CREATE TABLE user_input (
+  input_id DOUBLE PRECISION,
+  input_type TEXT,
+  postcode TEXT,
+  brand TEXT,
+  input TEXT,
+);
