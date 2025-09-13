@@ -20,15 +20,37 @@ The **Makefile** in the project root provides shortcuts to work with all compone
 
 ## Prerequisites
 
+### For Local Development
 - **Python 3.11+** with [`uv`](https://docs.astral.sh/uv/getting-started/installation/) for the API
 - **Node.js 20+** and npm for the web frontend
 - **SQLite3** CLI for building the local database
+
+### For Docker
+- **Docker** installed and running
 
 ## Common Commands
 
 From the project root:
 
-### Setup & Build
+### Docker (Quickest way to get started)
+
+```bash
+# Build and run the container (serves on http://localhost:8000)
+make docker-run
+
+# Stop the container
+make docker-stop
+
+# View container logs
+make docker-logs
+
+# Access container shell
+make docker-shell
+```
+
+### Local Development
+
+#### Setup & Build
 
 ```bash
 # Generate the SQLite database from schema + CSVs
@@ -38,9 +60,9 @@ make db
 make build
 ```
 
-### Run in Development
+#### Run in Development
 
-```
+```bash
 # Run both API (http://localhost:8000) and Web (http://localhost:5173)
 make dev
 

@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+docs/
+
+# Development files
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.venv/
+**/.pytest_cache/
+**/*.egg-info/
+
+# Node
+**/node_modules/
+**/dist/
+**/.npm/
+
+# Database (will be generated in Docker)
+src/data/hotspot.db
+
+# Misc
+.DS_Store
+Thumbs.db
