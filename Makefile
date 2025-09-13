@@ -57,3 +57,23 @@ clean-web:
 	@$(MAKE) -C src/web clean
 
 rebuild: clean all
+
+docker-build:
+	@echo "Building Docker image..."
+	@docker build -t hotspot:latest .
+
+docker-run: docker-build
+	@echo "Running Docker container..."
+	@docker run -d --name hotspot -p 8000:8000 hotspot:latest
+	@echo "Application is running at http://localhost:8000"
+
+docker-stop:
+	@echo "Stopping Docker container..."
+	@docker stop hotspot || true
+	@docker rm hotspot || true
+
+docker-logs:
+	@docker logs -f hotspot
+
+docker-shell:
+	@docker exec -it hotspot /bin/sh

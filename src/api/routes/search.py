@@ -4,7 +4,7 @@ from fastapi.responses import PlainTextResponse
 router = APIRouter()
 
 
-@router.get("/api/v1/search")
+@router.get("/v1/search")
 def search(request: Request, q: str = Query(..., description="Search query for suburb or postcode")):
     db = request.app.state.db
     rows = db.fetch_all("""
