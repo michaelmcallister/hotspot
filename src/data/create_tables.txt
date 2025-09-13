@@ -27,5 +27,5 @@ CREATE TABLE user_input (
   input_type TEXT,
   postcode TEXT,
   brand TEXT,
-  input TEXT,
+  input TEXT
 );
