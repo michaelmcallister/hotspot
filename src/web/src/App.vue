@@ -1,13 +1,11 @@
 <template>
   <main class="container">
     <h1>Hotspot</h1>
-    <HelloWorld msg="Hello World!" />
     <Homepage />
   </main>
 </template>
 
 <script setup lang="ts">
-
 import Homepage from './Homepage.vue';
 </script>
 
