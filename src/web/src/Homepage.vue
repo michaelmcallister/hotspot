@@ -17,9 +17,6 @@
         <button @click="findSafeParking" class="btn-primary">
           Find Safe Parking
         </button>
-        <button @click="viewHeatMap" class="btn-outline">
-          View Heat Map
-        </button>
       </div>
     </section>
 
@@ -47,7 +44,6 @@ const shownSuburb = ref('Toorak');
 const safetyScore = ref(92);
 
 const showResources = ref(false);
-const showHeatMap = ref(false);
 
 
 const showStaticReport = () => {
@@ -62,9 +58,6 @@ const findSafeParking = () => {
   alert(`Finding safe parking in ${shownSuburb.value}`);
 };
 
-const viewHeatMap = () => {
-  showHeatMap.value = true;
-};
 </script>
 
 <style scoped>
