@@ -1,0 +1,42 @@
+name: CI/CD to App Runner
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ap-southeast-2
+  ECR_REPO: hotspot
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::023231074070:role/hotspot-autodeploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPO:$IMAGE_TAG .
+          docker tag $ECR_REPO:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          docker tag $ECR_REPO:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/$ECR_REPO:latest
+
+      - name: Push Docker image (latest + sha)
+        run: |
+          docker push ${{ steps.ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          docker push ${{ steps.ecr.outputs.registry }}/$ECR_REPO:latest
