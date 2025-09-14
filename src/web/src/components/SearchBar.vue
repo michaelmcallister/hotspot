@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
 interface Suggestion {
   label: string;
@@ -44,6 +44,7 @@ const emit = defineEmits<{
 
 const search = ref(props.modelValue || '');
 const suggestions = ref<Suggestion[]>([]);
+const defaultSuggestions = ref<Suggestion[]>([]);
 const loading = ref(false);
 const selected = ref<Suggestion | null>(null);
 let debounceId: ReturnType<typeof setTimeout> | undefined;
@@ -54,7 +55,8 @@ watch(() => props.modelValue, val => {
 
 const fetchSuggestions = async (q: string) => {
   if (!q || q.trim().length < 2) {
-    suggestions.value = [];
+    // When query is empty/short, show default list so the dropdown isn't empty
+    suggestions.value = defaultSuggestions.value;
     return;
   }
   loading.value = true;
@@ -72,6 +74,38 @@ const fetchSuggestions = async (q: string) => {
     loading.value = false;
   }
 };
+
+// Prefetch a sensible default list so clicking the dropdown shows items
+const fetchDefaultSuggestions = async () => {
+  try {
+    const params = new URLSearchParams({ scope: 'postcode', order: 'desc', limit: '50' });
+    const res = await fetch(`/api/v1/risk/top?${params.toString()}`);
+    if (!res.ok) throw new Error(`Failed to load defaults (${res.status})`);
+    const rows = await res.json();
+    const mapped: Suggestion[] = Array.isArray(rows)
+      ? rows.map((r: any) => ({
+          label: `${r.suburb} ${r.postcode}`.trim(),
+          suburb: String(r.suburb ?? ''),
+          postcode: String(r.postcode ?? ''),
+          lga: String(r.lga ?? ''),
+          risk_score: Number(r.risk_score ?? 0),
+        }))
+      : [];
+    defaultSuggestions.value = mapped;
+    // If user hasn't typed anything yet we can offer some defaults
+    if (!search.value || search.value.trim().length < 2) {
+      suggestions.value = defaultSuggestions.value;
+    }
+  } catch (e) {
+    // Keep silent failure for defaults so search still works
+    console.error('Default suggestions error:', e);
+    defaultSuggestions.value = [];
+  }
+};
+
+onMounted(() => {
+  fetchDefaultSuggestions();
+});
 
 const onSearchUpdate = (val: string) => {
   search.value = val;
