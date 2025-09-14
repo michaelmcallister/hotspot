@@ -5,13 +5,21 @@
       Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
     </p>
 
-    <SearchBar v-model="searchQuery" @search="showStaticReport" />
+    <SearchBar
+      v-model="searchQuery"
+      @search="showStaticReport"
+      @select="handleSuburbSelect"
+    />
 
-    <ScoreCard :suburb="shownSuburb" :score="safetyScore" />
+    <ScoreCard
+      v-if="selectedSuburb"
+      :suburb="selectedSuburb.suburb"
+      :score="safetyScore"
+    />
 
-    <FeedbackCard :suburb="shownSuburb" />
+    <FeedbackCard v-if="selectedSuburb" :suburb="selectedSuburb.suburb" />
 
-    <section class="card actions-card" aria-labelledby="actions-title">
+    <section v-if="selectedSuburb" class="card actions-card" aria-labelledby="actions-title">
       <h2 id="actions-title" class="sr-only">Actions</h2>
       <div class="actions-row">
         <button @click="findSafeParking" class="btn-primary">
@@ -20,42 +28,76 @@
       </div>
     </section>
 
-    <section class="card resources-card" aria-labelledby="resources-title">
+    <section v-if="selectedSuburb" class="card resources-card" aria-labelledby="resources-title">
       <h2 id="resources-title" class="sr-only">Resources</h2>
       <button @click="showResources = true" class="btn-resources">
         Resources & Contacts
       </button>
     </section>
 
-    <ResourcesModal :show="showResources" :suburb="shownSuburb" @close="showResources = false" />
+    <ResourcesModal
+      v-if="selectedSuburb"
+      :show="showResources"
+      :suburb="selectedSuburb.suburb"
+      @close="showResources = false"
+    />
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import FeedbackCard from './components/FeedbackCard.vue';
 import ResourcesModal from './components/ResourcesModal.vue';
 
-const searchQuery = ref('Toorak');
-const shownSuburb = ref('Toorak');
-const safetyScore = ref(92);
+interface Suburb {
+  label: string;
+  suburb: string;
+  postcode: string;
+  lga: string;
+  risk_score: number;
+}
 
+const searchQuery = ref('');
+const selectedSuburb = ref<Suburb | null>(null);
 const showResources = ref(false);
 
+const safetyScore = computed(() => {
+  if (!selectedSuburb.value) return 0;
+  // Convert risk_score (0-1) to safety score (0-100)
+  // Lower risk = higher safety
+  return Math.round((1 - selectedSuburb.value.risk_score) * 100);
+});
 
-const showStaticReport = () => {
-  // Demo: always show Toorak; in real app, fetch & update score/risk here
-  shownSuburb.value = searchQuery.value.trim() || 'Toorak';
-  // Example of changing score if needed:
-  // safetyScore.value = 92
+const handleSuburbSelect = (suburb: Suburb) => {
+  selectedSuburb.value = suburb;
+};
+
+const showStaticReport = async () => {
+  // If user presses enter without selecting from dropdown, search for exact match
+  if (searchQuery.value.trim() && !selectedSuburb.value) {
+    try {
+      const response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`);
+      if (response.ok) {
+        const results = await response.json();
+        if (results.length > 0) {
+          // Select the first match
+          selectedSuburb.value = results[0];
+        }
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  }
 };
 
 const findSafeParking = () => {
-  console.log(`Finding safe parking for: ${shownSuburb.value}`);
-  alert(`Finding safe parking in ${shownSuburb.value}`);
+  if (selectedSuburb.value) {
+    console.log(`Finding safe parking for: ${selectedSuburb.value.suburb}`);
+    alert(`Finding safe parking in ${selectedSuburb.value.suburb}`);
+  }
 };
 
 </script>
