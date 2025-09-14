@@ -5,18 +5,20 @@
         <v-icon class="mr-1">mdi-motorbike</v-icon>
         Hotspot
       </v-app-bar-title>
+      <v-spacer />
+      <v-btn variant="text" color="primary" to="/">Home</v-btn>
+      <v-btn variant="text" color="primary" to="/top-suburbs">Top Suburbs</v-btn>
     </v-app-bar>
 
     <v-main>
       <v-container fluid>
-        <Homepage />
+        <router-view />
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import Homepage from './Homepage.vue';
 </script>
 
 <!-- Keep the same styles -->
