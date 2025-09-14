@@ -1,8 +1,18 @@
 <template>
-  <main class="container">
-    <h1>Hotspot</h1>
-    <Homepage />
-  </main>
+  <v-app>
+    <v-app-bar app>
+      <v-app-bar-title>
+        <v-icon class="mr-1">mdi-motorbike</v-icon>
+        Hotspot
+      </v-app-bar-title>
+    </v-app-bar>
+
+    <v-main>
+      <v-container>
+        <Homepage />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script setup lang="ts">
