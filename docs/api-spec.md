@@ -6,182 +6,266 @@ This document defines the REST API endpoints for the Hotspot app.
 The API allows riders to:
 
 - Search for safe parking by suburb/postcode
-- Filter by parking type
-- Suggest/report a parking spot
-- Upvote/downvote suggestions
-- Get directions to a spot
-- Save favourite parking spots for easy access
+- View motorcycle theft risk scores by location
+- Compare motorcycle models by theft risk
+- Analyze risk data by Local Government Area (LGA)
+- Get comprehensive theft statistics
 
 **Base URL:** `/api/v1`
 
 ---
 
-## 1.0 Parking Search & Discovery (Epic 5.0)
+## 1.0 Parking Safety Search & Discovery
 
-### 1.1 Search for Parking
-**Endpoint:**  
-`GET /parking`
+### 1.1 Search for Safe Parking
+**Endpoint:**
+`GET /search`
 
-**Query Parameters:**  
-- `suburb` (string, required) -> suburb or postcode  
-- `type` (string, optional) -> `on-street` | `off-street` | `secure`
+**Query Parameters:**
+- `q` (string, required) -> search query for suburb or postcode
 
 **Request Example:**
-`GET /parking?suburb=Richmond&type=secure`
+`GET /search?q=Richmond`
 
 **Response Example:**
 ```json
 [
   {
-    "id": 1,
+    "label": "Richmond, 3121",
     "suburb": "Richmond",
-    "type": "secure",
-    "lat": -37.82,
-    "long": 144.99,
-    "votes": 5
+    "postcode": "3121",
+    "lga": "Yarra City",
+    "risk_score": 0.025476
   },
   {
-    "id": 2,
-    "suburb": "Richmond",
-    "type": "on-street",
-    "lat": -37.83,
-    "long": 145.01,
-    "votes": 2
+    "label": "Richmond North, 3121",
+    "suburb": "Richmond North",
+    "postcode": "3121",
+    "lga": "Yarra City",
+    "risk_score": 0.025476
   }
 ]
 ```
 
-### 1.2 Get Parking Spot by ID
-**Endpoint:**  
-`GET /parking/{id}`
+## 2.0 Risk Analysis
 
-**Path Parameters:**  
-- `{id}` (integer, required) -> unique parking spot ID
+### 2.1 Compare Risk for Postcode
+**Endpoint:**
+`GET /risk/compare`
 
-**Request Example:**
-`GET /parking/1`
-
-**Response Example:**
-```json
-{
-  "id": 1,
-  "suburb": "Richmond",
-  "type": "secure",
-  "lat": -37.82,
-  "long": 144.99,
-  "votes": 5,
-  "created_at": "2025-09-10T10:00:00Z"
-}
-```
-
-### 1.3 Get Directions via Google Maps
-**Endpoint:**  
-`GET /parking/{id}/directions`
-
-**Path Parameters:**  
-- `{id}` (integer, required) -> parking spot ID
-
-**Query Parameters (optional):**  
-- `from` (string) -> user starting location in lat,long format
+**Query Parameters:**
+- `postcode` (string, required) -> postcode to analyze
 
 **Request Example:**
-`GET /parking/1/directions?from=-37.81,144.97`
+`GET /risk/compare?postcode=3121`
 
 **Response Example:**
 ```json
 {
-  "id": 1,
-  "from": [-37.81, 144.97],
-  "to": [-37.82, 144.99],
-  "directions_url": "https://maps.app.goo.gl/QnP8Z1coeH3h2R236"
+  "base": {
+    "postcode": "3121",
+    "suburb": "Richmond",
+    "lga": "Yarra City",
+    "motorcycle_theft_rate": 2.547619,
+    "risk_score": 0.025476
+  },
+  "defaults": {
+    "default_risk": 0.014285,
+    "max_risk": 0.125000
+  }
 }
 ```
 
-## 2.0 User Supplied Content (Epic 4.0)
+### 2.2 Top Risk Areas
+**Endpoint:**
+`GET /risk/top`
 
-### 2.1 Suggest a Parking Spot
-
-**Endpoint:**  
-`POST /parking`
+**Query Parameters:**
+- `scope` (string, optional) -> `postcode` | `lga` (default: `postcode`)
+- `order` (string, optional) -> `desc` | `asc` (default: `desc`)
+- `limit` (integer, optional) -> 1-200 (default: 20)
 
 **Request Example:**
-```json
-{
-  "suburb": "Brunswick",
-  "type": "on-street",
-  "lat": -37.77,
-  "long": 144.96
-}
-```
+`GET /risk/top?scope=postcode&order=desc&limit=10`
 
 **Response Example:**
 ```json
-{
-  "message": "Parking spot added successfully",
-  "id": 3
-}
+[
+  {
+    "postcode": "3000",
+    "suburb": "Melbourne",
+    "lga": "Melbourne City",
+    "risk_score": 0.125000
+  },
+  {
+    "postcode": "3141",
+    "suburb": "South Yarra",
+    "lga": "Stonnington City",
+    "risk_score": 0.098765
+  }
+]
 ```
 
-### 2.2 Upvote/Downvote a Spot
+## 3.0 Motorcycle Model Risk
 
-**Endpoint:**  
-`POST /parking/{id}/vote`
+### 3.1 List Motorcycle Models by Risk
+**Endpoint:**
+`GET /models`
 
-**Path Parameters:**  
-- `{id}` (integer, required) -> parking spot ID
+**Query Parameters:**
+- `brand` (string, optional) -> filter by brand name
+- `model` (string, optional) -> filter by model name
+- `min_total` (integer, optional) -> minimum total thefts (default: 0)
+- `sort` (string, optional) -> `risk_desc` | `risk_asc` | `total_desc` | `total_asc` | `brand` | `model` (default: `risk_desc`)
+- `limit` (integer, optional) -> 1-500 (default: 100)
+- `offset` (integer, optional) -> pagination offset (default: 0)
 
 **Request Example:**
-```json
-{ "vote": "up" }  // or "down"
-```
+`GET /models?brand=honda&sort=risk_desc&limit=5`
 
 **Response Example:**
 ```json
-{
-  "id": 3,
-  "votes": 6
-}
+[
+  {
+    "brand": "honda",
+    "model": "cbr650",
+    "total": 17,
+    "percentage": 0.06073380729520203,
+    "model_risk": 0.01484327087198516
+  }
+]
 ```
 
-### 2.3 Save Favourite Spots
+### 3.2 Get Specific Model Risk
+**Endpoint:**
+`GET /models/{brand}/{model}`
 
-**Endpoint:**  
-`POST /users/{id}/favourites`
-
-**Path Parameters:**  
-- `{id}` (integer, required) -> user ID
+**Path Parameters:**
+- `{brand}` (string, required) -> motorcycle brand
+- `{model}` (string, required) -> motorcycle model
 
 **Request Example:**
-```json
-{ "parking_id": 1 }
-```
+`GET /models/honda/cbr1000rr`
 
 **Response Example:**
 ```json
 {
-  "message": "Parking spot saved to favourites",
-  "user_id": 13,
-  "parking_id": 1
+  "brand": "honda",
+  "model": "cbr650",
+  "total": 17,
+  "percentage": 0.06073380729520203,
+  "model_risk": 0.01484327087198516
 }
 ```
 
-## 3.0 Error Handling
+## 4.0 Local Government Area (LGA) Analysis
 
-### 3.1 Invalid suburb parameter
+### 4.1 LGA Risk Summary
+**Endpoint:**
+`GET /lgas`
+
+**Query Parameters:**
+- `q` (string, optional) -> filter by LGA name
+- `sort` (string, optional) -> `avg_desc` | `avg_asc` | `count_desc` | `count_asc` | `lga` (default: `avg_desc`)
+
+**Request Example:**
+`GET /lgas?q=Melbourne&sort=avg_desc`
+
+**Response Example:**
+```json
+[
+  {
+    "lga": "Melbourne",
+    "postcode_count": 20,
+    "avg_risk": 0.632164,
+    "min_risk": 0.6321638896707255,
+    "max_risk": 0.6321638896707255
+  }
+]
+```
+
+### 4.2 LGA Postcode Details
+**Endpoint:**
+`GET /lgas/{lga}/postcodes`
+
+**Path Parameters:**
+- `{lga}` (string, required) -> Local Government Area name
+
+**Query Parameters:**
+- `order` (string, optional) -> `desc` | `asc` (default: `desc`)
+
+**Request Example:**
+`GET /lgas/Melbourne City/postcodes?order=desc`
+
+**Response Example:**
+```json
+[
+  {
+    "postcode": "3000",
+    "suburb": "MELBOURNE",
+    "long": 144.9825846,
+    "lat": -37.81443733,
+    "risk_score": 0.6321638896707255
+  },
+  {
+    "postcode": "3002",
+    "suburb": "EAST MELBOURNE",
+    "long": 144.9825846,
+    "lat": -37.81443733,
+    "risk_score": 0.6321638896707255
+  }
+]
+```
+
+## 5.0 Statistics
+
+### 5.1 Overall Statistics Summary
+**Endpoint:**
+`GET /stats/summary`
+
+**Request Example:**
+`GET /stats/summary`
 
 **Response Example:**
 ```json
 {
-  "error": "Invalid suburb parameter",
-  "status": 400
+  "total_postcodes": 3482,
+  "total_lgas": 78,
+  "avg_postcode_risk": 0.202648,
+  "total_models": 1529
 }
 ```
-### 3.2 Invalid parking id parameter
+
+## 6.0 System
+
+### 6.1 Health Check
+**Endpoint:**
+`GET /health`
+
+**Request Example:**
+`GET /health`
+
+**Response:**
+```
+ok
+```
+
+## 7.0 Error Handling
+
+### 7.1 Resource Not Found
 
 **Response Example:**
 ```json
 {
-  "error": "Parking spot not found",
-  "status": 404
+  "detail": "Postcode not found"
+}
+```
+
+### 7.2 Invalid Parameters
+
+**Response Example:**
+```json
+{
+  "detail": "scope must be postcode or lga"
 }
 ```
