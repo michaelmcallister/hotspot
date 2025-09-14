@@ -11,6 +11,23 @@ import '@mdi/font/css/materialdesignicons.css'
 const vuetify = createVuetify({
   components,
   directives,
+  theme: {
+    defaultTheme: 'hotspot',
+    themes: {
+      hotspot: {
+        dark: false,
+        colors: {
+          primary: '#07a377',
+          secondary: '#0b1541',
+          success: '#10b981',
+          error: '#ef4444',
+          warning: '#f59e0b',
+          info: '#3b82f6',
+          surface: '#ffffff',
+        },
+      },
+    },
+  },
 })
 
 createApp(App).use(vuetify).mount('#app')

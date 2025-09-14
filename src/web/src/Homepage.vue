@@ -19,20 +19,20 @@
 
     <FeedbackCard v-if="selectedSuburb" :suburb="selectedSuburb.suburb" />
 
-    <section v-if="selectedSuburb" class="card actions-card" aria-labelledby="actions-title">
+    <section v-if="selectedSuburb" class="actions-card" aria-labelledby="actions-title">
       <h2 id="actions-title" class="sr-only">Actions</h2>
       <div class="actions-row">
-        <button @click="findSafeParking" class="btn-primary">
+        <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="findSafeParking">
           Find Safe Parking
-        </button>
+        </v-btn>
       </div>
     </section>
 
-    <section v-if="selectedSuburb" class="card resources-card" aria-labelledby="resources-title">
+    <section v-if="selectedSuburb" class="resources-card" aria-labelledby="resources-title">
       <h2 id="resources-title" class="sr-only">Resources</h2>
-      <button @click="showResources = true" class="btn-resources">
+      <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
         Resources & Contacts
-      </button>
+      </v-btn>
     </section>
 
     <ResourcesModal
@@ -126,15 +126,6 @@ h1 {
   margin-bottom: 1.75rem;
 }
 
-.card {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px -10px rgba(2, 8, 23, 0.15);
-  padding: 1.6rem;
-  margin: 1.25rem auto 0;
-  max-width: 720px;
-}
-
 .actions-card { padding: 1.25rem; }
 .actions-row {
   display: flex;
@@ -143,31 +134,7 @@ h1 {
   align-items: center;
   flex-wrap: wrap;
 }
-.actions-row .btn-primary {
-  flex: 0 0 auto;
-  width: auto;
-  max-width: 320px;
-}
-.btn-primary, .btn-outline, .btn-resources {
-  border-radius: 12px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  padding: .9rem 1.4rem;
-}
-.btn-primary {
-  background: #07a377; color: #040d35; border: 2px solid #3cc799;;
-}
-.btn-primary:hover { background: #46e5b0; }
-.btn-outline {
-  background: transparent; color: #07a377; border: 2px solid #07a377;
-}
-.btn-outline:hover { background: #dffff4; color: #07a377; }
-
 .resources-card { padding: 1.25rem; }
-.btn-resources {
-  background: #07a377; color: #fff; border: 2px solid #46e5b0;
-}
-.btn-resources:hover { background: #46e5b0; }
 
 .sr-only {
   position: absolute !important;
