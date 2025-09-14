@@ -9,14 +9,19 @@
     </v-chip>
 
     <p class="description">
-      Premium suburb with top-tier security and surveillance. Minimal theft risk.
+      <template v-if="avgReady && trend !== 'same'">
+        Risk is <strong class="delta" :class="trendClass">{{ signedPercent }}</strong> {{ trendWord }} than the average.
+      </template>
+      <template v-else-if="avgReady && trend === 'same'">
+        Risk level is about the same as the average.
+      </template>
     </p>
   </v-card>
   
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { safetyLabel, safetyColor } from '../utils/safety'
 
 const props = defineProps<{
@@ -26,6 +31,37 @@ const props = defineProps<{
 
 const riskLabel = computed(() => safetyLabel(props.score))
 const chipColor = computed(() => safetyColor(props.score))
+
+// Fetch average postcode risk from the API and compute delta
+const avgRisk = ref<number | null>(null)
+const suburbRisk = computed(() => 1 - props.score / 100)
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/v1/stats/summary')
+    if (res.ok) {
+      const data = await res.json()
+      avgRisk.value = Number(data.avg_postcode_risk)
+    }
+  } catch (e) {
+    console.error('Failed to load stats summary', e)
+  }
+})
+
+const avgReady = computed(() => avgRisk.value != null && avgRisk.value > 0)
+const deltaPct = computed(() => {
+  if (!avgReady.value) return 0
+  // percentage difference relative to average
+  return ((suburbRisk.value - (avgRisk.value as number)) / (avgRisk.value as number)) * 100
+})
+const trend = computed(() => (deltaPct.value > 0 ? 'higher' : deltaPct.value < 0 ? 'lower' : 'same'))
+const trendWord = computed(() => (trend.value === 'higher' ? 'higher' : trend.value === 'lower' ? 'lower' : 'the same as'))
+const trendClass = computed(() => (trend.value === 'higher' ? 'is-higher' : trend.value === 'lower' ? 'is-lower' : ''))
+const signedPercent = computed(() => {
+  const sign = deltaPct.value > 0 ? '+' : deltaPct.value < 0 ? '-' : ''
+  const absRounded = Math.round(Math.abs(deltaPct.value) * 10) / 10
+  return `${sign}${absRounded}%`
+})
 </script>
 
 <style scoped>
@@ -56,4 +92,6 @@ const chipColor = computed(() => safetyColor(props.score))
   padding: 1rem 1.25rem;
   border-left: 4px solid #10b981;
 }
+.delta.is-higher { color: #dc2626; }
+.delta.is-lower { color: #059669; }
 </style>
