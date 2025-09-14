@@ -55,12 +55,12 @@ const submitFeedback = (feedbackType: 'safer' | 'less-safe') => {
 
 <style scoped>
 .card {
-  background: #ffffff;
+  background: transparent;  /* remove white card background */
   border-radius: 16px;
-  box-shadow: 0 10px 25px -10px rgba(2, 8, 23, 0.15);
+  box-shadow: none;         /* remove card shadow */
   padding: 1.6rem;
   margin: 1.25rem auto 0;
-  max-width: 720px;
+  max-width: 100%;          /* span available width */
 }
 
 .accuracy-card { padding: 1.25rem; }

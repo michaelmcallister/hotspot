@@ -8,7 +8,7 @@
     </v-app-bar>
 
     <v-main>
-      <v-container>
+      <v-container fluid>
         <Homepage />
       </v-container>
     </v-main>
@@ -38,4 +38,3 @@ body {
   padding: 2rem;
 }
 </style>
-

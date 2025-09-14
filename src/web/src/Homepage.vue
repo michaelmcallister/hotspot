@@ -104,9 +104,9 @@ const findSafeParking = () => {
 
 <style scoped>
 .homepage {
-  max-width: 880px;         /* desktop-friendly centered column */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1rem 4rem;
+  padding: 1.5rem 1rem 2rem;
   text-align: center;
   line-height: 1.25;
   -webkit-font-smoothing: antialiased;
@@ -142,6 +142,11 @@ h1 {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+}
+.actions-row .btn-primary {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 320px;
 }
 .btn-primary, .btn-outline, .btn-resources {
   border-radius: 12px;

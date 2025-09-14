@@ -159,13 +159,13 @@ watch(() => props.modelValue, (newValue) => {
 .search-container {
   position: relative;
   margin: 0 auto 2rem;
-  max-width: 720px;
+  max-width: 1200px;  /* allow wider search */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .search-input {
-  width: 80%;
+  width: 100%;
   padding: 1rem 1rem 1rem 3rem;
   border: 2px solid #e5e7eb;
   border-radius: 14px;
@@ -180,12 +180,12 @@ watch(() => props.modelValue, (newValue) => {
 }
 .search-icon {
   position: absolute;
-  left: 10%;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: #9ca3af;
   z-index: 2;
-  margin-left: 1rem;
+  margin-left: 0;
 }
 .suggestions-list {
   position: absolute;
@@ -202,11 +202,7 @@ watch(() => props.modelValue, (newValue) => {
   max-height: 300px;
   overflow-y: auto;
   z-index: 1000;
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 100%;
 }
 .suggestion-item {
   padding: 0.75rem 1rem;

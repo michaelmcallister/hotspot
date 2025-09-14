@@ -40,7 +40,7 @@ const riskClass = computed(() => {
   box-shadow: 0 10px 25px -10px rgba(2, 8, 23, 0.15);
   padding: 1.6rem;
   margin: 1.25rem auto 0;
-  max-width: 720px;
+  max-width: 100%;
 }
 
 .score-card .suburb-name {
