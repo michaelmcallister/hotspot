@@ -1,33 +1,41 @@
 <template>
-  <section class="card accuracy-card" aria-labelledby="accuracy-title">
+  <div class="accuracy-card" aria-labelledby="accuracy-title">
     <p id="accuracy-title" class="feedback-question">
       <strong>Is this score accurate?</strong> Help improve our data:
     </p>
 
-    <div class="feedback-buttons">
-      <button
-        type="button"
+    <div class="d-flex flex-wrap justify-center ga-3">
+      <v-btn
+        color="success"
+        variant="outlined"
+        :append-icon="userFeedback === 'safer' ? 'mdi-check' : undefined"
+        :class="{ 'font-weight-bold': userFeedback === 'safer' }"
         @click="submitFeedback('safer')"
-        :class="['feedback-btn','feels-safer', { active: userFeedback === 'safer' }]"
-        :aria-pressed="userFeedback === 'safer' ? 'true' : 'false'"
       >
         👍 Feels Safer
-      </button>
+      </v-btn>
 
-      <button
-        type="button"
+      <v-btn
+        color="error"
+        variant="outlined"
+        :append-icon="userFeedback === 'less-safe' ? 'mdi-check' : undefined"
+        :class="{ 'font-weight-bold': userFeedback === 'less-safe' }"
         @click="submitFeedback('less-safe')"
-        :class="['feedback-btn','feels-less-safe', { active: userFeedback === 'less-safe' }]"
-        :aria-pressed="userFeedback === 'less-safe' ? 'true' : 'false'"
       >
         👎 Less Safe
-      </button>
+      </v-btn>
     </div>
 
-    <p v-if="feedbackSubmitted" class="feedback-thankyou" aria-live="polite">
+    <v-alert
+      v-if="feedbackSubmitted"
+      type="success"
+      variant="tonal"
+      class="mt-3 text-center"
+      density="compact"
+    >
       Thank you for your feedback! ✓
-    </p>
-  </section>
+    </v-alert>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -54,45 +62,10 @@ const submitFeedback = (feedbackType: 'safer' | 'less-safe') => {
 </script>
 
 <style scoped>
-.card {
-  background: transparent;  /* remove white card background */
-  border-radius: 16px;
-  box-shadow: none;         /* remove card shadow */
-  padding: 1.6rem;
-  margin: 1.25rem auto 0;
-  max-width: 100%;          /* span available width */
-}
-
 .accuracy-card { padding: 1.25rem; }
 .accuracy-card .feedback-question {
   color: #111827;
   margin-bottom: .9rem;
   font-size: 1rem;
-}
-.feedback-buttons {
-  display: flex;
-  gap: .75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.feedback-btn {
-  min-width: 190px;
-  padding: .65rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fff;
-  cursor: pointer;
-  transition: all .2s;
-  font-weight: 700;
-  color: #111827;
-}
-.feedback-btn:hover { transform: translateY(-1px); }
-.feedback-btn.active { border-color: #111827; }
-
-.feels-safer.active { border-color:#10b981; background:#ecfdf5; color:#047857; }
-.feels-less-safe.active { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
-
-.feedback-thankyou {
-  margin-top: .6rem; color: #10b981; font-weight: 700; font-size: .95rem;
 }
 </style>
