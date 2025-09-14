@@ -17,23 +17,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { safetyLabel, safetyColor } from '../utils/safety'
 
 const props = defineProps<{
   suburb: string
   score: number
 }>();
 
-const riskLabel = computed(() => {
-  if (props.score >= 80) return 'Low Risk';
-  if (props.score >= 50) return 'Medium Risk';
-  return 'High Risk';
-});
-
-const chipColor = computed(() => {
-  if (props.score >= 80) return 'success';
-  if (props.score >= 50) return 'warning';
-  return 'error';
-});
+const riskLabel = computed(() => safetyLabel(props.score))
+const chipColor = computed(() => safetyColor(props.score))
 </script>
 
 <style scoped>
