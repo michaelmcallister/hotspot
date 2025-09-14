@@ -160,6 +160,9 @@ watch(() => props.modelValue, (newValue) => {
   position: relative;
   margin: 0 auto 2rem;
   max-width: 720px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .search-input {
   width: 80%;
@@ -167,7 +170,7 @@ watch(() => props.modelValue, (newValue) => {
   border: 2px solid #e5e7eb;
   border-radius: 14px;
   font-size: 1.05rem;
-  background: #67686b;
+  background: #ffffff;
   transition: border-color .2s, box-shadow .2s;
 }
 .search-input:focus {
@@ -177,11 +180,12 @@ watch(() => props.modelValue, (newValue) => {
 }
 .search-icon {
   position: absolute;
-  left: 1rem;
+  left: 10%;
   top: 50%;
   transform: translateY(-50%);
   color: #9ca3af;
   z-index: 2;
+  margin-left: 1rem;
 }
 .suggestions-list {
   position: absolute;
