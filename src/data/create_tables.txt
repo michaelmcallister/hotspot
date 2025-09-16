@@ -29,3 +29,44 @@ CREATE TABLE user_input (
   brand TEXT,
   input TEXT
 );
+
+CREATE TABLE user_contribution (
+  parking_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  postcode TEXT NOT NULL, 
+  suburb TEXT,
+  type TEXT CHECK(type IN ('on-street', 'off-street', 'secure')) NOT NULL,
+  long DOUBLE PRECISION,
+  lat DOUBLE PRECISION,
+  lighting BOOLEAN DEFAULT 0, 
+  cctv BOOLEAN DEFAULT 0, 
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE facilities (
+  facility_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  facility_name TEXT NOT NULL UNIQUE 
+);
+
+CREATE TABLE user_contribution_facilities (
+  parking_id INTEGER NOT NULL, 
+  facility_id INTEGER NOT NULL
+  PRIMARY KEY (parking_id, facility_id), 
+  FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE, 
+  FOREIGN KEY (facility_id) REFERENCES facilities(facility_id) ON DELETE CASCADE
+);
+
+INSERT INTO facilities (facility_name) VALUES 
+('Toilet'),
+('Cafe'),
+('Lockers'),
+('Covered parking'),
+('Security guard'),
+('Accessible');
+
+CREATE TABLE votes (
+  vote_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  parking_id INTEGER NOT NULL, 
+  vote_type TEXT CHECK(vote_type IN ('upvote', 'downvote')) NOT NULL, 
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+  FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE
+);
