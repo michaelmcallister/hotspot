@@ -88,8 +88,6 @@ import { ref, watch } from 'vue';
 interface AddressSuggestion {
   display: string;
   value: string;
-  lat?: number;
-  lng?: number;
 }
 
 const props = defineProps<{

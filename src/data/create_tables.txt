@@ -31,14 +31,14 @@ CREATE TABLE user_input (
 );
 
 CREATE TABLE user_contribution (
-  parking_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-  postcode TEXT NOT NULL, 
-  suburb TEXT,
+  parking_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  address TEXT NOT NULL,
+  suburb TEXT NOT NULL,
+  postcode TEXT NOT NULL,
   type TEXT CHECK(type IN ('on-street', 'off-street', 'secure')) NOT NULL,
-  long DOUBLE PRECISION,
-  lat DOUBLE PRECISION,
-  lighting BOOLEAN DEFAULT 0, 
-  cctv BOOLEAN DEFAULT 0, 
+  /* The integers map to the UI, poor (1), fair (2), good (3), excellent (4) */
+  lighting INTEGER CHECK(lighting IN (1, 2, 3, 4)),
+  cctv BOOLEAN,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,7 +65,7 @@ INSERT INTO facilities (facility_name) VALUES
 
 CREATE TABLE votes (
   vote_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-  parking_id INTEGER NOT NULL, 
+  parking_id INTEGER NOT NULL,  
   vote_type TEXT CHECK(vote_type IN ('upvote', 'downvote')) NOT NULL, 
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
   FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE
