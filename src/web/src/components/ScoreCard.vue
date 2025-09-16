@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto pa-6" max-width="720" elevation="6" aria-labelledby="score-title">
+  <v-card class="mx-auto pa-6" max-width="500" elevation="6" aria-labelledby="score-title">
     <div id="score-title" class="suburb-name">{{ suburb }}</div>
     <div class="safety-score">{{ score }}</div>
     <div class="score-label">Safety Score</div>

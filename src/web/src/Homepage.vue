@@ -11,22 +11,21 @@
       @select="handleSuburbSelect"
     />
 
-    <ScoreCard
-      v-if="selectedSuburb"
-      :suburb="selectedSuburb.suburb"
-      :score="safetyScore"
-    />
-
-    <FeedbackCard v-if="selectedSuburb" :suburb="selectedSuburb.suburb" />
-
-    <section v-if="selectedSuburb" class="actions-card" aria-labelledby="actions-title">
-      <h2 id="actions-title" class="sr-only">Actions</h2>
-      <div class="actions-row">
-        <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="findSafeParking">
-          Find Safe Parking
-        </v-btn>
+    <div v-if="selectedSuburb" class="cards-container">
+      <div class="left-column">
+        <ScoreCard
+          :suburb="selectedSuburb.suburb"
+          :score="safetyScore"
+        />
       </div>
-    </section>
+
+      <div class="right-column">
+        <ParkingLocationForm
+          :postcode="selectedSuburb.postcode"
+          @submit="handleParkingSubmit"
+        />
+      </div>
+    </div>
 
     <section v-if="selectedSuburb" class="resources-card" aria-labelledby="resources-title">
       <h2 id="resources-title" class="sr-only">Resources</h2>
@@ -49,8 +48,8 @@
 import { ref, computed } from 'vue';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
-import FeedbackCard from './components/FeedbackCard.vue';
 import ResourcesModal from './components/ResourcesModal.vue';
+import ParkingLocationForm from './components/ParkingLocationForm.vue';
 
 interface Suburb {
   label: string;
@@ -93,11 +92,9 @@ const showStaticReport = async () => {
   }
 };
 
-const findSafeParking = () => {
-  if (selectedSuburb.value) {
-    console.log(`Finding safe parking for: ${selectedSuburb.value.suburb}`);
-    alert(`Finding safe parking in ${selectedSuburb.value.suburb}`);
-  }
+const handleParkingSubmit = (data: any) => {
+  console.log('Parking location submitted:', data);
+  alert(`Parking location added: ${data.address}`);
 };
 
 </script>
@@ -126,14 +123,27 @@ h1 {
   margin-bottom: 1.75rem;
 }
 
-.actions-card { padding: 1.25rem; }
-.actions-row {
+.cards-container {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
+
+.left-column {
+  flex: 0 0 auto;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.right-column {
+  flex: 1;
+  min-width: 400px;
+  max-width: 600px;
+}
+
 .resources-card { padding: 1.25rem; }
 
 .sr-only {
@@ -141,5 +151,18 @@ h1 {
   height: 1px; width: 1px;
   overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+@media (max-width: 1024px) {
+  .cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .left-column,
+  .right-column {
+    width: 100%;
+    max-width: 720px;
+  }
 }
 </style>
