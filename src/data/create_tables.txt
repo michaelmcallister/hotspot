@@ -48,8 +48,8 @@ CREATE TABLE facilities (
 );
 
 CREATE TABLE user_contribution_facilities (
-  parking_id INTEGER NOT NULL, 
-  facility_id INTEGER NOT NULL
+  parking_id INTEGER NOT NULL,
+  facility_id INTEGER NOT NULL,
   PRIMARY KEY (parking_id, facility_id), 
   FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE, 
   FOREIGN KEY (facility_id) REFERENCES facilities(facility_id) ON DELETE CASCADE
