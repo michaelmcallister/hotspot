@@ -4,7 +4,7 @@ SHELL := bash
 
 DB      := hotspot.db
 SCHEMA  := create_tables.txt
-CSVS    := default_risk.csv model_risk.csv postcode_risk.csv
+CSVS    := default_risk.csv model_risk.csv postcode_risk.csv victorian_addresses.csv
 
 # This is a hack (or really clever?) but uses the file name of the csvs as the table name 
 define IMPORT_LINE

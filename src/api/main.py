@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from database import Database
-from routes import health, search, bikes, lgas, risk, stats
+from routes import health, search, bikes, lgas, risk, stats, addresses
 
 
 parser = argparse.ArgumentParser(description="Hotspot API Server")
@@ -50,6 +50,7 @@ app.include_router(lgas.router, prefix="/api")
 app.include_router(risk.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(bikes.router, prefix="/api")
+app.include_router(addresses.router, prefix="/api")
 
 if static_path.exists():
     @app.get("/")

@@ -70,3 +70,9 @@ CREATE TABLE votes (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
   FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE
 );
+
+CREATE TABLE victorian_addresses (
+    address TEXT NOT NULL,
+    suburb TEXT NOT NULL,
+    postcode TEXT NOT NULL
+);
