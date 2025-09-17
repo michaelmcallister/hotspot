@@ -76,3 +76,24 @@ CREATE TABLE victorian_addresses (
     suburb TEXT NOT NULL,
     postcode TEXT NOT NULL
 );
+
+CREATE TABLE carpark_counts (
+    postcode TEXT NOT NULL,
+    carpark_count INTEGER NOT NULL
+);
+
+CREATE TABLE street_light_coverage (
+    postcode TEXT NOT NULL,
+    area_km2 INTEGER,
+    light_count INTEGER,
+    lights_per_km2 DOUBLE PRECISION
+);
+
+CREATE TABLE crime_data (
+    postcode TEXT NOT NULL,
+    offence_division TEXT NOT NULL,
+    offence_subdivision TEXT NOT NULL,
+    offence_subgroup TEXT NOT NULL,
+    offence_count INTEGER NOT NULL
+);
+
