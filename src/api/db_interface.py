@@ -212,7 +212,7 @@ class PersistentDatabase(DatabaseInterface):
     def insert_parking_contribution(self, data: Dict[str, Any]) -> int:
         from datetime import datetime
 
-        parking_id = str(uuid.uuid4())
+        parking_id = uuid.uuid4().int
 
         item = {
             'parking_id': parking_id,
