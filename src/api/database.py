@@ -17,3 +17,13 @@ class Database:
             return [dict(row) for row in rows]
         finally:
             conn.close()
+
+    def execute(self, query: str, params: Dict[str, Any] = None):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, params or {})
+            conn.commit()
+            return cursor.lastrowid
+        finally:
+            conn.close()
