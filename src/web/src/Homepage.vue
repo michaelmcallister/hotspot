@@ -22,6 +22,7 @@
       <div class="right-column">
         <ParkingLocationForm
           :postcode="selectedSuburb.postcode"
+          :suburb="selectedSuburb.suburb"
           @submit="handleParkingSubmit"
         />
       </div>
@@ -40,6 +41,62 @@
       :suburb="selectedSuburb.suburb"
       @close="showResources = false"
     />
+
+    <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="success"
+            size="80"
+            class="mb-4"
+          >
+            mdi-check-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Thank you!</h3>
+          <p class="text-body-1 mb-0">
+            {{ successMessage }}
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showSuccessDialog = false"
+          >
+            Got it
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showErrorDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="error"
+            size="80"
+            class="mb-4"
+          >
+            mdi-alert-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Error</h3>
+          <p class="text-body-1 mb-0">
+            {{ errorMessage }}
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showErrorDialog = false"
+          >
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </div>
 </template>
@@ -62,6 +119,10 @@ interface Suburb {
 const searchQuery = ref('');
 const selectedSuburb = ref<Suburb | null>(null);
 const showResources = ref(false);
+const showSuccessDialog = ref(false);
+const showErrorDialog = ref(false);
+const successMessage = ref('');
+const errorMessage = ref('');
 
 const safetyScore = computed(() => {
   if (!selectedSuburb.value) return 0;
@@ -92,9 +153,32 @@ const showStaticReport = async () => {
   }
 };
 
-const handleParkingSubmit = (data: any) => {
-  console.log('Parking location submitted:', data);
-  alert(`Parking location added: ${data.address}`);
+const handleParkingSubmit = async (data: any) => {
+  try {
+    const response = await fetch('/api/v1/parking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Parking location submitted:', result);
+      successMessage.value = `Parking location successfully added: ${data.address}`;
+      showSuccessDialog.value = true;
+    } else {
+      const error = await response.json();
+      console.error('Submission error:', error);
+      errorMessage.value = error.detail || 'Failed to add parking location. Please try again.';
+      showErrorDialog.value = true;
+    }
+  } catch (error) {
+    console.error('Network error:', error);
+    errorMessage.value = 'Failed to submit parking location. Please check your connection and try again.';
+    showErrorDialog.value = true;
+  }
 };
 
 </script>
