@@ -28,6 +28,14 @@
       </div>
     </div>
 
+    <div v-if="selectedSuburb" class="parking-feed-container">
+      <ParkingFeed
+        ref="parkingFeedRef"
+        :postcode="selectedSuburb.postcode"
+        :suburb="selectedSuburb.suburb"
+      />
+    </div>
+
     <section v-if="selectedSuburb" class="resources-card" aria-labelledby="resources-title">
       <h2 id="resources-title" class="sr-only">Resources</h2>
       <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
@@ -107,6 +115,7 @@ import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import ResourcesModal from './components/ResourcesModal.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
+import ParkingFeed from './components/ParkingFeed.vue';
 
 interface Suburb {
   label: string;
@@ -123,6 +132,7 @@ const showSuccessDialog = ref(false);
 const showErrorDialog = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
+const parkingFeedRef = ref<any>(null);
 
 const safetyScore = computed(() => {
   if (!selectedSuburb.value) return 0;
@@ -168,6 +178,11 @@ const handleParkingSubmit = async (data: any) => {
       console.log('Parking location submitted:', result);
       successMessage.value = `Parking location successfully added: ${data.address}`;
       showSuccessDialog.value = true;
+
+      // Refresh the parking feed
+      if (parkingFeedRef.value) {
+        parkingFeedRef.value.fetchSubmissions();
+      }
     } else {
       const error = await response.json();
       console.error('Submission error:', error);
@@ -226,6 +241,12 @@ h1 {
   flex: 1;
   min-width: 400px;
   max-width: 600px;
+}
+
+.parking-feed-container {
+  max-width: 1200px;
+  margin: 2rem auto 0;
+  padding: 0 1rem;
 }
 
 .resources-card { padding: 1.25rem; }
