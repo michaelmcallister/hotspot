@@ -27,6 +27,8 @@
       <v-select
         v-model="parkingType"
         :items="parkingTypes"
+        item-title="title"
+        item-value="value"
         variant="outlined"
         density="compact"
         label="Parking Type"
@@ -37,6 +39,8 @@
       <v-select
         v-model="quality"
         :items="qualityOptions"
+        item-title="title"
+        item-value="value"
         variant="outlined"
         density="compact"
         label="Lighting"
@@ -47,6 +51,8 @@
       <v-select
         v-model="cctvStatus"
         :items="cctvOptions"
+        item-title="title"
+        item-value="value"
         variant="outlined"
         density="compact"
         label="CCTV Nearby"
@@ -57,6 +63,8 @@
       <v-autocomplete
         v-model="nearbyFacilities"
         :items="facilityOptions"
+        item-title="title"
+        item-value="value"
         variant="outlined"
         density="compact"
         label="Nearby Facilities (optional)"
@@ -88,19 +96,25 @@ import { ref, watch } from 'vue';
 interface AddressSuggestion {
   display: string;
   value: string;
+  address: string;
+  suburb: string;
+  postcode: string;
 }
 
 const props = defineProps<{
   postcode: string;
+  suburb: string;
 }>();
 
 const emit = defineEmits<{
   'submit': [data: {
     address: string;
-    parkingType: string;
-    quality: string;
-    cctvStatus: string;
-    nearbyFacilities: string[];
+    suburb: string;
+    postcode: string;
+    type: string;
+    lighting: number | null;
+    cctv: boolean | null;
+    facilities: number[];
   }]
 }>();
 
@@ -108,40 +122,41 @@ const selectedAddress = ref<AddressSuggestion | null>(null);
 const addressSearch = ref('');
 const addressSuggestions = ref<AddressSuggestion[]>([]);
 const addressLoading = ref(false);
-const parkingType = ref('Kerbside');
-const quality = ref('Good');
-const cctvStatus = ref('Unknown');
-const nearbyFacilities = ref<string[]>([]);
+const parkingType = ref('on-street');
+const quality = ref<number | null>(3);
+const cctvStatus = ref<boolean | null>(null);
+const nearbyFacilities = ref<number[]>([]);
 const submitting = ref(false);
 
 
-// These are just hardcoded for now
+// Parking types matching API requirements, these are stored as strings in the backend
 const parkingTypes = [
-  'On-Street',
-  'Off-street',
-  'Secure'
+  { title: 'On-Street', value: 'on-street' },
+  { title: 'Off-Street', value: 'off-street' },
+  { title: 'Secure', value: 'secure' }
 ];
 
 const qualityOptions = [
-  'Excellent',
-  'Good',
-  'Fair',
-  'Poor'
+  { title: 'Excellent', value: 4 },
+  { title: 'Good', value: 3 },
+  { title: 'Fair', value: 2 },
+  { title: 'Poor', value: 1 }
 ];
 
 const cctvOptions = [
-  'Yes',
-  'No',
-  'Unknown'
+  { title: 'Yes', value: true },
+  { title: 'No', value: false },
+  { title: 'Unknown', value: null }
 ];
 
+// These map with integers in the backend, check create_tables.txt
 const facilityOptions = [
-  'Toilet',
-  'Cafe',
-  'Lockers',
-  'Covered parking',
-  'Security guard',
-  'Accessible'
+  { title: 'Toilet', value: 1 },
+  { title: 'Cafe', value: 2 },
+  { title: 'Lockers', value: 3 },
+  { title: 'Covered parking', value: 4 },
+  { title: 'Security guard', value: 5 },
+  { title: 'Accessible', value: 6 }
 ];
 
 let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -183,7 +198,10 @@ const fetchAddressSuggestions = async (query: string) => {
       const results = await response.json();
       addressSuggestions.value = results.map((item: any) => ({
         display: `${item.address}, ${item.suburb} ${item.postcode}`,
-        value: item.address
+        value: item.address,
+        address: item.address,
+        suburb: item.suburb,
+        postcode: item.postcode
       }));
     } else {
       addressSuggestions.value = [];
@@ -204,11 +222,13 @@ const handleSubmit = () => {
   submitting.value = true;
 
   const data = {
-    address: selectedAddress.value.value,
-    parkingType: parkingType.value,
-    quality: quality.value,
-    cctvStatus: cctvStatus.value,
-    nearbyFacilities: nearbyFacilities.value
+    address: selectedAddress.value.address,
+    suburb: selectedAddress.value.suburb,
+    postcode: selectedAddress.value.postcode,
+    type: parkingType.value,
+    lighting: quality.value,
+    cctv: cctvStatus.value,
+    facilities: nearbyFacilities.value
   };
 
   emit('submit', data);
