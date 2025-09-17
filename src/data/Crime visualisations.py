@@ -46,10 +46,9 @@ filtered_carpark_data = carpark_data.loc[lambda df: df['postcode'] == selected_p
 filtered_street_light_data = street_light_data.loc[lambda df: df['postcode'] == selected_postcode]
 
 # Creating aggregated metrics---------------------------------------------------------
-# Note: Still need to update data cleaning to change from average offences to most recent yearly offences
 agg_crime_data_subdivision = (filtered_crime_data.
     groupby('offence_subdivision').
-    agg(yearly_offences = ('avg_offences', 'sum')).
+    agg(yearly_offences = ('offence_count', 'sum')).
     reset_index())
 
 # Pulling car park and street coverage values-----------------------------------------
@@ -70,14 +69,14 @@ pio.templates.default = "plotly_white"
 colour_scale = 'Viridis'
 
 # Plotting Avg offences by subgroup---------------------------------------------------
-plot_off_subgroup = px.bar(filtered_crime_data.sort_values('avg_offences', ascending=True), 
-    x='avg_offences',
+plot_off_subgroup = px.bar(filtered_crime_data.sort_values('offence_count', ascending=True), 
+    x='offence_count',
     y='offence_subgroup',
     orientation='h', 
-    color='avg_offences',
+    color='offence_count',
     color_continuous_scale=colour_scale,
     title='Yearly Offences by Theft Subgroup',
-    labels={'avg_offences':'Yearly Offences', 'offence_subgroup':''})
+    labels={'offence_count':'Yearly Offences', 'offence_subgroup':''})
 
 plot_off_subgroup.update_coloraxes(showscale=False) #Removing the legend
 plot_off_subgroup.update_traces(hovertemplate=("<b>%{y}</b><br>" "Yearly offences: %{x:.1f}<br>" "<extra></extra>")) #Updating tooltips

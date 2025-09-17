@@ -1,6 +1,6 @@
 ######################################################################################
 ####                                                                              ####  
-####                        Motorbike Hotspot Postcode Data ETL                   ####
+####                             Motorbike Hotspot Data ETL                       ####
 ####                                                                              ####
 ######################################################################################
 
@@ -82,42 +82,38 @@ postcode_crime_incidents_clean = (postcode_crime_incidents.
     rename(columns = {"Postcode": "postcode"}).
     merge(postcode_area[['postcode']], on = 'postcode', how = 'inner'). #Joining in the cleaned postcode data to filter to Victorian postcodes
     loc[lambda df: 
-            (df['Year'] >= (pd.Timestamp.today().year - 2)) & #Filtering to the last three years of data
+            (df['Year'] == pd.Timestamp.today().year) & #Filtering to the current year
             (df['Offence Subgroup'].isin([ #Selecting theft related offence subgroups
                 'A51 Aggravated robbery', 'A52 Non-Aggravated robbery', 'B41 Motor vehicle theft', 'B42 Steal from a motor vehicle',
                 'B311 Residential aggravated burglary', 'B312 Non-residential aggravated burglary', 'B319 Unknown aggravated burglary',
                 'B321 Residential non-aggravated burglary', 'B322 Non-residential non-aggravated burglary', 'B329 Unknown non-aggravated burglary',
                 'B43 Steal from a retail store', 'B44 Theft of a bicycle', 'B49 Other theft']))].
     groupby(['Year', 'postcode', 'Offence Division', 'Offence Subdivision', 'Offence Subgroup']).
-    agg(incidents_recorded = ('Incidents Recorded','sum')). # Consolidating incidents recorded by postcode and offence subgroup
-    groupby(['postcode', 'Offence Division', 'Offence Subdivision', 'Offence Subgroup']).
-    agg(avg_incidents = ("incidents_recorded", lambda x: x.mean().round(2))). #Calculating the average incidents over the last three years
+    agg(incident_count = ('Incidents Recorded','sum')). # Consolidating incidents recorded by postcode and offence subgroup
     reset_index().
     rename(columns = lambda x: x.lower().replace(" ", "_"))) #Renaming columns for consistency
 
-# Cleaning postcode recorded offences data------------------------------------------------
+# Cleaning postcode recorded offences data------------------------------------------------ USE THIS ONE
 # Cleaning the postcode recorded offences data to only include theft subgroups for melbourne postcodes
 postcode_recorded_offences_clean = (postcode_recorded_offences.
     rename(columns = {"Postcode": "postcode"}).
     merge(postcode_area[['postcode']], on = 'postcode', how = 'inner'). #Joining in the cleaned postcode data to filter to Victorian postcodes
     loc[lambda df: 
-            (df['Year'] >= (pd.Timestamp.today().year - 2)) & #Filtering to the last three years of data
+            (df['Year'] == pd.Timestamp.today().year) & #Filtering to the current year
             (df['Offence Subgroup'].isin([ #Selecting theft related offence subgroups
                 'A51 Aggravated robbery', 'A52 Non-Aggravated robbery', 'B41 Motor vehicle theft', 'B42 Steal from a motor vehicle',
                 'B311 Residential aggravated burglary', 'B312 Non-residential aggravated burglary', 'B319 Unknown aggravated burglary',
                 'B321 Residential non-aggravated burglary', 'B322 Non-residential non-aggravated burglary', 'B329 Unknown non-aggravated burglary',
                 'B43 Steal from a retail store', 'B44 Theft of a bicycle', 'B49 Other theft']))].
-    groupby(['Year', 'postcode', 'Offence Division', 'Offence Subdivision', 'Offence Subgroup']).
-    agg(offence_count = ('Offence Count','sum')). # Consolidating incidents recorded by postcode and offence subgroup
     groupby(['postcode', 'Offence Division', 'Offence Subdivision', 'Offence Subgroup']).
-    agg(avg_offences = ("offence_count", lambda x: x.mean().round(2))). #Calculating the average incidents over the last three years
+    agg(offence_count = ('Offence Count','sum')). # Consolidating incidents recorded by postcode and offence subgroup
     reset_index().
     rename(columns = lambda x: x.lower().replace(" ", "_"))) #Renaming columns for consistency
 
 # Combining the cleaned crime incidents and recorded offences data----------------------
 postcode_crime_data_clean = (postcode_crime_incidents_clean.
     merge(postcode_recorded_offences_clean, on = ['postcode', 'offence_division', 'offence_subdivision', 'offence_subgroup'], how = 'outer'). #Merging the two datasets together with a full join to retain all data
-    assign(**{col: lambda df, col = col: df[col].fillna(0) for col in ["avg_incidents", "avg_offences"]})) #Cleaning NA values to be 0 instead of NA if any missing data is present
+    assign(**{col: lambda df, col = col: df[col].fillna(0) for col in ["incident_count", "offence_count"]})) #Cleaning NA values to be 0 instead of NA if any missing data is present
 
 # Creating counts of secure parking for each postcode-----------------------------------
 # Creating a dataframe with the overall postcode car park counts
@@ -146,7 +142,7 @@ postcode_light_coverage = (postcode_lights.
 postcode_clean.to_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_data.csv', index = False)
 
 # Saving cleaned postcode crime data----------------------------------------------------
-postcode_crime_data_clean.to_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_crime_data.csv', index = False)
+postcode_recorded_offences_clean.to_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_crime_data.csv', index = False) #Went with recorded offences data as it is more comprehensive and incidents are not needed
 
 # Saving cleaned postcode car park data-------------------------------------------------
 postcode_carpark_counts.to_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_carpark_data.csv', index = False)
