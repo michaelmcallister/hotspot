@@ -27,30 +27,19 @@ def submit_parking(
 
     try:
         # To prevent abuse we only allow addresses that we know about (no custom ones)
-        address_check = db.fetch_all("""
-            SELECT address, suburb, postcode
-            FROM victorian_addresses
-            WHERE UPPER(address) = UPPER(:address)
-              AND UPPER(suburb) = UPPER(:suburb)
-              AND postcode = :postcode
-        """, {
-            "address": submission.address,
-            "suburb": submission.suburb,
-            "postcode": submission.postcode
-        })
+        verified_address = db.verify_address(
+            submission.address,
+            submission.suburb,
+            submission.postcode
+        )
 
-        if not address_check:
+        if not verified_address:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid address"
             )
 
-        verified_address = address_check[0]
-
-        parking_id = db.execute("""
-            INSERT INTO user_contribution (address, suburb, postcode, type, lighting, cctv)
-            VALUES (:address, :suburb, :postcode, :type, :lighting, :cctv)
-        """, {
+        parking_id = db.insert_parking_contribution({
             "address": verified_address["address"],
             "suburb": verified_address["suburb"],
             "postcode": verified_address["postcode"],
@@ -61,13 +50,7 @@ def submit_parking(
 
         if submission.facilities:
             for facility_id in submission.facilities:
-                db.execute("""
-                    INSERT INTO user_contribution_facilities (parking_id, facility_id)
-                    VALUES (:parking_id, :facility_id)
-                """, {
-                    "parking_id": parking_id,
-                    "facility_id": facility_id
-                })
+                db.insert_parking_facility(parking_id, facility_id)
 
         return ParkingResponse(
             parking_id=parking_id,
@@ -84,21 +67,10 @@ def get_parking_by_postcode(
 ):
     db = request.app.state.db
 
-    parking_list = db.fetch_all("""
-        SELECT parking_id, address, suburb, postcode, type, lighting, cctv, created_at
-        FROM user_contribution
-        WHERE postcode = :postcode
-        ORDER BY created_at DESC
-        LIMIT 20
-    """, {"postcode": postcode})
+    parking_list = db.get_parking_by_postcode(postcode)
 
     for parking in parking_list:
-        facilities = db.fetch_all("""
-            SELECT f.facility_id, f.facility_name
-            FROM user_contribution_facilities ucf
-            JOIN facilities f ON ucf.facility_id = f.facility_id
-            WHERE ucf.parking_id = :parking_id
-        """, {"parking_id": parking["parking_id"]})
+        facilities = db.get_facilities_for_parking(parking["parking_id"])
         parking["facilities"] = facilities
 
     return parking_list
