@@ -10,23 +10,4 @@ def get_addresses(
     q: Optional[str] = Query(None, description="Search query for address")
 ):
     db = request.app.state.db
-
-    if q:
-        rows = db.fetch_all("""
-            SELECT address, suburb, postcode
-            FROM victorian_addresses
-            WHERE postcode = :postcode
-              AND LOWER(address) LIKE '%' || LOWER(:query) || '%'
-            ORDER BY address
-            LIMIT 20
-        """, {"postcode": postcode, "query": q})
-    else:
-        rows = db.fetch_all("""
-            SELECT address, suburb, postcode
-            FROM victorian_addresses
-            WHERE postcode = :postcode
-            ORDER BY address
-            LIMIT 20
-        """, {"postcode": postcode})
-
-    return rows
+    return db.get_addresses_by_postcode(postcode, q)

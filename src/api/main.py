@@ -1,11 +1,12 @@
 import argparse
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from database import Database
+from db_interface import get_database
 from routes import health, search, bikes, lgas, risk, stats, addresses, parking
 
 
@@ -24,17 +25,19 @@ parser.add_argument(
 )
 args, unknown = parser.parse_known_args()
 
-db_path = Path(args.db).resolve()
-if not db_path.exists():
-    raise FileNotFoundError(f"Database file not found: {db_path}")
-
-db = Database(str(db_path))
+# Get the appropriate database implementation
+db = get_database()
+env = os.environ.get('ENVIRONMENT', 'development')
 
 static_path = Path(args.static).resolve()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(f"Connected to database: {db_path}")
+    if env == 'production':
+        print(f"Connected to DynamoDB in {os.environ.get('AWS_DEFAULT_REGION', 'ap-southeast-2')} region")
+        print(f"Using table: {os.environ.get('DYNAMODB_TABLE', 'user_contributions')}")
+    else:
+        print(f"Connected to SQLite database: {os.environ.get('SQLITE_DB_PATH')}")
     if static_path.exists():
         print(f"Serving static files from: {static_path}")
     yield
