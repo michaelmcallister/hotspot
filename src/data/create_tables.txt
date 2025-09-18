@@ -22,14 +22,6 @@ CREATE TABLE default_risk (
   postcode_default_risk DOUBLE PRECISION
 );
 
-CREATE TABLE user_input (
-  input_id DOUBLE PRECISION,
-  input_type TEXT,
-  postcode TEXT,
-  brand TEXT,
-  input TEXT
-);
-
 CREATE TABLE user_contribution (
   parking_id INTEGER PRIMARY KEY AUTOINCREMENT,
   address TEXT NOT NULL,
