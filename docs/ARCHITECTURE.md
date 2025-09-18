@@ -2,7 +2,7 @@
 
 ## System Overview
 
-This is a simple architecture running a Docker container on an AWS t3.micro instance that contains the entire application stack. It's primary guiding principle is simplicity, and ease of development, there is a section that acknowledges the shortcomings and tradeoffs made to meet this objective. 
+This is a simple architecture running a Docker container on AWS AppRunner that contains the application stack with DynamoDB for data persistence (when running in production mode). It's primary guiding principle is simplicity, and ease of development, there is a section that acknowledges the shortcomings and tradeoffs made to meet this objective 
 
 ## Architecture Diagram
 
@@ -15,7 +15,7 @@ flowchart TB
 
   %% AWS Infrastructure
   subgraph AWS["AWS Cloud"]
-    subgraph EC2["EC2 Instance (t3.micro)"]
+    subgraph AppRunner["AWS AppRunner"]
       subgraph Docker["Docker Container"]
         Frontend[Frontend
         Static HTML/CSS/JS
@@ -23,17 +23,17 @@ flowchart TB
         Backend[Python Backend
         FastAPI
         Business Logic]
-        DB[(SQLite Database
-        Application Data
-        User Information)]
 
         Frontend <--> Backend
-        Backend <--> DB
       end
     end
+
+    DynamoDB[(DynamoDB
+    user_submissions)]
   end
 
-  Users -->|HTTPS:443| EC2
+  Users -->|HTTPS:443| AppRunner
+  Backend <-->|AWS SDK| DynamoDB
 
   %% Styling
   classDef user fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -42,40 +42,46 @@ flowchart TB
   classDef data fill:#fce4ec,stroke:#880e4f,stroke-width:2px
 
   class Users user
-  class Docker,EC2 container
+  class Docker,AppRunner container
   class Frontend,Backend app
-  class DB data
+  class DynamoDB data
 ```
 ```
 ```
 
 ## Component Details
 
-### EC2 Instance
-- **Type**: t3.micro (1 vCPU, 1 GB RAM)
-- **OS**: Amazon Linux 2
-- **Network**: Public IP with security group allowing HTTPS (443)
+### AWS AppRunner Service
+- **Platform**: Fully managed container service
+- **Auto-scaling**: Automatic scaling based on traffic
+- **Network**: HTTPS endpoint with custom domain support
 
 ### Docker Container
-Single container running the entire application stack:
+Single container running the application stack:
 
 - **Frontend**: Served as static files (HTML, CSS, JavaScript)
 - **Backend**: Python web framework handling API requests
-- **Database**: SQLite file stored in a Docker volume for persistence
+
+### Database Layer
+- **DynamoDB**: NoSQL database service for production data persistence
+  - **Tables**: user_submissions (see entity relationship diagram)
+  - **Features**: Auto-scaling, point-in-time recovery
+- **SQLite**: Available inside Docker container for all other data
+  - **Location**: `/app/data/hotspot.db`
+  - **Usage**: Risk scores and suburbs
 
 ## Data Flow
 
-1. User sends HTTPS request to EC2 public IP
-2. Docker container receives request on port 443
+1. User sends HTTPS request to AppRunner service endpoint
+2. AppRunner routes request to Docker container
 3. Frontend serves static files for web interface
 4. API calls route to Python backend
-5. Backend reads/writes to SQLite database
+5. Backend reads/writes to DynamoDB using AWS SDK (some paths may still use SQLite)
 6. Response sent back to user
 
 ## Limitations
 
-- **Single point of failure**: No redundancy
-- **Limited scalability**: Bound by t3.micro resources
-- **SQLite constraints**: Not suitable for high concurrency
-- **No load balancing**: Single instance only
-- **Manual backups**: Need to implement backup strategy
+- **Single region deployment**: No multi-region redundancy
+- **Container limitations**: Single container instance (though AppRunner handles scaling)
+- **DynamoDB costs**: Pay-per-request pricing model
+- **Limited local development**: Uses SQLite for local development which is not persistent
