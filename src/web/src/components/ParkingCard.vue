@@ -8,6 +8,21 @@
       <v-card-title class="text-body-1">
         {{ submission.address }}
       </v-card-title>
+
+      <template v-slot:append>
+        <v-btn
+          icon
+          variant="plain"
+          size="small"
+          @click="toggleFavourite"
+        >
+          <v-icon
+            :color="isFavourite ? 'yellow-darken-2' : 'grey-lighten-1'"
+          >
+            {{ isFavourite ? 'mdi-star' : 'mdi-star-outline' }}
+          </v-icon>
+        </v-btn>
+      </template>
     </v-card-item>
 
     <v-card-text class="pt-3 pb-2">
@@ -71,6 +86,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+
 interface Facility {
   facility_id: number;
   facility_name: string;
@@ -92,6 +109,52 @@ interface ParkingSubmission {
 const props = defineProps<{
   submission: ParkingSubmission;
 }>();
+
+const emit = defineEmits<{
+  'update:favourite': [void];
+}>();
+
+const favourites = ref<Set<number>>(new Set());
+
+const loadFavourites = () => {
+  const storedFavourites = localStorage.getItem('parkingFavourites');
+  if (storedFavourites) {
+    favourites.value = new Set(JSON.parse(storedFavourites));
+  }
+};
+
+onMounted(() => {
+  loadFavourites();
+  window.addEventListener('storage', loadFavourites);
+});
+
+const isFavourite = computed(() => {
+  return favourites.value.has(props.submission.parking_id);
+});
+
+const toggleFavourite = () => {
+  if (isFavourite.value) {
+    favourites.value.delete(props.submission.parking_id);
+  } else {
+    favourites.value.add(props.submission.parking_id);
+
+    const cachedData = localStorage.getItem('parkingDataCache');
+    let cache: Record<number, ParkingSubmission> = {};
+    if (cachedData) {
+      try {
+        cache = JSON.parse(cachedData);
+      } catch (e) {
+        console.error('Failed to parse cache:', e);
+      }
+    }
+    cache[props.submission.parking_id] = props.submission;
+    localStorage.setItem('parkingDataCache', JSON.stringify(cache));
+  }
+
+  localStorage.setItem('parkingFavourites', JSON.stringify([...favourites.value]));
+  emit('update:favourite');
+  window.dispatchEvent(new Event('storage'));
+};
 
 const formatType = (type: string) => {
   const types: Record<string, string> = {

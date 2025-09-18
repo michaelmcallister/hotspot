@@ -8,6 +8,7 @@
       <v-spacer />
       <v-btn variant="text" color="primary" to="/">Home</v-btn>
       <v-btn variant="text" color="primary" to="/top-suburbs">Top Suburbs</v-btn>
+      <v-btn variant="text" color="primary" to="/saved">Saved</v-btn>
     </v-app-bar>
 
     <v-main>
