@@ -211,6 +211,7 @@ class PersistentDatabase(DatabaseInterface):
 
     def insert_parking_contribution(self, data: Dict[str, Any]) -> int:
         from datetime import datetime
+        from decimal import Decimal
 
         parking_id = uuid.uuid4().int
 
@@ -224,7 +225,7 @@ class PersistentDatabase(DatabaseInterface):
         }
 
         if data.get('lighting') is not None:
-            item['lighting'] = data['lighting']
+            item['lighting'] = Decimal(str(data['lighting']))
         if data.get('cctv') is not None:
             item['cctv'] = data['cctv']
 
