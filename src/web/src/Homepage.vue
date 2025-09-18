@@ -1,7 +1,7 @@
 <template>
   <div class="homepage">
-    <h1>Search Suburb</h1>
-    <p class="subtitle">
+    <h1 class="text-h3 font-weight-bold text-primary mb-2">Search Suburb</h1>
+    <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
       Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
     </p>
 
@@ -209,18 +209,6 @@ const handleParkingSubmit = async (data: any) => {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1 {
-  color: #111827;
-  font-size: 2.75rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-.subtitle {
-  color: #6b7280;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 1.75rem;
-}
 
 .cards-container {
   display: flex;

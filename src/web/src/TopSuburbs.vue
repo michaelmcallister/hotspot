@@ -1,7 +1,7 @@
 <template>
   <div class="top-suburbs">
-    <h1>Top Suburbs</h1>
-    <p class="subtitle">Explore suburbs and LGAs ranked by safety score.</p>
+    <h1 class="text-h3 font-weight-bold text-primary mb-2">Top Suburbs</h1>
+    <p class="subtitle text-body-1 text-grey-darken-1 mb-6">Explore suburbs and LGAs ranked by safety score.</p>
 
     <v-toolbar class="mb-4 bg-transparent" density="comfortable" elevation="0" rounded="lg">
       <v-spacer />
@@ -154,16 +154,6 @@ watch([scope, order, limit], fetchData, { immediate: true })
   padding: 1.5rem 1rem 2rem;
 }
 
-h1 {
-  color: #111827;
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-}
-.subtitle {
-  color: #6b7280;
-  margin-bottom: 1rem;
-}
 
 
 </style>
