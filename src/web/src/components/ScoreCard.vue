@@ -65,33 +65,35 @@ const signedPercent = computed(() => {
 </script>
 
 <style scoped>
-.score-card .suburb-name {
-  color: #111827;
+.suburb-name {
+  color: rgb(var(--v-theme-on-surface));
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: .25rem;
 }
 .safety-score {
-  color: #059669;
+  color: rgb(var(--v-theme-success));
   font-size: 3.25rem;
   font-weight: 800;
   margin: .25rem 0 0;
 }
 .score-label {
-  color: #6b7280;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.6;
   margin-bottom: .6rem;
 }
 
 .description {
-  color: #4b5563;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.87;
   line-height: 1.6;
   margin: 0 auto;
   max-width: 560px;
-  background: #f9fafb;
+  background: rgba(var(--v-theme-on-surface), 0.04);
   border-radius: 10px;
   padding: 1rem 1.25rem;
-  border-left: 4px solid #10b981;
+  border-left: 4px solid rgb(var(--v-theme-success));
 }
-.delta.is-higher { color: #dc2626; }
-.delta.is-lower { color: #059669; }
+.delta.is-higher { color: rgb(var(--v-theme-error)); }
+.delta.is-lower { color: rgb(var(--v-theme-success)); }
 </style>

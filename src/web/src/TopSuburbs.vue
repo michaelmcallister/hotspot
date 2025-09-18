@@ -1,7 +1,7 @@
 <template>
   <div class="top-suburbs">
-    <h1 class="text-h3 font-weight-bold text-primary mb-2">Top Suburbs</h1>
-    <p class="subtitle text-body-1 text-grey-darken-1 mb-6">Explore suburbs and LGAs ranked by safety score.</p>
+    <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Top Suburbs</h1>
+    <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">Explore suburbs and LGAs ranked by safety score.</p>
 
     <v-toolbar class="mb-4 bg-transparent" density="comfortable" elevation="0" rounded="lg">
       <v-spacer />
