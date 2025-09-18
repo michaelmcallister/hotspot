@@ -1,60 +1,8 @@
 body {
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
 }
 
-#app {
-  width: 100%;
-  max-width: none; /* allow full viewport width */
-  margin: 0 auto;
-  padding: 0; /* avoid adding height beyond Vuetify layout */
-}
-
-/* Ensure Vuetify root uses background from body and doesn't add extra height */
 .v-application, .v-main {
   background: transparent !important;
-}
-
-/* Typography */
-h1 {
-  color: #1f2937;
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.subtitle {
-  color: #6b7280;
-  text-align: center;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.suburb-name {
-  color: #1f2937;
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.safety-score {
-  color: #059669; /* Emerald green for good score */
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0.5rem 0;
-}
-
-.description {
-  color: #6b7280;
-  line-height: 1.6;
-  margin: 1.5rem 0;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
-  border-left: 4px solid #42b883; /* Vue green */
 }

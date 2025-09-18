@@ -241,7 +241,7 @@ const handleSubmit = () => {
 
 <style scoped>
 h3 {
-  color: #111827;
+  color: rgb(var(--v-theme-on-surface));
   font-size: 1.125rem;
   font-weight: 600;
   display: flex;

@@ -26,18 +26,20 @@
 .not-found h1 {
   font-size: 6rem;
   margin: 0;
-  color: #333;
+  color: rgb(var(--v-theme-secondary));
+  opacity: 0.3;
 }
 
 .not-found h2 {
   font-size: 2rem;
   margin: 1rem 0;
-  color: #666;
+  color: rgb(var(--v-theme-on-surface));
 }
 
 .not-found p {
   font-size: 1.2rem;
-  color: #999;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.6;
   margin: 1rem 0 2rem;
 }
 </style>

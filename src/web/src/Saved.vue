@@ -1,7 +1,7 @@
 <template>
   <div class="saved-page">
-    <h1 class="text-h3 font-weight-bold text-primary mb-2">Saved Parking</h1>
-    <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
+    <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Saved Parking</h1>
+    <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">
       Your favourite parking locations
     </p>
 
