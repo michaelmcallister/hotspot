@@ -93,7 +93,7 @@ postcode_crime_incidents_clean = (postcode_crime_incidents.
     reset_index().
     rename(columns = lambda x: x.lower().replace(" ", "_"))) #Renaming columns for consistency
 
-# Cleaning postcode recorded offences data------------------------------------------------ USE THIS ONE
+# Cleaning postcode recorded offences data------------------------------------------------
 # Cleaning the postcode recorded offences data to only include theft subgroups for melbourne postcodes
 postcode_recorded_offences_clean = (postcode_recorded_offences.
     rename(columns = {"Postcode": "postcode"}).
