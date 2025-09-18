@@ -1,9 +1,7 @@
-# Build stage for Python API
 FROM python:3.13-slim AS api-builder
 
 WORKDIR /app
 
-# Install uv
 RUN pip install --no-cache-dir uv
 
 # Copy API source and dependencies
@@ -11,14 +9,11 @@ COPY src/api/pyproject.toml ./api/
 COPY src/api/uv.lock ./api/
 COPY src/api/ ./api/
 
-# Install Python dependencies using uv
 WORKDIR /app/api
 RUN uv sync --frozen --no-dev
 
-# Build stage for Vue frontend
 FROM node:20-alpine AS web-builder
 
-# Install make for using Makefile
 RUN apk add --no-cache make bash
 
 WORKDIR /app/web
@@ -49,18 +44,20 @@ FROM python:3.13-slim
 # Install uv in the runtime image
 RUN pip install --no-cache-dir uv
 
-COPY --from=api-builder /app/api/.venv /app/api/.venv
-
-COPY --from=api-builder /app/api /app/api
-
-COPY --from=web-builder /app/web/dist /app/web/dist
-
-COPY --from=db-builder /app/data/hotspot.db /app/data/hotspot.db
-
 WORKDIR /app/api
+
+# Create venv in the final image
+COPY src/api/pyproject.toml ./
+COPY src/api/uv.lock ./
+RUN uv sync --frozen --no-dev
 
 ENV PATH="/app/api/.venv/bin:$PATH"
 ENV PYTHONPATH=/app/api
+
+COPY src/api/ ./
+
+COPY --from=web-builder /app/web/dist /app/web/dist
+COPY --from=db-builder /app/data/hotspot.db /app/data/hotspot.db
 
 EXPOSE 8000
 
