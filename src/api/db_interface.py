@@ -212,7 +212,16 @@ class PersistentDatabase(DatabaseInterface):
     def insert_parking_contribution(self, data: Dict[str, Any]) -> int:
         from datetime import datetime
 
-        parking_id = uuid.uuid4().int
+        # Matches the sqllite implementation by auto-incrementing the ID
+        counter_response = self.table.update_item(
+            Key={'postcode': 'COUNTER', 'parking_id': 0},
+            UpdateExpression='SET #counter = if_not_exists(#counter, :zero) + :inc',
+            ExpressionAttributeNames={'#counter': 'counter'},
+            ExpressionAttributeValues={':zero': 0, ':inc': 1},
+            ReturnValues='UPDATED_NEW'
+        )
+
+        parking_id = int(counter_response['Attributes']['counter'])
 
         item = {
             'parking_id': parking_id,
@@ -224,7 +233,7 @@ class PersistentDatabase(DatabaseInterface):
         }
 
         if data.get('lighting') is not None:
-            item['lighting'] = int(data['lighting'])
+            item['lighting'] = data['lighting']
         if data.get('cctv') is not None:
             item['cctv'] = data['cctv']
 
