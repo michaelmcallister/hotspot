@@ -313,7 +313,7 @@ class PersistentDatabase(DatabaseInterface):
                 SELECT facility_id, facility_name
                 FROM facilities
                 WHERE facility_id = :facility_id
-            """, {"facility_id": fid})
+            """, {"facility_id": int(fid)})
 
             if facilities:
                 facilities_list.append(facilities[0])
