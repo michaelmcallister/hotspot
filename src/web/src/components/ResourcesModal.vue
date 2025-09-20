@@ -40,12 +40,12 @@
           <v-list density="comfortable">
             <v-list-item 
               clickable
-              href="https://bikefinder.com/en/articles/how-to-avoid-bike-thieves-common-bike-theft-hotspots-and-prevention-tips/"
+              href="https://nhw.com.au/cars-and-vehicles/prevent-your-motorbike-from-being-stolen/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <v-list-item-title>Motorcycle Theft Prevention Guide</v-list-item-title>
-              <v-list-item-subtitle>Learn how to protect your motorbike from theft</v-list-item-subtitle>
+              <v-list-item-title>Theft Prevention Guide (Neighbourhood Watch)</v-list-item-title>
+              <v-list-item-subtitle>Practical tips on how to prevent your motorcycle from theft</v-list-item-subtitle>
               <template #append>
                 <v-icon icon="mdi-open-in-new" size="small" />
               </template>
@@ -53,30 +53,25 @@
             
             <v-list-item 
               clickable
-              href="https://edge.sitecorecloud.io/stategovernc45d-cftw-production-c9ca/media/Project/TransportWebsite/Forms/discover-safe-riding.pdf"
+              href="https://www.propertyvault.com.au/motorbikevault/ "
               target="_blank"
               rel="noopener noreferrer"
             >
-              <v-list-item-title>VicRoads Motorcycle Safety Guide (PDF)</v-list-item-title>
-              <v-list-item-subtitle>Official government advice on motorcycle security</v-list-item-subtitle>
+              <v-list-item-title>Motorbike Property Vault</v-list-item-title>
+              <v-list-item-subtitle>Register your motorcycle for free and report if it's stolen</v-list-item-subtitle>
               <template #append>
                 <v-icon icon="mdi-open-in-new" size="small" />
               </template>
             </v-list-item>
             
-            <v-list-item clickable>
-              <v-list-item-title>Recent Theft Reports — {{ suburb }}</v-list-item-title>
-              <v-list-item-subtitle>Latest reports in your area</v-list-item-subtitle>
-            </v-list-item>
-            
             <v-list-item 
               clickable
-              href="https://www.nationalmotorcycleinsurance.com.au/claims/"
+              href="https://www.facebook.com/groups/stolen.motorcycles.australia"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <v-list-item-title>Insurance Claims for Stolen Motorcycles</v-list-item-title>
-              <v-list-item-subtitle>What to do if your motorcycle is stolen</v-list-item-subtitle>
+              <v-list-item-title>Stolen Motorcycles Australia (Facebook Group)</v-list-item-title>
+              <v-list-item-subtitle>Engage with other riders about stolen motorcycles</v-list-item-subtitle>
               <template #append>
                 <v-icon icon="mdi-open-in-new" size="small" />
               </template>
