@@ -38,21 +38,48 @@
         <div>
           <div class="text-subtitle-1 font-weight-medium mb-2">Helpful Resources</div>
           <v-list density="comfortable">
-            <v-list-item clickable>
-              <v-list-item-title>Melbourne Bike Theft Prevention Guide</v-list-item-title>
+            <v-list-item 
+              clickable
+              href="https://bikefinder.com/en/articles/how-to-avoid-bike-thieves-common-bike-theft-hotspots-and-prevention-tips/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <v-list-item-title>Motorcycle Theft Prevention Guide</v-list-item-title>
               <v-list-item-subtitle>Learn how to protect your motorbike from theft</v-list-item-subtitle>
+              <template #append>
+                <v-icon icon="mdi-open-in-new" size="small" />
+              </template>
             </v-list-item>
-            <v-list-item clickable>
-              <v-list-item-title>VicRoads Motorcycle Security Tips</v-list-item-title>
+            
+            <v-list-item 
+              clickable
+              href="https://edge.sitecorecloud.io/stategovernc45d-cftw-production-c9ca/media/Project/TransportWebsite/Forms/discover-safe-riding.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <v-list-item-title>VicRoads Motorcycle Safety Guide (PDF)</v-list-item-title>
               <v-list-item-subtitle>Official government advice on motorcycle security</v-list-item-subtitle>
+              <template #append>
+                <v-icon icon="mdi-open-in-new" size="small" />
+              </template>
             </v-list-item>
+            
             <v-list-item clickable>
               <v-list-item-title>Recent Theft Reports — {{ suburb }}</v-list-item-title>
               <v-list-item-subtitle>Latest reports in your area</v-list-item-subtitle>
             </v-list-item>
-            <v-list-item clickable>
-              <v-list-item-title>Insurance Claims for Stolen Bikes</v-list-item-title>
+            
+            <v-list-item 
+              clickable
+              href="https://www.nationalmotorcycleinsurance.com.au/claims/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <v-list-item-title>Insurance Claims for Stolen Motorcycles</v-list-item-title>
               <v-list-item-subtitle>What to do if your motorcycle is stolen</v-list-item-subtitle>
+              <template #append>
+                <v-icon icon="mdi-open-in-new" size="small" />
+              </template>
             </v-list-item>
           </v-list>
         </div>
