@@ -3,10 +3,18 @@
 ## Overview
 
 Hotspot is a platform that helps riders identify motorbike theft hotspots across Victoria.  
-It aggregates open crime and transport data into **suburb-level risk scores** with a **safe parking finder**.  
-This supports informed parking and travel decisions, reduces theft risk, and strengthens the motorbike community
+It aggregates open crime and transport data into **suburb-level risk scores** with a **safe parking finder**. 
+Additional educational and support resources are also linked within the app.
+This supports informed parking and travel decisions, reduces theft risk, and strengthens the motorbike community.
 
 The project aligns with **UN Sustainable Development Goal 11: Sustainable Cities and Communities**, focusing on making urban areas safer and more resilient
+
+## Demo
+You can try out **Hotspot - Motorbike Theft Web App** here:
+[Live Web App](https://pnwuvfcpqp.ap-southeast-2.awsapprunner.com/)
+
+Below is a preview of the app interface:
+[Hotspot Screenshot](docs/app-screenshot.png)
 
 ## Project Structure
 
