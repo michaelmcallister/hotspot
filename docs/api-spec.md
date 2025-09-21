@@ -292,6 +292,7 @@ The API allows riders to:
 `GET /addresses/3000?q=Collins`
 
 **Response Example:**
+```json
 [
   {
     "address": "123 Collins St",
@@ -304,7 +305,7 @@ The API allows riders to:
     "postcode": "3000"
   }
 ]
-
+```
 ## 7.0 Statistics
 
 ### 7.1 Overall Statistics Summary
