@@ -14,10 +14,20 @@ The API allows riders to:
 **Base URL:** `/api/v1`
 
 ---
+## 1.0 Health Check
+### 1.1 System Health
+**Endpoint:**
+`GET /health`
 
-## 1.0 Parking Safety Search & Discovery
+**Request Example:**
+`GET /health`
 
-### 1.1 Search for Safe Parking
+**Response Example:**
+`ok`
+
+## 2.0 Parking Safety Search & Discovery
+
+### 2.1 Search for Safe Parking
 **Endpoint:**
 `GET /search`
 
@@ -46,15 +56,68 @@ The API allows riders to:
   }
 ]
 ```
+### 2.2 Submit Parking Suggestion
+**Endpoint:**
+`POST /parking`
 
-## 2.0 Risk Analysis
+**Request Body:**
+```json
+  {
+    "address": "Richmond, 3121",
+    "suburb": "Richmond",
+    "postcode": "3121",
+    "type": "off-street",
+    "lighting": 0.025476,
+    "cctv": true,
+    "facilities": [1,2]
+  }
 
-### 2.1 Compare Risk for Postcode
+```
+**Response Example:**
+```json
+  {
+    "parking_id": "101",
+    "message": "Parking suggestion submitted successfully"
+  }
+```
+
+### 2.3 Get Parking by Postcode
+**Endpoint:**
+`GET /parking/{postcode}`
+
+**Path Parameters:**
+- `{postcode}` (string, required) -> postcode to search for parking options
+
+**Request Example:**
+`GET /search?q=3121`
+
+**Response Example:**
+```json
+[
+  {
+    "parking_id": 101,
+    "address": "123 Example St",
+    "suburb": "Richmond",
+    "postcode": "3121",
+    "type": "off-street",
+    "lighting": 4,
+    "cctv": true,
+    "facilities": [
+      {"id": 1, "name": "Covered"},
+      {"id": 2, "name": "Security Guard"}
+    ]
+  }
+]
+```
+
+## 3.0 Risk Analysis
+
+### 3.1 Compare Risk for Postcode
 **Endpoint:**
 `GET /risk/compare`
 
 **Query Parameters:**
-- `postcode` (string, required) -> postcode to analyze
+- `postcode` (string, required) -> postcode to analyse
 
 **Request Example:**
 `GET /risk/compare?postcode=3121`
@@ -76,7 +139,7 @@ The API allows riders to:
 }
 ```
 
-### 2.2 Top Risk Areas
+### 3.2 Top Risk Areas
 **Endpoint:**
 `GET /risk/top`
 
@@ -106,12 +169,12 @@ The API allows riders to:
 ]
 ```
 
-## 3.0 Motorcycle Model Risk
+## 4.0 Motorcycle Model Risk
 
-### 3.1 List Motorcycle Models by Risk
+### 4.1 List Motorcycle Models by Risk
 **Endpoint:**
 `GET /models`
-
+  
 **Query Parameters:**
 - `brand` (string, optional) -> filter by brand name
 - `model` (string, optional) -> filter by model name
@@ -136,7 +199,7 @@ The API allows riders to:
 ]
 ```
 
-### 3.2 Get Specific Model Risk
+### 4.2 Get Specific Model Risk
 **Endpoint:**
 `GET /models/{brand}/{model}`
 
@@ -158,9 +221,9 @@ The API allows riders to:
 }
 ```
 
-## 4.0 Local Government Area (LGA) Analysis
+## 5.0 Local Government Area (LGA) Analysis
 
-### 4.1 LGA Risk Summary
+### 5.1 LGA Risk Summary
 **Endpoint:**
 `GET /lgas`
 
@@ -184,7 +247,7 @@ The API allows riders to:
 ]
 ```
 
-### 4.2 LGA Postcode Details
+### 5.2 LGA Postcode Details
 **Endpoint:**
 `GET /lgas/{lga}/postcodes`
 
@@ -216,10 +279,35 @@ The API allows riders to:
   }
 ]
 ```
+## 6.0 Address Lookup
 
-## 5.0 Statistics
+### 6.1 Get Addresses by Postcode
+**Endpoint:**
+`GET /addresses/{postcode}`
 
-### 5.1 Overall Statistics Summary
+**Path Parameters:**
+- `{postcode}` (string, required) -> search query to filter addresses within the postcode
+
+**Request Example:**
+`GET /addresses/3000?q=Collins`
+
+**Response Example:**
+[
+  {
+    "address": "123 Collins St",
+    "suburb": "Melbourne",
+    "postcode": "3000"
+  },
+  {
+    "address": "456 Collins St",
+    "suburb": "Melbourne",
+    "postcode": "3000"
+  }
+]
+
+## 7.0 Statistics
+
+### 7.1 Overall Statistics Summary
 **Endpoint:**
 `GET /stats/summary`
 
@@ -236,9 +324,9 @@ The API allows riders to:
 }
 ```
 
-## 6.0 System
+## 8.0 System
 
-### 6.1 Health Check
+### 8.1 Health Check
 **Endpoint:**
 `GET /health`
 
@@ -250,9 +338,9 @@ The API allows riders to:
 ok
 ```
 
-## 7.0 Error Handling
+## 9.0 Error Handling
 
-### 7.1 Resource Not Found
+### 9.1 Resource Not Found
 
 **Response Example:**
 ```json
@@ -261,7 +349,7 @@ ok
 }
 ```
 
-### 7.2 Invalid Parameters
+### 9.2 Invalid Parameters
 
 **Response Example:**
 ```json
