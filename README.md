@@ -1,4 +1,4 @@
-# Hotspot – Motorbike Theft Web App
+# Hotspot – Motorbike Theft Web App [![CI/CD to App Runner](https://github.com/michaelmcallister/hotspot/actions/workflows/deploy.yaml/badge.svg)](https://github.com/michaelmcallister/hotspot/actions/workflows/deploy.yaml)
 
 ## Overview
 
@@ -14,7 +14,7 @@ You can try out **Hotspot - Motorbike Theft Web App** here:
 [Live Web App](https://pnwuvfcpqp.ap-southeast-2.awsapprunner.com/)
 
 Below is a preview of the app interface:
-[Hotspot Screenshot](docs/app-screenshot.png)
+![Hotspot Screenshot](docs/app-screenshot.png?raw=true)
 
 ## Project Structure
 
