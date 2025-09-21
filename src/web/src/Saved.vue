@@ -57,7 +57,6 @@ interface ParkingSubmission {
   cctv: boolean | null;
   created_at: string;
   facilities: Facility[];
-  userVote?: string;
 }
 
 const savedParkingData = ref<ParkingSubmission[]>([]);
