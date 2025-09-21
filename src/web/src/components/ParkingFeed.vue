@@ -45,7 +45,6 @@ interface ParkingSubmission {
   cctv: boolean | null;
   created_at: string;
   facilities: Facility[];
-  userVote?: string;
 }
 
 const props = defineProps<{

@@ -237,7 +237,6 @@ class PersistentDatabase(DatabaseInterface):
         if data.get('cctv') is not None:
             item['cctv'] = data['cctv']
 
-        item['facility_ids'] = []
 
         self.table.put_item(Item=item)
 

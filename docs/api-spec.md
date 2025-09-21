@@ -67,18 +67,18 @@ The API allows riders to:
     "suburb": "Richmond",
     "postcode": "3121",
     "type": "off-street",
-    "lighting": 0.025476,
+    "lighting": 4,
     "cctv": true,
-    "facilities": [1,2]
+    "facilities": [1, 2]
   }
 
 ```
 **Response Example:**
 ```json
-  {
-    "parking_id": "101",
-    "message": "Parking suggestion submitted successfully"
-  }
+{
+  "parking_id": 101,
+  "message": "Parking suggestion submitted successfully"
+}
 ```
 
 ### 2.3 Get Parking by Postcode
@@ -89,7 +89,7 @@ The API allows riders to:
 - `{postcode}` (string, required) -> postcode to search for parking options
 
 **Request Example:**
-`GET /search?q=3121`
+`GET /parking/3121`
 
 **Response Example:**
 ```json
@@ -102,9 +102,10 @@ The API allows riders to:
     "type": "off-street",
     "lighting": 4,
     "cctv": true,
+    "created_at": "2025-09-19T16:46:31.212339",
     "facilities": [
-      {"id": 1, "name": "Covered"},
-      {"id": 2, "name": "Security Guard"}
+      {"facility_id": 1, "facility_name": "Covered parking"},
+      {"facility_id": 2, "facility_name": "Security guard"}
     ]
   }
 ]
@@ -286,7 +287,10 @@ The API allows riders to:
 `GET /addresses/{postcode}`
 
 **Path Parameters:**
-- `{postcode}` (string, required) -> search query to filter addresses within the postcode
+- `{postcode}` (string, required) -> postcode to filter addresses
+
+**Query Parameters:**
+- `q` (string, optional) -> search query to filter addresses within the postcode
 
 **Request Example:**
 `GET /addresses/3000?q=Collins`
