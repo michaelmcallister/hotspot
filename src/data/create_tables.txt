@@ -69,6 +69,12 @@ CREATE TABLE victorian_addresses (
     postcode TEXT NOT NULL
 );
 
+CREATE TABLE postcode_distances (
+    primary_postcode TEXT NOT NULL,
+    secondary_postcode TEXT NOT NULL,
+    distance_meters REAL NOT NULL
+);
+
 CREATE TABLE carpark_counts (
     postcode TEXT NOT NULL,
     carpark_count INTEGER NOT NULL
