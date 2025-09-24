@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <v-main>
     <v-container class="pa-6">
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6">
-          <h1 class="text-h3 font-weight-bold text-primary mb-8 text-center">Contact Us</h1>
+          <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Contact Us</h1>
 
           <v-form ref="form" v-model="valid">
             <v-text-field
@@ -142,7 +142,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-main>
 </template>
 
 <script setup lang="ts">

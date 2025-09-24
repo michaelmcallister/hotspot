@@ -1,47 +1,84 @@
 <template>
-  <div class="homepage">
-    <h1 class="text-h3 font-weight-bold text-primary mb-2">Search Suburb</h1>
-    <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
-      Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
-    </p>
+  <v-main>
+    <v-container>
+      <v-row>
+        <v-col cols="12" class="text-center">
+          <h1 class="text-h3 font-weight-bold text-primary mb-2">Search Suburb</h1>
+          <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
+            Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
+          </p>
 
-    <SearchBar
-      v-model="searchQuery"
-      @search="showStaticReport"
-      @select="handleSuburbSelect"
-    />
+          <SearchBar
+            v-model="searchQuery"
+            @search="showStaticReport"
+            @select="handleSuburbSelect"
+          />
+        </v-col>
+      </v-row>
 
-    <div v-if="selectedSuburb" class="cards-container">
-      <div class="left-column">
-        <ScoreCard
-          :suburb="selectedSuburb.suburb"
-          :score="safetyScore"
-        />
-      </div>
+      <v-row v-if="selectedSuburb">
+        <v-col
+          cols="12"
+          md="3"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4"
+            color="white"
+          >
+            <ScoreCard
+              :suburb="selectedSuburb.suburb"
+              :score="safetyScore"
+            />
+          </v-sheet>
+        </v-col>
 
-      <div class="right-column">
-        <ParkingLocationForm
-          :postcode="selectedSuburb.postcode"
-          :suburb="selectedSuburb.suburb"
-          @submit="handleParkingSubmit"
-        />
-      </div>
-    </div>
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4"
+            color="white"
+          >
+            <ParkingFeed
+              ref="parkingFeedRef"
+              :postcode="selectedSuburb.postcode"
+              :suburb="selectedSuburb.suburb"
+            />
+          </v-sheet>
+        </v-col>
 
-    <div v-if="selectedSuburb" class="parking-feed-container">
-      <ParkingFeed
-        ref="parkingFeedRef"
-        :postcode="selectedSuburb.postcode"
-        :suburb="selectedSuburb.suburb"
-      />
-    </div>
+        <v-col
+          cols="12"
+          md="3"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4 mb-4"
+            color="white"
+          >
+            <ParkingLocationForm
+              :postcode="selectedSuburb.postcode"
+              :suburb="selectedSuburb.suburb"
+              @submit="handleParkingSubmit"
+            />
+          </v-sheet>
 
-    <section v-if="selectedSuburb" class="resources-card" aria-labelledby="resources-title">
-      <h2 id="resources-title" class="sr-only">Resources</h2>
-      <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
-        Resources & Contacts
-      </v-btn>
-    </section>
+          <v-sheet
+            rounded="lg"
+            class="pa-4 text-center"
+            color="white"
+          >
+            <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
+              Resources & Contacts
+            </v-btn>
+          </v-sheet>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>
 
     <ResourcesModal
       v-if="selectedSuburb"
@@ -106,7 +143,6 @@
       </v-card>
     </v-dialog>
 
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -199,63 +235,10 @@ const handleParkingSubmit = async (data: any) => {
 </script>
 
 <style scoped>
-.homepage {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 2rem;
-  text-align: center;
-  line-height: 1.25;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-
-.cards-container {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
-.left-column {
-  flex: 0 0 auto;
-  min-width: 300px;
-  max-width: 500px;
-}
-
-.right-column {
-  flex: 1;
-  min-width: 400px;
-  max-width: 600px;
-}
-
-.parking-feed-container {
-  max-width: 1200px;
-  margin: 2rem auto 0;
-  padding: 0 1rem;
-}
-
-.resources-card { padding: 1.25rem; }
-
 .sr-only {
   position: absolute !important;
   height: 1px; width: 1px;
   overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap; border: 0; padding: 0; margin: -1px;
-}
-
-@media (max-width: 1024px) {
-  .cards-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .left-column,
-  .right-column {
-    width: 100%;
-    max-width: 720px;
-  }
 }
 </style>

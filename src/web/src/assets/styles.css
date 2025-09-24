@@ -1,8 +1,3 @@
 body {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
-}
-
-.v-application, .v-main {
-  background: transparent !important;
 }
