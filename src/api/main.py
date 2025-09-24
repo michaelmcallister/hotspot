@@ -1,5 +1,7 @@
 import argparse
 import os
+import logging
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -7,8 +9,22 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from db_interface import get_database
-from routes import health, search, bikes, lgas, risk, stats, addresses, parking
+from routes import health, search, bikes, lgas, risk, stats, addresses, parking, contact
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.handlers = []
+uvicorn_logger.addHandler(logging.StreamHandler(sys.stdout))
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description="Hotspot API Server")
 parser.add_argument(
@@ -34,14 +50,14 @@ static_path = Path(args.static).resolve()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if env == 'production':
-        print(f"Connected to DynamoDB in {os.environ.get('AWS_DEFAULT_REGION', 'ap-southeast-2')} region")
-        print(f"Using table: {os.environ.get('DYNAMODB_TABLE', 'user_contributions')}")
+        logger.info(f"Connected to DynamoDB in {os.environ.get('AWS_DEFAULT_REGION', 'ap-southeast-2')} region")
+        logger.info(f"Using table: {os.environ.get('DYNAMODB_TABLE', 'user_contributions')}")
     else:
-        print(f"Connected to SQLite database: {os.environ.get('SQLITE_DB_PATH')}")
+        logger.info(f"Connected to SQLite database: {os.environ.get('SQLITE_DB_PATH')}")
     if static_path.exists():
-        print(f"Serving static files from: {static_path}")
+        logger.info(f"Serving static files from: {static_path}")
     yield
-    print("Shutting down...")
+    logger.info("Shutting down...")
 
 
 app = FastAPI(title="Hotspot API", version="0.0.1", lifespan=lifespan)
@@ -55,6 +71,7 @@ app.include_router(stats.router, prefix="/api")
 app.include_router(bikes.router, prefix="/api")
 app.include_router(addresses.router, prefix="/api")
 app.include_router(parking.router, prefix="/api")
+app.include_router(contact.router, prefix="/api")
 
 if static_path.exists():
     @app.get("/")
