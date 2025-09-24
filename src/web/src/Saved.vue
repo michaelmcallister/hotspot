@@ -1,5 +1,6 @@
 <template>
-  <div class="saved-page">
+  <v-main>
+    <v-container class="saved-page">
     <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Saved Parking</h1>
     <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">
       Your favourite parking locations
@@ -35,7 +36,8 @@
         </v-card-text>
       </v-card>
     </div>
-  </div>
+    </v-container>
+  </v-main>
 </template>
 
 <script setup lang="ts">
@@ -161,7 +163,6 @@ watch(() => localStorage.getItem('parkingFavourites'), () => {
   margin: 0 auto;
   padding: 2rem;
 }
-
 
 .parking-feed-container {
   margin-top: 2rem;

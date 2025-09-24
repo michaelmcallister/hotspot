@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-3" elevation="1">
-    <v-card-item class="bg-grey-lighten-4">
+    <v-card-item>
       <template v-slot:prepend>
         <v-icon color="primary">mdi-map-marker</v-icon>
       </template>

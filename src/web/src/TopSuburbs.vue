@@ -1,14 +1,21 @@
 <template>
-  <div class="top-suburbs">
-    <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Top Suburbs</h1>
-    <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">Explore suburbs and LGAs ranked by safety score.</p>
+  <v-main>
+    <v-container>
+      <v-row>
+        <v-col cols="12" class="text-center">
+          <h1 class="text-h3 font-weight-bold text-primary mb-2">Top Suburbs</h1>
+          <p class="subtitle text-body-1 text-grey-darken-1 mb-6">Explore suburbs and LGAs ranked by safety score.</p>
+        </v-col>
+      </v-row>
 
-    <v-toolbar class="mb-4 bg-transparent" density="comfortable" elevation="0" rounded="lg">
-      <v-spacer />
-      <v-toolbar-items>
-        <div class="d-flex align-center flex-wrap">
+      <!-- Controls Section -->
+      <v-row class="mb-4">
+        <v-col
+          cols="12"
+          sm="4"
+          md="4"
+        >
           <v-select
-            class="mx-2"
             label="Scope"
             :items="scopes"
             v-model="scope"
@@ -16,8 +23,13 @@
             variant="outlined"
             hide-details="auto"
           />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="4"
+          md="4"
+        >
           <v-select
-            class="mx-2"
             label="Order"
             :items="orders"
             v-model="order"
@@ -25,8 +37,13 @@
             variant="outlined"
             hide-details="auto"
           />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="4"
+          md="4"
+        >
           <v-text-field
-            class="mx-2"
             label="Limit"
             type="number"
             v-model.number="limit"
@@ -36,41 +53,53 @@
             variant="outlined"
             hide-details="auto"
           />
-        </div>
-      </v-toolbar-items>
-    </v-toolbar>
+        </v-col>
+      </v-row>
 
-    <v-alert v-if="error" type="error" class="mb-3" density="compact">
-      {{ error }}
-    </v-alert>
+      <!-- Error Alert -->
+      <v-row v-if="error">
+        <v-col cols="12">
+          <v-alert type="error" density="compact">
+            {{ error }}
+          </v-alert>
+        </v-col>
+      </v-row>
 
-    <v-data-table
-      :headers="headers"
-      :items="items"
-      :loading="loading"
-      loading-text="Loading data..."
-      class="elevation-1"
-      hover
-      density="comfortable"
-    >
-      <template #item.safety_score="{ item }">
-        <div class="d-inline-flex align-center">
-          <span class="mr-2">{{ item.safety_score }}</span>
-          <v-chip :color="safetyColor(item.safety_score)" variant="tonal" size="small" label>
-            {{ safetyLabel(item.safety_score) }}
-          </v-chip>
-        </div>
-      </template>
-      <template #item.avg_safety="{ item }">
-        <div class="d-inline-flex align-center">
-          <span class="mr-2">{{ item.avg_safety }}</span>
-          <v-chip :color="safetyColor(item.avg_safety)" variant="tonal" size="small" label>
-            {{ safetyLabel(item.avg_safety) }}
-          </v-chip>
-        </div>
-      </template>
-    </v-data-table>
-  </div>
+      <!-- Data Table -->
+      <v-row>
+        <v-col cols="12">
+          <v-card elevation="1">
+            <v-data-table
+              :headers="headers"
+              :items="items"
+              :loading="loading"
+              loading-text="Loading data..."
+              hover
+              density="comfortable"
+              mobile-breakpoint="sm"
+            >
+              <template #item.safety_score="{ item }">
+                <div class="d-inline-flex align-center">
+                  <span class="mr-2">{{ item.safety_score }}</span>
+                  <v-chip :color="safetyColor(item.safety_score)" variant="tonal" size="small" label>
+                    {{ safetyLabel(item.safety_score) }}
+                  </v-chip>
+                </div>
+              </template>
+              <template #item.avg_safety="{ item }">
+                <div class="d-inline-flex align-center">
+                  <span class="mr-2">{{ item.avg_safety }}</span>
+                  <v-chip :color="safetyColor(item.avg_safety)" variant="tonal" size="small" label>
+                    {{ safetyLabel(item.avg_safety) }}
+                  </v-chip>
+                </div>
+              </template>
+            </v-data-table>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>
   
 </template>
 
@@ -148,12 +177,5 @@ watch([scope, order, limit], fetchData, { immediate: true })
 </script>
 
 <style scoped>
-.top-suburbs {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 2rem;
-}
-
-
-
+/* Mobile-first responsive design handled by Vuetify grid system */
 </style>
