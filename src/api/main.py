@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from db_interface import get_database
-from routes import health, search, bikes, lgas, risk, stats, addresses, parking, contact
+from routes import health, search, bikes, lgas, risk, stats, addresses, parking, contact, postcodes
 
 
 logging.basicConfig(
@@ -72,6 +72,7 @@ app.include_router(bikes.router, prefix="/api")
 app.include_router(addresses.router, prefix="/api")
 app.include_router(parking.router, prefix="/api")
 app.include_router(contact.router, prefix="/api")
+app.include_router(postcodes.router, prefix="/api")
 
 if static_path.exists():
     @app.get("/")
