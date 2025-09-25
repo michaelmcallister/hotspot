@@ -17,7 +17,7 @@
           icon
           variant="plain"
           size="small"
-          @click.stop="toggleFavourite"
+          @click.stop="toggleFavouriteHandler"
         >
           <v-icon
             :color="isFavourite ? 'yellow-darken-2' : 'grey-lighten-1'"
@@ -136,7 +136,7 @@ const isFavourite = computed(() => {
   return favourites.value.has(props.submission.parking_id);
 });
 
-const toggleFavourite = () => {
+const toggleFavouriteHandler = () => {
   const wasAdded = toggleFavourite(props.submission.parking_id);
 
   if (wasAdded) {
