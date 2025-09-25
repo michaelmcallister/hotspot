@@ -48,8 +48,39 @@
           color="white"
           flat
         >
-          <v-card-text class="text-center py-8">
-            <p class="text-grey text-body-1">Coming soon...</p>
+
+          <v-card-text v-if="nearestLoading" class="text-center py-4">
+            <v-progress-circular indeterminate size="32"></v-progress-circular>
+          </v-card-text>
+
+          <v-card-text v-else-if="nearestSuburbs.length === 0" class="text-center py-8">
+            <p class="text-grey text-body-1">No nearby suburbs found</p>
+          </v-card-text>
+
+          <v-card-text v-else class="pa-0">
+            <div
+              class="suburb-scroll-container pa-3"
+              style="max-height: 500px; overflow-y: auto;"
+              @scroll="handleScroll"
+            >
+              <SuburbCard
+                v-for="suburb in displayedSuburbs"
+                :key="`${suburb.postcode}-${suburb.suburb}`"
+                :suburb="suburb"
+              />
+              <div
+                v-if="displayedSuburbs.length < nearestSuburbs.length"
+                class="text-center py-2"
+              >
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  @click="loadMoreSuburbs"
+                >
+                  Load More
+                </v-btn>
+              </div>
+            </div>
           </v-card-text>
         </v-card>
       </v-tabs-window-item>
@@ -59,7 +90,9 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import ParkingCard from './ParkingCard.vue';
+import SuburbCard from './SuburbCard.vue';
 
 interface Facility {
   facility_id: number;
@@ -78,14 +111,29 @@ interface ParkingSubmission {
   facilities: Facility[];
 }
 
+interface NearestSuburb {
+  postcode: string;
+  suburb: string;
+  lga: string;
+  distance_in_meters: number;
+  parking_count?: number;
+  risk_score?: number;
+}
+
+const route = useRoute();
+
 const props = defineProps<{
   postcode: string;
   suburb?: string;
 }>();
 
 const submissions = ref<ParkingSubmission[]>([]);
+const nearestSuburbs = ref<NearestSuburb[]>([]);
+const displayedSuburbs = ref<NearestSuburb[]>([]);
 const loading = ref(false);
+const nearestLoading = ref(false);
 const tab = ref('Parking Feed');
+const currentDisplayCount = ref(3);
 
 const fetchSubmissions = async () => {
   if (!props.postcode) return;
@@ -105,16 +153,104 @@ const fetchSubmissions = async () => {
   }
 };
 
+const fetchNearestSuburbs = async () => {
+  if (!props.postcode) return;
+
+  nearestLoading.value = true;
+  try {
+    const response = await fetch(`/api/v1/postcode/${props.postcode}/nearest`);
+    if (response.ok) {
+      const suburbs = await response.json();
+
+      const suburbsWithData = await Promise.all(
+        suburbs.map(async (suburb: NearestSuburb) => {
+          let parking_count = 0;
+          let risk_score: number | undefined = undefined;
+
+          try {
+            const parkingResponse = await fetch(`/api/v1/parking/${suburb.postcode}`);
+            if (parkingResponse.ok) {
+              const parkingData = await parkingResponse.json();
+              parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
+            }
+          } catch (error) {
+            console.warn(`Failed to fetch parking count for ${suburb.postcode}:`, error);
+          }
+
+          try {
+            // Fetch risk score directly using postcode
+            const riskResponse = await fetch(`/api/v1/risk/compare?postcode=${suburb.postcode}`);
+            if (riskResponse.ok) {
+              const riskData = await riskResponse.json();
+
+              if (riskData && riskData.base && riskData.base.risk_score !== undefined) {
+                risk_score = riskData.base.risk_score;
+              }
+            }
+          } catch (error) {
+            console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
+          }
+
+          return {
+            ...suburb,
+            parking_count,
+            risk_score
+          };
+        })
+      );
+
+      nearestSuburbs.value = suburbsWithData;
+      displayedSuburbs.value = suburbsWithData.slice(0, 3);
+      currentDisplayCount.value = 3;
+    } else {
+      nearestSuburbs.value = [];
+      displayedSuburbs.value = [];
+    }
+  } catch (error) {
+    nearestSuburbs.value = [];
+    displayedSuburbs.value = [];
+  } finally {
+    nearestLoading.value = false;
+  }
+};
+
+const loadMoreSuburbs = () => {
+  const nextCount = Math.min(currentDisplayCount.value + 3, nearestSuburbs.value.length);
+
+  if (nextCount > currentDisplayCount.value) {
+    displayedSuburbs.value = nearestSuburbs.value.slice(0, nextCount);
+    currentDisplayCount.value = nextCount;
+  }
+};
+
+const handleScroll = (event: Event) => {
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight, clientHeight } = target;
+
+  if (scrollTop + clientHeight >= scrollHeight - 10) {
+    loadMoreSuburbs();
+  }
+};
+
 watch(() => props.postcode, () => {
   fetchSubmissions();
+  fetchNearestSuburbs();
 });
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab === 'parking-feed') {
+    tab.value = 'Parking Feed';
+  }
+}, { immediate: true });
 
 onMounted(() => {
   fetchSubmissions();
+  fetchNearestSuburbs();
 });
 
 defineExpose({
-  fetchSubmissions
+  fetchSubmissions,
+  fetchNearestSuburbs
 });
 </script>
 
