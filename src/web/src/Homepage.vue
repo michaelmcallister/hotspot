@@ -149,12 +149,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import slugify from 'slugify';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import ResourcesModal from './components/ResourcesModal.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
+import { searchService, parkingService } from './services';
+import { createSlug, riskToSafetyScore } from './utils';
 
 const props = defineProps<{
   slug?: string;
@@ -183,46 +184,36 @@ const searchBarRef = ref<any>(null);
 
 const safetyScore = computed(() => {
   if (!selectedSuburb.value) return 0;
-  return Math.round((1 - selectedSuburb.value.risk_score) * 100);
+  return riskToSafetyScore(selectedSuburb.value.risk_score);
 });
 
-const createSlug = (suburb: string, postcode: string): string => {
-  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
-};
 
 const lookupSuburbBySlug = async (slug: string): Promise<Suburb | null> => {
   try {
     let searchTerm = slug.replace(/-/g, ' ');
-    let response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchTerm)}`);
+    let results = await searchService.search(searchTerm);
 
-    if (response.ok) {
-      let results = await response.json();
+    if (results.length > 0) {
+      const targetSlug = slug.toLowerCase();
+      const match = results.find((suburb: Suburb) => {
+        const suburbSlug = createSlug(suburb.suburb, suburb.postcode);
+        return suburbSlug === targetSlug;
+      });
+
+      if (match) return match;
+    }
+
+    const parts = slug.split('-');
+    if (parts.length > 1) {
+      const suburbOnly = parts.slice(0, -1).join(' ');
+      results = await searchService.search(suburbOnly);
 
       if (results.length > 0) {
-        const targetSlug = slug.toLowerCase();
-        const match = results.find((suburb: Suburb) => {
-          const suburbSlug = createSlug(suburb.suburb, suburb.postcode);
-          return suburbSlug === targetSlug;
-        });
-
-        if (match) return match;
-      }
-
-      const parts = slug.split('-');
-      if (parts.length > 1) {
-        const suburbOnly = parts.slice(0, -1).join(' ');
-        response = await fetch(`/api/v1/search?q=${encodeURIComponent(suburbOnly)}`);
-
-        if (response.ok) {
-          results = await response.json();
-          if (results.length > 0) {
-            const targetPostcode = parts[parts.length - 1];
-            const postcodeMatch = results.find((suburb: Suburb) =>
-              suburb.postcode === targetPostcode
-            );
-            return postcodeMatch || results[0];
-          }
-        }
+        const targetPostcode = parts[parts.length - 1];
+        const postcodeMatch = results.find((suburb: Suburb) =>
+          suburb.postcode === targetPostcode
+        );
+        return postcodeMatch || results[0];
       }
     }
   } catch (error) {
@@ -240,12 +231,9 @@ const handleSuburbSelect = (suburb: Suburb) => {
 const showStaticReport = async () => {
   if (searchQuery.value.trim() && !selectedSuburb.value) {
     try {
-      const response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`);
-      if (response.ok) {
-        const results = await response.json();
-        if (results.length > 0) {
-          selectedSuburb.value = results[0];
-        }
+      const results = await searchService.search(searchQuery.value);
+      if (results.length > 0) {
+        selectedSuburb.value = results[0];
       }
     } catch (error) {
       console.error('Search error:', error);
@@ -255,28 +243,15 @@ const showStaticReport = async () => {
 
 const handleParkingSubmit = async (data: any) => {
   try {
-    const response = await fetch('/api/v1/parking', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      successMessage.value = `Parking location successfully added: ${data.address}`;
-      showSuccessDialog.value = true;
-      if (parkingFeedRef.value) {
-        parkingFeedRef.value.fetchSubmissions();
-      }
-    } else {
-      const error = await response.json();
-      errorMessage.value = error.detail || 'Failed to add parking location. Please try again.';
-      showErrorDialog.value = true;
+    await parkingService.submitParking(data);
+    successMessage.value = `Parking location successfully added: ${data.address}`;
+    showSuccessDialog.value = true;
+    if (parkingFeedRef.value) {
+      parkingFeedRef.value.fetchSubmissions();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Network error:', error);
-    errorMessage.value = 'Failed to submit parking location. Please check your connection and try again.';
+    errorMessage.value = error.message || 'Failed to submit parking location. Please check your connection and try again.';
     showErrorDialog.value = true;
   }
 };

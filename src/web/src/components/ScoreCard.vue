@@ -22,7 +22,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { safetyLabel, safetyColor } from '../utils/safety'
+import { safetyLabel, safetyColor } from '../utils/safety';
+import { statsService } from '../services';
+import { safetyToRiskScore, riskDifferencePercent } from '../utils';
 
 const props = defineProps<{
   suburb: string
@@ -34,25 +36,21 @@ const chipColor = computed(() => safetyColor(props.score))
 
 // Fetch average postcode risk from the API and compute delta
 const avgRisk = ref<number | null>(null)
-const suburbRisk = computed(() => 1 - props.score / 100)
+const suburbRisk = computed(() => safetyToRiskScore(props.score))
 
 onMounted(async () => {
   try {
-    const res = await fetch('/api/v1/stats/summary')
-    if (res.ok) {
-      const data = await res.json()
-      avgRisk.value = Number(data.avg_postcode_risk)
-    }
+    const data = await statsService.getSummary();
+    avgRisk.value = Number(data.avg_postcode_risk);
   } catch (e) {
-    console.error('Failed to load stats summary', e)
+    console.error('Failed to load stats summary', e);
   }
 })
 
 const avgReady = computed(() => avgRisk.value != null && avgRisk.value > 0)
 const deltaPct = computed(() => {
   if (!avgReady.value) return 0
-  // percentage difference relative to average
-  return ((suburbRisk.value - (avgRisk.value as number)) / (avgRisk.value as number)) * 100
+  return riskDifferencePercent(suburbRisk.value, avgRisk.value as number)
 })
 const trend = computed(() => (deltaPct.value > 0 ? 'higher' : deltaPct.value < 0 ? 'lower' : 'same'))
 const trendWord = computed(() => (trend.value === 'higher' ? 'higher' : trend.value === 'lower' ? 'lower' : 'the same as'))

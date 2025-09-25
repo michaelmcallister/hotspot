@@ -113,8 +113,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import slugify from 'slugify'
 import { safetyLabel, safetyColor } from './utils/safety'
+import { riskService } from './services'
+import { createSlug, riskToSafetyScore } from './utils'
 
 const router = useRouter()
 
@@ -158,24 +159,21 @@ async function fetchData() {
   loading.value = true
   error.value = ''
   try {
-    const params = new URLSearchParams({
+    const data = await riskService.getTopRisk({
       scope: scope.value,
       order: order.value,
       limit: String(limit.value ?? 20),
     })
-    const res = await fetch(`/api/v1/risk/top?${params.toString()}`)
-    if (!res.ok) throw new Error(`Failed to load data (${res.status})`)
-    const data = await res.json()
     const rows = Array.isArray(data) ? data : []
     if (scope.value === 'postcode') {
       items.value = rows.map(r => ({
         ...r,
-        safety_score: Math.round((1 - Number(r.risk_score)) * 100),
+        safety_score: riskToSafetyScore(Number(r.risk_score)),
       }))
     } else {
       items.value = rows.map(r => ({
         ...r,
-        avg_safety: Math.round((1 - Number(r.avg_risk)) * 100),
+        avg_safety: riskToSafetyScore(Number(r.avg_risk)),
       }))
     }
   } catch (e: any) {
@@ -185,9 +183,6 @@ async function fetchData() {
   }
 }
 
-const createSlug = (suburb: string, postcode: string): string => {
-  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
-}
 
 const viewSuburbDetails = (item: any) => {
   const slug = createSlug(item.suburb, item.postcode);

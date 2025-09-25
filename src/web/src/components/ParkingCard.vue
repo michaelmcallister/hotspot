@@ -36,7 +36,7 @@
           label
         >
           <v-icon start size="14">{{ getTypeIcon(submission.type) }}</v-icon>
-          {{ formatType(submission.type) }}
+          {{ formatParkingType(submission.type) }}
         </v-chip>
 
         <v-chip
@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import slugify from 'slugify';
+import { createSlug, getFavouriteIds, toggleFavourite, getCachedParkingData, setCachedParkingData, formatParkingType, getLightingLabel } from '../utils';
 
 const router = useRouter();
 
@@ -123,10 +123,8 @@ const emit = defineEmits<{
 const favourites = ref<Set<number>>(new Set());
 
 const loadFavourites = () => {
-  const storedFavourites = localStorage.getItem('parkingFavourites');
-  if (storedFavourites) {
-    favourites.value = new Set(JSON.parse(storedFavourites));
-  }
+  const favouriteIds = getFavouriteIds();
+  favourites.value = new Set(favouriteIds);
 };
 
 onMounted(() => {
@@ -139,37 +137,22 @@ const isFavourite = computed(() => {
 });
 
 const toggleFavourite = () => {
-  if (isFavourite.value) {
-    favourites.value.delete(props.submission.parking_id);
-  } else {
-    favourites.value.add(props.submission.parking_id);
+  const wasAdded = toggleFavourite(props.submission.parking_id);
 
-    const cachedData = localStorage.getItem('parkingDataCache');
-    let cache: Record<number, ParkingSubmission> = {};
-    if (cachedData) {
-      try {
-        cache = JSON.parse(cachedData);
-      } catch (e) {
-        console.error('Failed to parse cache:', e);
-      }
-    }
+  if (wasAdded) {
+    // Cache the submission data when adding to favourites
+    const cache = getCachedParkingData();
     cache[props.submission.parking_id] = props.submission;
-    localStorage.setItem('parkingDataCache', JSON.stringify(cache));
+    setCachedParkingData(cache);
+    favourites.value.add(props.submission.parking_id);
+  } else {
+    favourites.value.delete(props.submission.parking_id);
   }
 
-  localStorage.setItem('parkingFavourites', JSON.stringify([...favourites.value]));
   emit('update:favourite');
   window.dispatchEvent(new Event('storage'));
 };
 
-const formatType = (type: string) => {
-  const types: Record<string, string> = {
-    'on-street': 'On Street',
-    'off-street': 'Off Street',
-    'secure': 'Secure'
-  };
-  return types[type] || type;
-};
 
 const getTypeColor = (type: string) => {
   const colors: Record<string, string> = {
@@ -189,15 +172,6 @@ const getTypeIcon = (type: string) => {
   return icons[type] || 'mdi-parking';
 };
 
-const getLightingLabel = (lighting: number) => {
-  const labels: Record<number, string> = {
-    1: 'Poor',
-    2: 'Fair',
-    3: 'Good',
-    4: 'Excellent'
-  };
-  return labels[lighting] || 'Unknown';
-};
 
 const getFacilityIcon = (facilityName: string) => {
   const icons: Record<string, string> = {
@@ -211,9 +185,6 @@ const getFacilityIcon = (facilityName: string) => {
   return icons[facilityName] || 'mdi-star';
 };
 
-const createSlug = (suburb: string, postcode: string): string => {
-  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
-};
 
 const navigateToSuburb = () => {
   const slug = createSlug(props.submission.suburb, props.submission.postcode);

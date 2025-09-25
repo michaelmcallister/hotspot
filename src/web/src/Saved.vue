@@ -43,6 +43,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import ParkingCard from './components/ParkingCard.vue';
+import { parkingService } from './services';
+import { getFavouriteIds, getCachedParkingData, setCachedParkingData } from './utils';
 
 interface Facility {
   facility_id: number;
@@ -68,23 +70,12 @@ const fetchSavedParking = async () => {
   loading.value = true;
 
   try {
-    const storedFavourites = localStorage.getItem('parkingFavourites');
-    if (storedFavourites) {
-      const favouriteIds = JSON.parse(storedFavourites);
-
-      if (favouriteIds.length > 0) {
+    const favouriteIds = getFavouriteIds();
+    if (favouriteIds.length > 0) {
         const allPostcodes = new Set<string>();
         const parkingByPostcode: Map<string, ParkingSubmission[]> = new Map();
 
-        const tempStorage = localStorage.getItem('parkingDataCache');
-        let cachedData: Record<number, ParkingSubmission> = {};
-        if (tempStorage) {
-          try {
-            cachedData = JSON.parse(tempStorage);
-          } catch (e) {
-            console.error('Failed to parse cached data:', e);
-          }
-        }
+        let cachedData = getCachedParkingData();
 
         for (const id of favouriteIds) {
           if (cachedData[id]) {
@@ -103,15 +94,12 @@ const fetchSavedParking = async () => {
 
         for (const postcode of allPostcodes) {
           try {
-            const response = await fetch(`/api/v1/parking/${postcode}`);
-            if (response.ok) {
-              const postcodeParking = await response.json();
-              for (const parking of postcodeParking) {
-                if (favouriteIds.includes(parking.parking_id)) {
-                  allParkingData.push(parking);
-                  if (!cachedData[parking.parking_id]) {
-                    cachedData[parking.parking_id] = parking;
-                  }
+            const postcodeParking = await parkingService.getParkingByPostcode(postcode);
+            for (const parking of postcodeParking) {
+              if (favouriteIds.includes(parking.parking_id)) {
+                allParkingData.push(parking);
+                if (!cachedData[parking.parking_id]) {
+                  cachedData[parking.parking_id] = parking;
                 }
               }
             }
@@ -124,10 +112,9 @@ const fetchSavedParking = async () => {
           }
         }
 
-        localStorage.setItem('parkingDataCache', JSON.stringify(cachedData));
+        setCachedParkingData(cachedData);
         savedParkingData.value = allParkingData;
       }
-    }
   } catch (error) {
     // Fine for now, TODO: proper error handling (show a popup?)
     console.error('Failed to fetch saved parking:', error);
@@ -137,9 +124,8 @@ const fetchSavedParking = async () => {
 };
 
 const handleFavouriteUpdate = () => {
-  const storedFavourites = localStorage.getItem('parkingFavourites');
-  if (storedFavourites) {
-    const favouriteIds = new Set(JSON.parse(storedFavourites));
+  const favouriteIds = new Set(getFavouriteIds());
+  if (favouriteIds.size > 0) {
     savedParkingData.value = savedParkingData.value.filter(
       parking => favouriteIds.has(parking.parking_id)
     );
