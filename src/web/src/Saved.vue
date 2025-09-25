@@ -10,11 +10,18 @@
       <v-progress-circular indeterminate size="32"></v-progress-circular>
     </v-card-text>
 
-    <v-card-text v-else-if="savedParkingData.length === 0" class="text-center py-4">
-      <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
-      <p class="text-grey text-body-1 mt-3">No saved parking locations yet</p>
-      <p class="text-grey text-body-2">Star parking locations to save them here</p>
-    </v-card-text>
+
+   <v-empty-state v-else-if="savedParkingData.length === 0">
+      <template v-slot:media>
+        <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
+      </template>
+      <template v-slot:title>
+        <h3 class="text-grey">No saved parking locations yet</h3>
+      </template>
+      <template v-slot:text>
+        <p class="text-grey">Star parking locations to save them here</p>
+      </template>
+    </v-empty-state> 
 
     <div v-else class="parking-feed-container">
       <v-card class="parking-feed">
