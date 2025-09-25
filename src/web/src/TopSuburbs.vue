@@ -8,7 +8,6 @@
         </v-col>
       </v-row>
 
-      <!-- Controls Section -->
       <v-row class="mb-4">
         <v-col
           cols="12"
@@ -56,7 +55,6 @@
         </v-col>
       </v-row>
 
-      <!-- Error Alert -->
       <v-row v-if="error">
         <v-col cols="12">
           <v-alert type="error" density="compact">
@@ -65,7 +63,6 @@
         </v-col>
       </v-row>
 
-      <!-- Data Table -->
       <v-row>
         <v-col cols="12">
           <v-card elevation="1">
@@ -94,6 +91,16 @@
                   </v-chip>
                 </div>
               </template>
+              <template #item.actions="{ item }">
+                <v-btn
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                  @click="viewSuburbDetails(item)"
+                >
+                  View Details
+                </v-btn>
+              </template>
             </v-data-table>
           </v-card>
         </v-col>
@@ -105,7 +112,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import slugify from 'slugify'
 import { safetyLabel, safetyColor } from './utils/safety'
+
+const router = useRouter()
 
 type Scope = 'postcode' | 'lga'
 type Order = 'asc' | 'desc'
@@ -130,6 +141,7 @@ const headers = computed(() => {
         { title: 'Suburb', key: 'suburb' },
         { title: 'LGA', key: 'lga' },
         { title: 'Safety Score', key: 'safety_score' },
+        { title: '', key: 'actions', sortable: false },
       ]
     : [
         { title: 'LGA', key: 'lga' },
@@ -173,9 +185,17 @@ async function fetchData() {
   }
 }
 
+const createSlug = (suburb: string, postcode: string): string => {
+  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
+}
+
+const viewSuburbDetails = (item: any) => {
+  const slug = createSlug(item.suburb, item.postcode);
+  router.push({ name: 'suburb', params: { slug } });
+}
+
 watch([scope, order, limit], fetchData, { immediate: true })
 </script>
 
 <style scoped>
-/* Mobile-first responsive design handled by Vuetify grid system */
 </style>

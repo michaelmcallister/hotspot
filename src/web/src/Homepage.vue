@@ -9,6 +9,7 @@
           </p>
 
           <SearchBar
+            ref="searchBarRef"
             v-model="searchQuery"
             @search="showStaticReport"
             @select="handleSuburbSelect"
@@ -146,12 +147,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import slugify from 'slugify';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import ResourcesModal from './components/ResourcesModal.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
+
+const props = defineProps<{
+  slug?: string;
+}>();
+
+const router = useRouter();
+const route = useRoute();
 
 interface Suburb {
   label: string;
@@ -169,27 +179,71 @@ const showErrorDialog = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
 const parkingFeedRef = ref<any>(null);
+const searchBarRef = ref<any>(null);
 
 const safetyScore = computed(() => {
   if (!selectedSuburb.value) return 0;
-  // Convert risk_score (0-1) to safety score (0-100)
-  // Lower risk = higher safety
   return Math.round((1 - selectedSuburb.value.risk_score) * 100);
 });
 
+const createSlug = (suburb: string, postcode: string): string => {
+  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
+};
+
+const lookupSuburbBySlug = async (slug: string): Promise<Suburb | null> => {
+  try {
+    let searchTerm = slug.replace(/-/g, ' ');
+    let response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchTerm)}`);
+
+    if (response.ok) {
+      let results = await response.json();
+
+      if (results.length > 0) {
+        const targetSlug = slug.toLowerCase();
+        const match = results.find((suburb: Suburb) => {
+          const suburbSlug = createSlug(suburb.suburb, suburb.postcode);
+          return suburbSlug === targetSlug;
+        });
+
+        if (match) return match;
+      }
+
+      const parts = slug.split('-');
+      if (parts.length > 1) {
+        const suburbOnly = parts.slice(0, -1).join(' ');
+        response = await fetch(`/api/v1/search?q=${encodeURIComponent(suburbOnly)}`);
+
+        if (response.ok) {
+          results = await response.json();
+          if (results.length > 0) {
+            const targetPostcode = parts[parts.length - 1];
+            const postcodeMatch = results.find((suburb: Suburb) =>
+              suburb.postcode === targetPostcode
+            );
+            return postcodeMatch || results[0];
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error looking up suburb by slug:', error);
+  }
+  return null;
+};
+
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
+  const slug = createSlug(suburb.suburb, suburb.postcode);
+  router.push({ name: 'suburb', params: { slug } });
 };
 
 const showStaticReport = async () => {
-  // If user presses enter without selecting from dropdown, search for exact match
   if (searchQuery.value.trim() && !selectedSuburb.value) {
     try {
       const response = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery.value)}`);
       if (response.ok) {
         const results = await response.json();
         if (results.length > 0) {
-          // Select the first match
           selectedSuburb.value = results[0];
         }
       }
@@ -210,18 +264,13 @@ const handleParkingSubmit = async (data: any) => {
     });
 
     if (response.ok) {
-      const result = await response.json();
-      console.log('Parking location submitted:', result);
       successMessage.value = `Parking location successfully added: ${data.address}`;
       showSuccessDialog.value = true;
-
-      // Refresh the parking feed
       if (parkingFeedRef.value) {
         parkingFeedRef.value.fetchSubmissions();
       }
     } else {
       const error = await response.json();
-      console.error('Submission error:', error);
       errorMessage.value = error.detail || 'Failed to add parking location. Please try again.';
       showErrorDialog.value = true;
     }
@@ -232,13 +281,35 @@ const handleParkingSubmit = async (data: any) => {
   }
 };
 
+const handleRouteChange = async () => {
+  const slug = (props.slug || route.params.slug) as string;
+
+  if (slug && slug !== 'undefined') {
+    const suburb = await lookupSuburbBySlug(slug);
+    if (suburb) {
+      selectedSuburb.value = suburb;
+      searchQuery.value = suburb.label;
+      if (searchBarRef.value) {
+        searchBarRef.value.updateSelection(suburb);
+      }
+    }
+  } else if (route.name === 'home') {
+    selectedSuburb.value = null;
+    searchQuery.value = '';
+    if (searchBarRef.value) {
+      searchBarRef.value.updateSelection(null);
+    }
+  }
+};
+
+watch(() => [props.slug, route.params.slug], handleRouteChange);
+watch(() => route.name, handleRouteChange);
+
+onMounted(() => {
+  handleRouteChange();
+});
+
 </script>
 
 <style scoped>
-.sr-only {
-  position: absolute !important;
-  height: 1px; width: 1px;
-  overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap; border: 0; padding: 0; margin: -1px;
-}
 </style>

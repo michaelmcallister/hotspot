@@ -1,6 +1,9 @@
 <template>
   <v-card class="mb-3" elevation="1">
-    <v-card-item>
+    <v-card-item
+      class="clickable-header"
+      @click="navigateToSuburb"
+    >
       <template v-slot:prepend>
         <v-icon color="primary">mdi-map-marker</v-icon>
       </template>
@@ -14,7 +17,7 @@
           icon
           variant="plain"
           size="small"
-          @click="toggleFavourite"
+          @click.stop="toggleFavourite"
         >
           <v-icon
             :color="isFavourite ? 'yellow-darken-2' : 'grey-lighten-1'"
@@ -87,6 +90,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import slugify from 'slugify';
+
+const router = useRouter();
 
 interface Facility {
   facility_id: number;
@@ -204,7 +211,16 @@ const getFacilityIcon = (facilityName: string) => {
   return icons[facilityName] || 'mdi-star';
 };
 
-//  This works surprisingly well, Google will fill in the blanks on your current location 
+const createSlug = (suburb: string, postcode: string): string => {
+  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
+};
+
+const navigateToSuburb = () => {
+  const slug = createSlug(props.submission.suburb, props.submission.postcode);
+  router.push({ name: 'suburb', params: { slug } });
+};
+
+//  This works surprisingly well, Google will fill in the blanks on your current location
 const openDirections = () => {
   const fullAddress = `${props.submission.address}, ${props.submission.suburb}, ${props.submission.postcode}`;
   const encodedAddress = encodeURIComponent(fullAddress);
@@ -216,5 +232,14 @@ const openDirections = () => {
 <style scoped>
 .gap-1 {
   gap: 0.25rem;
+}
+
+.clickable-header {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickable-header:hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
 }
 </style>

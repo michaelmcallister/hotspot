@@ -8,12 +8,13 @@
     @update:search="onSearchUpdate"
     @keyup.enter="emitSearch"
     v-model="selected"
+    clearable
     variant="outlined"
     bg-color="white"
     density="comfortable"
     rounded="lg"
-    hide-details
     hide-no-data
+    hide-details
     prepend-inner-icon="mdi-magnify"
     placeholder="Enter suburb or postcode (e.g., Toorak, 3142)"
     class="mx-auto mb-8"
@@ -75,7 +76,6 @@ const fetchSuggestions = async (q: string) => {
   }
 };
 
-// Prefetch a sensible default list so clicking the dropdown shows items
 const fetchDefaultSuggestions = async () => {
   try {
     const params = new URLSearchParams({ scope: 'postcode', order: 'desc', limit: '50' });
@@ -84,7 +84,7 @@ const fetchDefaultSuggestions = async () => {
     const rows = await res.json();
     const mapped: Suggestion[] = Array.isArray(rows)
       ? rows.map((r: any) => ({
-          label: `${r.suburb} ${r.postcode}`.trim(),
+          label: `${r.suburb}, ${r.postcode}`.trim(),
           suburb: String(r.suburb ?? ''),
           postcode: String(r.postcode ?? ''),
           lga: String(r.lga ?? ''),
@@ -98,7 +98,6 @@ const fetchDefaultSuggestions = async () => {
     }
   } catch (e) {
     // Keep silent failure for defaults so search still works
-    console.error('Default suggestions error:', e);
     defaultSuggestions.value = [];
   }
 };
@@ -110,6 +109,7 @@ onMounted(() => {
 const onSearchUpdate = (val: string) => {
   search.value = val;
   emit('update:modelValue', val);
+
   if (debounceId) clearTimeout(debounceId);
   debounceId = setTimeout(() => fetchSuggestions(val), 300);
 };
@@ -119,11 +119,20 @@ const emitSearch = () => {
 };
 
 watch(selected, (val) => {
-  if (val) {
-    // When a suggestion is selected
+  if (val && !isUpdatingExternally) {
     emit('update:modelValue', val.label);
     emit('select', val);
     emit('search');
   }
 });
+
+let isUpdatingExternally = false;
+
+const updateSelection = (suburb: Suggestion | null) => {
+  isUpdatingExternally = true;
+  selected.value = suburb;
+  isUpdatingExternally = false;
+};
+
+defineExpose({ updateSelection });
 </script>
