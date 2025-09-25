@@ -148,6 +148,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import validator from 'validator'
+import { contactService } from './services'
 
 const recaptchaReady = ref(false)
 let recaptchaWidgetId: number | null = null
@@ -274,27 +275,11 @@ const handleSubmit = async (event?: Event) => {
   }
 
   try {
-    const response = await fetch('/api/v1/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-
-    if (response.ok) {
-      const result = await response.json()
-      showLoadingDialog.value = false
-      successMessage.value = 'Your message has been sent successfully.'
-      showSuccessDialog.value = true
-
-      resetForm()
-    } else {
-      const errorData = await response.json()
-      showLoadingDialog.value = false
-      errorMessage.value = errorData.detail || 'Failed to submit form. Please try again.'
-      showErrorDialog.value = true
-    }
+    await contactService.submitContact(formData)
+    showLoadingDialog.value = false
+    successMessage.value = 'Your message has been sent successfully.'
+    showSuccessDialog.value = true
+    resetForm()
 
   } catch (error) {
     showLoadingDialog.value = false

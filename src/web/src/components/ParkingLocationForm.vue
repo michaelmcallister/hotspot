@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { addressService } from '../services';
 
 interface AddressSuggestion {
   display: string;
@@ -188,24 +189,14 @@ const fetchAddressSuggestions = async (query: string) => {
 
   addressLoading.value = true;
   try {
-    // Build URL based on whether we have a query
-    const url = query
-      ? `/api/v1/addresses/${props.postcode}?q=${encodeURIComponent(query)}`
-      : `/api/v1/addresses/${props.postcode}`;
-
-    const response = await fetch(url);
-    if (response.ok) {
-      const results = await response.json();
-      addressSuggestions.value = results.map((item: any) => ({
-        display: `${item.address}, ${item.suburb} ${item.postcode}`,
-        value: item.address,
-        address: item.address,
-        suburb: item.suburb,
-        postcode: item.postcode
-      }));
-    } else {
-      addressSuggestions.value = [];
-    }
+    const results = await addressService.getAddresses(props.postcode, query || undefined);
+    addressSuggestions.value = results.map((item: any) => ({
+      display: `${item.address}, ${item.suburb} ${item.postcode}`,
+      value: item.address,
+      address: item.address,
+      suburb: item.suburb,
+      postcode: item.postcode
+    }));
   } catch (error) {
     console.error('Address search error:', error);
     addressSuggestions.value = [];

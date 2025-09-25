@@ -93,6 +93,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ParkingCard from './ParkingCard.vue';
 import SuburbCard from './SuburbCard.vue';
+import { parkingService, postcodeService, riskService } from '../services';
 
 interface Facility {
   facility_id: number;
@@ -140,12 +141,7 @@ const fetchSubmissions = async () => {
 
   loading.value = true;
   try {
-    const response = await fetch(`/api/v1/parking/${props.postcode}`);
-    if (response.ok) {
-      submissions.value = await response.json();
-    } else {
-      submissions.value = [];
-    }
+    submissions.value = await parkingService.getParkingByPostcode(props.postcode);
   } catch (error) {
     submissions.value = [];
   } finally {
@@ -158,54 +154,40 @@ const fetchNearestSuburbs = async () => {
 
   nearestLoading.value = true;
   try {
-    const response = await fetch(`/api/v1/postcode/${props.postcode}/nearest`);
-    if (response.ok) {
-      const suburbs = await response.json();
+    const suburbs = await postcodeService.getNearestSuburbs(props.postcode);
 
-      const suburbsWithData = await Promise.all(
-        suburbs.map(async (suburb: NearestSuburb) => {
-          let parking_count = 0;
-          let risk_score: number | undefined = undefined;
+    const suburbsWithData = await Promise.all(
+      suburbs.map(async (suburb: NearestSuburb) => {
+        let parking_count = 0;
+        let risk_score: number | undefined = undefined;
 
-          try {
-            const parkingResponse = await fetch(`/api/v1/parking/${suburb.postcode}`);
-            if (parkingResponse.ok) {
-              const parkingData = await parkingResponse.json();
-              parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
-            }
-          } catch (error) {
-            console.warn(`Failed to fetch parking count for ${suburb.postcode}:`, error);
+        try {
+          const parkingData = await parkingService.getParkingByPostcode(suburb.postcode);
+          parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
+        } catch (error) {
+          console.warn(`Failed to fetch parking count for ${suburb.postcode}:`, error);
+        }
+
+        try {
+          const riskData = await riskService.compareRisk(suburb.postcode);
+          if (riskData && riskData.base && riskData.base.risk_score !== undefined) {
+            risk_score = riskData.base.risk_score;
           }
+        } catch (error) {
+          console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
+        }
 
-          try {
-            // Fetch risk score directly using postcode
-            const riskResponse = await fetch(`/api/v1/risk/compare?postcode=${suburb.postcode}`);
-            if (riskResponse.ok) {
-              const riskData = await riskResponse.json();
+        return {
+          ...suburb,
+          parking_count,
+          risk_score
+        };
+      })
+    );
 
-              if (riskData && riskData.base && riskData.base.risk_score !== undefined) {
-                risk_score = riskData.base.risk_score;
-              }
-            }
-          } catch (error) {
-            console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
-          }
-
-          return {
-            ...suburb,
-            parking_count,
-            risk_score
-          };
-        })
-      );
-
-      nearestSuburbs.value = suburbsWithData;
-      displayedSuburbs.value = suburbsWithData.slice(0, 3);
-      currentDisplayCount.value = 3;
-    } else {
-      nearestSuburbs.value = [];
-      displayedSuburbs.value = [];
-    }
+    nearestSuburbs.value = suburbsWithData;
+    displayedSuburbs.value = suburbsWithData.slice(0, 3);
+    currentDisplayCount.value = 3;
   } catch (error) {
     nearestSuburbs.value = [];
     displayedSuburbs.value = [];

@@ -69,8 +69,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import slugify from 'slugify';
-import { safetyLabel, safetyColor } from '../utils/safety';
+import { safetyLabel, safetyColor, createSlug, riskToSafetyScore, formatDistance } from '../utils';
 
 const router = useRouter();
 
@@ -91,20 +90,10 @@ const safetyScore = computed(() => {
   if (props.suburb.risk_score === undefined || props.suburb.risk_score === null) {
     return null;
   }
-  return Math.round((1 - props.suburb.risk_score) * 100);
+  return riskToSafetyScore(props.suburb.risk_score);
 });
 
-const formatDistance = (meters: number): string => {
-  if (meters < 1000) {
-    return `${Math.round(meters)}m`;
-  } else {
-    return `${(meters / 1000).toFixed(1)}km`;
-  }
-};
 
-const createSlug = (suburb: string, postcode: string): string => {
-  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
-};
 
 const navigateToSuburb = () => {
   const slug = createSlug(props.suburb.suburb, props.suburb.postcode);

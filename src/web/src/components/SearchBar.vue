@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+import { searchService, riskService } from '../services';
 
 interface Suggestion {
   label: string;
@@ -62,12 +63,7 @@ const fetchSuggestions = async (q: string) => {
   }
   loading.value = true;
   try {
-    const response = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`);
-    if (response.ok) {
-      suggestions.value = await response.json();
-    } else {
-      suggestions.value = [];
-    }
+    suggestions.value = await searchService.search(q);
   } catch (e) {
     console.error('Search error:', e);
     suggestions.value = [];
@@ -78,10 +74,7 @@ const fetchSuggestions = async (q: string) => {
 
 const fetchDefaultSuggestions = async () => {
   try {
-    const params = new URLSearchParams({ scope: 'postcode', order: 'desc', limit: '50' });
-    const res = await fetch(`/api/v1/risk/top?${params.toString()}`);
-    if (!res.ok) throw new Error(`Failed to load defaults (${res.status})`);
-    const rows = await res.json();
+    const rows = await riskService.getTopRisk({ scope: 'postcode', order: 'desc', limit: '50' });
     const mapped: Suggestion[] = Array.isArray(rows)
       ? rows.map((r: any) => ({
           label: `${r.suburb}, ${r.postcode}`.trim(),
