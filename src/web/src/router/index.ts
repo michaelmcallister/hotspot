@@ -7,6 +7,7 @@ import NotFound from '../NotFound.vue'
 
 const routes = [
   { path: '/', name: 'home', component: Homepage },
+  { path: '/suburb/:slug', name: 'suburb', component: Homepage, props: true },
   { path: '/top-suburbs', name: 'top-suburbs', component: TopSuburbs },
   { path: '/saved', name: 'saved', component: Saved },
   { path: '/contact', name: 'contact', component: Contact },
