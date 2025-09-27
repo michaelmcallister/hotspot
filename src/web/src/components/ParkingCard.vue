@@ -12,6 +12,10 @@
         {{ submission.address }}
       </v-card-title>
 
+      <v-card-subtitle class="text-body-2">
+        {{ submission.postcode }}
+      </v-card-subtitle>
+
       <template v-slot:append>
         <v-btn
           icon

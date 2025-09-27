@@ -29,9 +29,14 @@
             <v-progress-circular indeterminate size="32"></v-progress-circular>
           </v-card-text>
 
-          <v-card-text v-else-if="submissions.length === 0" class="text-center py-8">
-            <p class="text-grey text-body-1">No parking suggestions yet for this area</p>
-          </v-card-text>
+          <v-empty-state v-else-if="submissions.length === 0">
+            <template v-slot:media>
+              <v-icon size="64" color="grey-lighten-1">mdi-parking</v-icon>
+            </template>
+            <template v-slot:title>
+              <h3 class="text-grey">No parking suggestions yet</h3>
+            </template>
+          </v-empty-state>
 
           <v-card-text v-else class="pa-3">
             <ParkingCard
