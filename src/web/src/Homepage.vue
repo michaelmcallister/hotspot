@@ -1,48 +1,20 @@
 <template>
   <v-main>
-    <v-container>
+    <v-container class="py-2 py-md-8">
 
-      <!-- Hero header -->
-    <v-row>
-      <v-col cols="12">
-        <v-sheet
-          rounded="xl"
-          elevation="1"
-          class="px-6 py-10 mb-8 text-center bg-grey-lighten-5"
-          style="border: 1px solid rgba(0,0,0,0.08);"
-        >
-          <div class="d-flex align-center justify-center mb-4">
-            <v-avatar size="48" class="mr-3" color="primary" variant="tonal">
-              <v-icon size="28" color="primary">mdi-map-search</v-icon>
-            </v-avatar>
-            <h1 class="text-h3 font-weight-bold text-high-emphasis m-0">
-              Search Suburb
-            </h1>
-          </div>
-
-          <div class="text-subtitle-1 text-medium-emphasis mx-auto" style="max-width: 720px;">
-            Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
-          </div>
-
-          <!-- Green accent divider -->
-          <v-divider
-            class="my-6 mx-auto"
-            thickness="3"
-            color="primary"
-            style="max-width: 140px; border-radius: 999px;"
-          />
-
-          <!-- Search bar scaled up -->
-          <SearchBar
-            ref="searchBarRef"
-            v-model="searchQuery"
-            @search="showStaticReport"
-            @select="handleSuburbSelect"
-            class="text-h6 py-3 px-4"
-          />
-        </v-sheet>
-      </v-col>
-    </v-row>
+    <PageHero
+      title="Search Suburb"
+      subtitle="Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike"
+      icon="mdi-map-search"
+    >
+      <SearchBar
+        ref="searchBarRef"
+        v-model="searchQuery"
+        @search="showStaticReport"
+        @select="handleSuburbSelect"
+        class="hero-search-bar"
+      />
+    </PageHero>
 
 
       <v-row v-if="selectedSuburb">
@@ -113,8 +85,9 @@ import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
+import PageHero from './components/PageHero.vue';
 import { searchService, parkingService } from './services';
-import { createSlug, parseSlug, riskToSafetyScore } from './utils';
+import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
 
 const props = defineProps<{
   slug?: string;
@@ -146,35 +119,6 @@ const safetyScore = computed(() => {
 });
 
 
-const lookupSuburbBySlug = async (slug: string): Promise<Suburb | null> => {
-  try {
-    // First try to parse the slug to get suburb and postcode
-    const parsed = parseSlug(slug);
-    if (parsed) {
-      // Search using the parsed suburb name
-      const results = await searchService.search(parsed.suburb);
-
-      if (results.length > 0) {
-        // Try to find exact match by postcode
-        const exactMatch = results.find((suburb: Suburb) =>
-          suburb.postcode === parsed.postcode
-        );
-        if (exactMatch) return exactMatch;
-
-        // Fallback to first result if no exact postcode match
-        return results[0];
-      }
-    }
-
-    // Fallback: try searching with the full slug converted to search term
-    const searchTerm = slug.replace(/-/g, ' ');
-    const results = await searchService.search(searchTerm);
-    return results.length > 0 ? results[0] : null;
-  } catch (error) {
-    console.error('Error looking up suburb by slug:', error);
-    return null;
-  }
-};
 
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
@@ -241,31 +185,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Subtle, brand-leaning gradient block with soft glow */
-.hero {
-  /* Light green → light cyan; tweak to your palette */
- /* background: linear-gradient(135deg, #e8fff4 0%, #f2fbff 100%); */
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    0 12px 32px rgba(16, 185, 129, 0.12); /* primary-tinted glow */
+.hero-search-bar {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-/* Circular icon badge matching the header */
-.hero-avatar {
-  background: white;
-  color: var(--v-theme-primary);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-
-.hero-sub {
-  max-width: 760px;
-}
-
-.hero-divider {
-  max-width: 160px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--v-theme-primary), transparent);
+.hero-search-bar :deep(.v-field) {
+  font-size: 1.1rem;
 }
 </style>

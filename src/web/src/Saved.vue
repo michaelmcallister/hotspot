@@ -1,10 +1,11 @@
 <template>
   <v-main>
-    <v-container class="saved-page">
-    <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Saved Parking</h1>
-    <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">
-      Your favourite parking locations
-    </p>
+    <v-container class="py-2 py-md-8">
+    <PageHero
+      title="Saved Parking"
+      subtitle="Your favourite parking locations"
+      icon="mdi-star"
+    />
 
     <v-card-text v-if="loading" class="text-center py-4">
       <v-progress-circular indeterminate size="32"></v-progress-circular>
@@ -50,6 +51,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import ParkingCard from './components/ParkingCard.vue';
+import PageHero from './components/PageHero.vue';
 import { parkingService } from './services';
 import { getFavouriteIds, getCachedParkingData, setCachedParkingData } from './utils';
 

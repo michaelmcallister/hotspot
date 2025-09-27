@@ -89,7 +89,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   show: boolean
-  suburb: string
+  suburb?: string
 }>();
 
 const emit = defineEmits<{

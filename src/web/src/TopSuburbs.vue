@@ -1,12 +1,11 @@
 <template>
   <v-main>
-    <v-container>
-      <v-row>
-        <v-col cols="12" class="text-center">
-          <h1 class="text-h3 font-weight-bold text-primary mb-2">Top Suburbs</h1>
-          <p class="subtitle text-body-1 text-grey-darken-1 mb-6">Explore suburbs and LGAs ranked by safety score.</p>
-        </v-col>
-      </v-row>
+    <v-container class="py-2 py-md-8">
+      <PageHero
+        title="Top Suburbs"
+        subtitle="Explore suburbs and LGAs ranked by safety score"
+        icon="mdi-trophy"
+      />
 
       <v-row class="mb-4">
         <v-col
@@ -113,6 +112,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import PageHero from './components/PageHero.vue'
 import { safetyLabel, safetyColor } from './utils/safety'
 import { riskService } from './services'
 import { createSlug, riskToSafetyScore } from './utils'

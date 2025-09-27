@@ -1,9 +1,14 @@
 <template>
   <v-main>
-    <v-container class="pa-6">
+    <v-container class="py-2 py-md-8">
+      <PageHero
+        title="Contact Us"
+        subtitle="Get in touch with us for support, feedback, or questions"
+        icon="mdi-email"
+      />
+
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6">
-          <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Contact Us</h1>
 
           <v-form ref="form" v-model="valid">
             <v-text-field
@@ -148,6 +153,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import validator from 'validator'
+import PageHero from './components/PageHero.vue'
 import { contactService } from './services'
 
 const recaptchaReady = ref(false)
