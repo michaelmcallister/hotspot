@@ -19,6 +19,9 @@
             <v-list-item @click="showResources = true">
               <v-list-item-title class="text-button text-primary">Resources</v-list-item-title>
             </v-list-item>
+            <v-list-item to="/settings">
+              <v-list-item-title class="text-button text-primary">Settings</v-list-item-title>
+            </v-list-item>
             <v-list-item to="/contact">
               <v-list-item-title class="text-button text-primary">Contact</v-list-item-title>
             </v-list-item>
