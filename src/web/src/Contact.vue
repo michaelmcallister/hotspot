@@ -60,8 +60,10 @@
             />
 
             <div class="recaptcha-send-container mb-6">
-              <div id="recaptcha-widget" v-show="recaptchaReady"></div>
-              <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
+              <div class="recaptcha-wrapper">
+                <div id="recaptcha-widget" v-show="recaptchaReady"></div>
+                <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
+              </div>
               <v-btn
                 color="primary"
                 variant="flat"
@@ -96,57 +98,23 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-text class="text-center pa-6">
-          <v-icon
-            color="success"
-            size="80"
-            class="mb-4"
-          >
-            mdi-check-circle
-          </v-icon>
-          <h3 class="text-h5 mb-2">Thank you!</h3>
-          <p class="text-body-1">{{ successMessage }}</p>
-        </v-card-text>
-        <v-card-actions class="justify-center pb-4">
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="lg"
-            @click="showSuccessDialog = false"
-          >
-            Got it
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <StatusDialog
+      :show="showSuccessDialog"
+      type="success"
+      title="Thank you!"
+      :message="successMessage"
+      button-text="Got it"
+      @close="showSuccessDialog = false"
+    />
 
-    <v-dialog v-model="showErrorDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-text class="text-center pa-6">
-          <v-icon
-            color="error"
-            size="80"
-            class="mb-4"
-          >
-            mdi-alert-circle
-          </v-icon>
-          <h3 class="text-h5 mb-2">Error</h3>
-          <p class="text-body-1">{{ errorMessage }}</p>
-        </v-card-text>
-        <v-card-actions class="justify-center pb-4">
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="lg"
-            @click="showErrorDialog = false"
-          >
-            OK
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <StatusDialog
+      :show="showErrorDialog"
+      type="error"
+      title="Error"
+      :message="errorMessage"
+      button-text="OK"
+      @close="showErrorDialog = false"
+    />
   </v-main>
 </template>
 
@@ -154,6 +122,7 @@
 import { ref, onMounted } from 'vue'
 import validator from 'validator'
 import PageHero from './components/PageHero.vue'
+import StatusDialog from './components/StatusDialog.vue'
 import { contactService } from './services'
 
 const recaptchaReady = ref(false)
@@ -303,8 +272,33 @@ const handleSubmit = async (event?: Event) => {
   gap: 2rem;
 }
 
+.recaptcha-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 78px;
+}
+
 .send-button {
   flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .recaptcha-send-container {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .recaptcha-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .send-button {
+    width: 100%;
+    flex-shrink: 1;
+  }
 }
 </style>
 
