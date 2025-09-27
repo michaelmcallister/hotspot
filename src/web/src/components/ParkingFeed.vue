@@ -6,88 +6,79 @@
       grow
     >
       <v-tab value="Parking Feed">
-        <v-icon size="20" class="mr-2">mdi-parking</v-icon>
+        <v-icon start size="20">mdi-parking</v-icon>
         Parking Feed
-        <div class="d-flex align-center pa-4">
-          <v-chip size="small" class="ml-auto">{{ submissions.length }}</v-chip>
-        </div>
+        <v-spacer />
+        <v-chip size="small">{{ submissions.length }}</v-chip>
       </v-tab>
       <v-tab value="Nearest Suburbs">
-        <v-icon size="20" class="mr-2">mdi-map-marker-multiple</v-icon>
+        <v-icon start size="20">mdi-map-marker-multiple</v-icon>
         Nearest Suburbs
       </v-tab>
     </v-tabs>
 
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="Parking Feed">
-        <v-card
-          color="white"
-          flat
-        >
+        <v-card-text v-if="loading" class="d-flex justify-center py-4">
+          <v-progress-circular indeterminate size="32" />
+        </v-card-text>
 
-          <v-card-text v-if="loading" class="text-center py-4">
-            <v-progress-circular indeterminate size="32"></v-progress-circular>
-          </v-card-text>
+        <v-card-text v-else-if="submissions.length === 0" class="pa-0">
+          <div class="scroll-container pa-3">
+            <v-empty-state>
+              <template v-slot:media>
+                <v-icon size="64" color="grey-lighten-1">mdi-parking</v-icon>
+              </template>
+              <template v-slot:title>
+                <h3 class="text-grey">No parking suggestions yet</h3>
+              </template>
+            </v-empty-state>
+          </div>
+        </v-card-text>
 
-          <v-empty-state v-else-if="submissions.length === 0">
-            <template v-slot:media>
-              <v-icon size="64" color="grey-lighten-1">mdi-parking</v-icon>
-            </template>
-            <template v-slot:title>
-              <h3 class="text-grey">No parking suggestions yet</h3>
-            </template>
-          </v-empty-state>
-
-          <v-card-text v-else class="pa-3">
+        <v-card-text v-else class="pa-0">
+          <div class="scroll-container pa-3" @scroll="handleSubmissionScroll">
             <ParkingCard
-              v-for="submission in submissions"
+              v-for="submission in displayedSubmissions"
               :key="submission.parking_id"
               :submission="submission"
             />
-          </v-card-text>
-        </v-card>
+
+            <div v-if="displayedSubmissions.length < submissions.length" class="text-center py-2">
+              <v-btn variant="text" color="primary" @click="loadMoreSubmissions">
+                Load More
+              </v-btn>
+            </div>
+          </div>
+        </v-card-text>
       </v-tabs-window-item>
 
       <v-tabs-window-item value="Nearest Suburbs">
-        <v-card
-          color="white"
-          flat
-        >
+        <v-card-text v-if="nearestLoading" class="d-flex justify-center py-4">
+          <v-progress-circular indeterminate size="32" />
+        </v-card-text>
 
-          <v-card-text v-if="nearestLoading" class="text-center py-4">
-            <v-progress-circular indeterminate size="32"></v-progress-circular>
-          </v-card-text>
-
-          <v-card-text v-else-if="nearestSuburbs.length === 0" class="text-center py-8">
+        <v-card-text v-else-if="nearestSuburbs.length === 0" class="pa-0">
+          <div class="scroll-container pa-3 d-flex align-center justify-center">
             <p class="text-grey text-body-1">No nearby suburbs found</p>
-          </v-card-text>
+          </div>
+        </v-card-text>
 
-          <v-card-text v-else class="pa-0">
-            <div
-              class="suburb-scroll-container pa-3"
-              style="max-height: 500px; overflow-y: auto;"
-              @scroll="handleScroll"
-            >
-              <SuburbCard
-                v-for="suburb in displayedSuburbs"
-                :key="`${suburb.postcode}-${suburb.suburb}`"
-                :suburb="suburb"
-              />
-              <div
-                v-if="displayedSuburbs.length < nearestSuburbs.length"
-                class="text-center py-2"
-              >
-                <v-btn
-                  variant="text"
-                  color="primary"
-                  @click="loadMoreSuburbs"
-                >
-                  Load More
-                </v-btn>
-              </div>
+        <v-card-text v-else class="pa-0">
+          <div class="scroll-container pa-3" @scroll="handleScroll">
+            <SuburbCard
+              v-for="suburb in displayedSuburbs"
+              :key="`${suburb.postcode}-${suburb.suburb}`"
+              :suburb="suburb"
+            />
+
+            <div v-if="displayedSuburbs.length < nearestSuburbs.length" class="text-center py-2">
+              <v-btn variant="text" color="primary" @click="loadMoreSuburbs">
+                Load More
+              </v-btn>
             </div>
-          </v-card-text>
-        </v-card>
+          </div>
+        </v-card-text>
       </v-tabs-window-item>
     </v-tabs-window>
   </v-card>
@@ -134,12 +125,18 @@ const props = defineProps<{
 }>();
 
 const submissions = ref<ParkingSubmission[]>([]);
+const displayedSubmissions = ref<ParkingSubmission[]>([]);
 const nearestSuburbs = ref<NearestSuburb[]>([]);
 const displayedSuburbs = ref<NearestSuburb[]>([]);
+
 const loading = ref(false);
 const nearestLoading = ref(false);
+
 const tab = ref('Parking Feed');
-const currentDisplayCount = ref(3);
+
+const ITEMS_PER_PAGE = 3;
+const currentDisplayCount = ref(ITEMS_PER_PAGE);
+const currentSubmissionDisplayCount = ref(ITEMS_PER_PAGE);
 
 const fetchSubmissions = async () => {
   if (!props.postcode) return;
@@ -147,8 +144,11 @@ const fetchSubmissions = async () => {
   loading.value = true;
   try {
     submissions.value = await parkingService.getParkingByPostcode(props.postcode);
+    displayedSubmissions.value = submissions.value.slice(0, ITEMS_PER_PAGE);
+    currentSubmissionDisplayCount.value = ITEMS_PER_PAGE;
   } catch (error) {
     submissions.value = [];
+    displayedSubmissions.value = [];
   } finally {
     loading.value = false;
   }
@@ -191,8 +191,8 @@ const fetchNearestSuburbs = async () => {
     );
 
     nearestSuburbs.value = suburbsWithData;
-    displayedSuburbs.value = suburbsWithData.slice(0, 3);
-    currentDisplayCount.value = 3;
+    displayedSuburbs.value = suburbsWithData.slice(0, ITEMS_PER_PAGE);
+    currentDisplayCount.value = ITEMS_PER_PAGE;
   } catch (error) {
     nearestSuburbs.value = [];
     displayedSuburbs.value = [];
@@ -202,7 +202,7 @@ const fetchNearestSuburbs = async () => {
 };
 
 const loadMoreSuburbs = () => {
-  const nextCount = Math.min(currentDisplayCount.value + 3, nearestSuburbs.value.length);
+  const nextCount = Math.min(currentDisplayCount.value + ITEMS_PER_PAGE, nearestSuburbs.value.length);
 
   if (nextCount > currentDisplayCount.value) {
     displayedSuburbs.value = nearestSuburbs.value.slice(0, nextCount);
@@ -210,14 +210,27 @@ const loadMoreSuburbs = () => {
   }
 };
 
-const handleScroll = (event: Event) => {
-  const target = event.target as HTMLElement;
-  const { scrollTop, scrollHeight, clientHeight } = target;
+const loadMoreSubmissions = () => {
+  const nextCount = Math.min(currentSubmissionDisplayCount.value + ITEMS_PER_PAGE, submissions.value.length);
 
-  if (scrollTop + clientHeight >= scrollHeight - 10) {
-    loadMoreSuburbs();
+  if (nextCount > currentSubmissionDisplayCount.value) {
+    displayedSubmissions.value = submissions.value.slice(0, nextCount);
+    currentSubmissionDisplayCount.value = nextCount;
   }
 };
+
+const createScrollHandler = (loadMoreFn: () => void) => (event: Event) => {
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight, clientHeight } = target;
+  const SCROLL_THRESHOLD = 10;
+
+  if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD) {
+    loadMoreFn();
+  }
+};
+
+const handleScroll = createScrollHandler(loadMoreSuburbs);
+const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions);
 
 watch(() => props.postcode, () => {
   fetchSubmissions();
@@ -245,5 +258,10 @@ defineExpose({
 .parking-feed {
   max-width: 800px;
   margin: 0 auto;
+}
+
+.scroll-container {
+  height: 500px;
+  overflow-y: auto;
 }
 </style>
