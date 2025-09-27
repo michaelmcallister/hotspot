@@ -47,35 +47,23 @@
     </v-container>
   </v-main>
 
-  <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
-    <v-card>
-      <v-card-text class="text-center pa-6">
-        <v-icon color="success" size="80" class="mb-4">mdi-check-circle</v-icon>
-        <h3 class="text-h5 mb-2">Thank you!</h3>
-        <p class="text-body-1 mb-0">{{ successMessage }}</p>
-      </v-card-text>
-      <v-card-actions class="justify-center pb-4">
-        <v-btn color="primary" variant="flat" rounded="lg" @click="showSuccessDialog = false">
-          Got it
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <StatusDialog
+    :show="showSuccessDialog"
+    type="success"
+    title="Thank you!"
+    :message="successMessage"
+    button-text="Got it"
+    @close="showSuccessDialog = false"
+  />
 
-  <v-dialog v-model="showErrorDialog" max-width="500" persistent>
-    <v-card>
-      <v-card-text class="text-center pa-6">
-        <v-icon color="error" size="80" class="mb-4">mdi-alert-circle</v-icon>
-        <h3 class="text-h5 mb-2">Error</h3>
-        <p class="text-body-1 mb-0">{{ errorMessage }}</p>
-      </v-card-text>
-      <v-card-actions class="justify-center pb-4">
-        <v-btn color="primary" variant="flat" rounded="lg" @click="showErrorDialog = false">
-          OK
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <StatusDialog
+    :show="showErrorDialog"
+    type="error"
+    title="Error"
+    :message="errorMessage"
+    button-text="OK"
+    @close="showErrorDialog = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -86,6 +74,7 @@ import ScoreCard from './components/ScoreCard.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
 import PageHero from './components/PageHero.vue';
+import StatusDialog from './components/StatusDialog.vue';
 import { searchService, parkingService } from './services';
 import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
 
