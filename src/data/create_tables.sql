@@ -2,6 +2,8 @@ CREATE TABLE model_risk (
   brand TEXT,
   model TEXT,
   total INTEGER,
+  best_match TEXT,
+  score INTEGER,
   percentage DOUBLE PRECISION,
   model_risk DOUBLE PRECISION
 );
@@ -67,3 +69,9 @@ CREATE TABLE postcode_distances (
     distance_meters REAL NOT NULL
 );
 
+-- Add unique constraint to prevent duplicate parking locations, this ensures each unique address/suburb/postcode combination can only exist once
+CREATE UNIQUE INDEX idx_user_contribution_unique_location
+ON user_contribution(address, suburb, postcode);
+
+CREATE INDEX IF NOT EXISTS idx_user_contribution_postcode
+ON user_contribution(postcode);

@@ -17,6 +17,7 @@ class ParkingSubmission(BaseModel):
 class ParkingResponse(BaseModel):
     parking_id: int
     message: str
+    action: str  # "inserted", "updated", or "no_change"
 
 @router.post("/v1/parking", response_model=ParkingResponse)
 def submit_parking(
@@ -39,22 +40,25 @@ def submit_parking(
                 detail="Invalid address"
             )
 
-        parking_id = db.insert_parking_contribution({
+        result = db.upsert_parking_contribution({
             "address": verified_address["address"],
             "suburb": verified_address["suburb"],
             "postcode": verified_address["postcode"],
             "type": submission.type,
             "lighting": submission.lighting,
             "cctv": submission.cctv
-        })
+        }, facilities=submission.facilities or [])
 
-        if submission.facilities:
-            for facility_id in submission.facilities:
-                db.insert_parking_facility(parking_id, facility_id)
+        messages = {
+            "inserted": "Parking suggestion submitted successfully",
+            "updated": "Parking suggestion updated successfully",
+            "no_change": "Parking suggestion submitted successfully" # I don't think it make sense to tell them it's a dupe?
+        }
 
         return ParkingResponse(
-            parking_id=parking_id,
-            message="Parking suggestion submitted successfully"
+            parking_id=result["parking_id"],
+            message=messages[result["action"]],
+            action=result["action"]
         )
 
     except Exception as e:
