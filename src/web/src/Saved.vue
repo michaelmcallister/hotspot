@@ -7,9 +7,26 @@
       icon="mdi-star"
     />
 
-    <v-card-text v-if="loading" class="text-center py-4">
-      <v-progress-circular indeterminate size="32"></v-progress-circular>
-    </v-card-text>
+    <div v-if="loading" class="parking-feed-container">
+      <v-card class="parking-feed">
+        <v-card-title class="d-flex align-center">
+          <v-icon size="20" class="mr-2">mdi-star</v-icon>
+          <span>Saved Parking Locations</span>
+          <v-chip size="small" class="ml-auto">0</v-chip>
+        </v-card-title>
+
+        <v-divider />
+
+        <v-card-text class="pa-3">
+          <v-skeleton-loader
+            v-for="n in 2"
+            :key="n"
+            type="list-item-three-line"
+            class="mb-2"
+          />
+        </v-card-text>
+      </v-card>
+    </div>
 
 
    <v-empty-state v-else-if="savedParkingData.length === 0">

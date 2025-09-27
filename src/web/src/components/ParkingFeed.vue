@@ -19,8 +19,15 @@
 
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="Parking Feed">
-        <v-card-text v-if="loading" class="d-flex justify-center py-4">
-          <v-progress-circular indeterminate size="32" />
+        <v-card-text v-if="loading" class="pa-0">
+          <div class="scroll-container pa-3">
+            <v-skeleton-loader
+              v-for="n in 3"
+              :key="n"
+              type="card"
+              class="mb-3"
+            />
+          </div>
         </v-card-text>
 
         <v-card-text v-else-if="submissions.length === 0" class="pa-0">
@@ -54,8 +61,15 @@
       </v-tabs-window-item>
 
       <v-tabs-window-item value="Nearest Suburbs">
-        <v-card-text v-if="nearestLoading" class="d-flex justify-center py-4">
-          <v-progress-circular indeterminate size="32" />
+        <v-card-text v-if="nearestLoading" class="pa-0">
+          <div class="scroll-container pa-3">
+            <v-skeleton-loader
+              v-for="n in 3"
+              :key="n"
+              type="list-item-two-line"
+              class="mb-2"
+            />
+          </div>
         </v-card-text>
 
         <v-card-text v-else-if="nearestSuburbs.length === 0" class="pa-0">

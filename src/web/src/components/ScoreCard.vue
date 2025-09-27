@@ -1,23 +1,31 @@
 <template>
   <v-card class="mx-auto pa-6 text-center" max-width="500" elevation="1" aria-labelledby="score-title">
-    <div id="score-title" class="suburb-name">{{ suburb }}</div>
-    <div class="safety-score">{{ score }}</div>
-    <div class="score-label">Safety Score</div>
+    <template v-if="isLoading">
+      <v-skeleton-loader
+        type="heading, subtitle, chip, paragraph"
+        class="text-center"
+      />
+    </template>
 
-    <v-chip :color="chipColor" variant="tonal" size="small" class="mb-4 font-weight-bold">
-      {{ riskLabel }}
-    </v-chip>
+    <template v-else>
+      <div id="score-title" class="suburb-name">{{ suburb }}</div>
+      <div class="safety-score">{{ score }}</div>
+      <div class="score-label">Safety Score</div>
 
-    <p class="description">
-      <template v-if="avgReady && trend !== 'same'">
-        Risk is <strong class="delta" :class="trendClass">{{ signedPercent }}</strong> {{ trendWord }} than the average.
-      </template>
-      <template v-else-if="avgReady && trend === 'same'">
-        Risk level is about the same as the average.
-      </template>
-    </p>
+      <v-chip :color="chipColor" variant="tonal" size="small" class="mb-4 font-weight-bold">
+        {{ riskLabel }}
+      </v-chip>
+
+      <p class="description">
+        <template v-if="avgReady && trend !== 'same'">
+          Risk is <strong class="delta" :class="trendClass">{{ signedPercent }}</strong> {{ trendWord }} than the average.
+        </template>
+        <template v-else-if="avgReady && trend === 'same'">
+          Risk level is about the same as the average.
+        </template>
+      </p>
+    </template>
   </v-card>
-  
 </template>
 
 <script setup lang="ts">
@@ -34,7 +42,8 @@ const props = defineProps<{
 const riskLabel = computed(() => safetyLabel(props.score))
 const chipColor = computed(() => safetyColor(props.score))
 
-// Fetch average postcode risk from the API and compute delta
+// Loading and data state
+const isLoading = ref(true)
 const avgRisk = ref<number | null>(null)
 const suburbRisk = computed(() => safetyToRiskScore(props.score))
 
@@ -44,6 +53,8 @@ onMounted(async () => {
     avgRisk.value = Number(data.avg_postcode_risk);
   } catch (e) {
     console.error('Failed to load stats summary', e);
+  } finally {
+    isLoading.value = false;
   }
 })
 
