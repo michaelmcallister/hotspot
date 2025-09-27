@@ -55,14 +55,6 @@ INSERT INTO facilities (facility_name) VALUES
 ('Security guard'),
 ('Accessible');
 
-CREATE TABLE votes (
-  vote_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-  parking_id INTEGER NOT NULL,  
-  vote_type TEXT CHECK(vote_type IN ('upvote', 'downvote')) NOT NULL, 
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
-  FOREIGN KEY (parking_id) REFERENCES user_contributions(parking_id) ON DELETE CASCADE
-);
-
 CREATE TABLE victorian_addresses (
     address TEXT NOT NULL,
     suburb TEXT NOT NULL,
@@ -73,25 +65,5 @@ CREATE TABLE postcode_distances (
     primary_postcode TEXT NOT NULL,
     secondary_postcode TEXT NOT NULL,
     distance_meters REAL NOT NULL
-);
-
-CREATE TABLE carpark_counts (
-    postcode TEXT NOT NULL,
-    carpark_count INTEGER NOT NULL
-);
-
-CREATE TABLE street_light_coverage (
-    postcode TEXT NOT NULL,
-    area_km2 INTEGER,
-    light_count INTEGER,
-    lights_per_km2 DOUBLE PRECISION
-);
-
-CREATE TABLE crime_data (
-    postcode TEXT NOT NULL,
-    offence_division TEXT NOT NULL,
-    offence_subdivision TEXT NOT NULL,
-    offence_subgroup TEXT NOT NULL,
-    offence_count INTEGER NOT NULL
 );
 

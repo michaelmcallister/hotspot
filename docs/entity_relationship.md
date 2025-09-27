@@ -1,3 +1,5 @@
+
+```mermaid
 erDiagram
   MODEL_RISK {
     TEXT brand
@@ -88,3 +90,4 @@ erDiagram
   POSTCODE_RISK ||--o{ CARPARK_COUNTS : "postcode"
   POSTCODE_RISK ||--o{ STREET_LIGHT_COVERAGE : "postcode"
   POSTCODE_RISK ||--o{ CRIME_DATA : "postcode"
+```
