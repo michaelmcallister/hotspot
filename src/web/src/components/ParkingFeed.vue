@@ -1,10 +1,6 @@
 <template>
   <v-card class="parking-feed" color="white" elevation="1">
-    <v-tabs
-      v-model="tab"
-      color="primary"
-      grow
-    >
+    <v-tabs v-model="tab" color="primary" grow>
       <v-tab value="Parking Feed">
         <v-icon start size="20">mdi-parking</v-icon>
         Parking Feed
@@ -33,10 +29,10 @@
         <v-card-text v-else-if="submissions.length === 0" class="pa-0">
           <div class="scroll-container pa-3">
             <v-empty-state>
-              <template v-slot:media>
+              <template #media>
                 <v-icon size="64" color="grey-lighten-1">mdi-parking</v-icon>
               </template>
-              <template v-slot:title>
+              <template #title>
                 <h3 class="text-grey">No parking suggestions yet</h3>
               </template>
             </v-empty-state>
@@ -51,8 +47,15 @@
               :submission="submission"
             />
 
-            <div v-if="displayedSubmissions.length < submissions.length" class="text-center py-2">
-              <v-btn variant="text" color="primary" @click="loadMoreSubmissions">
+            <div
+              v-if="displayedSubmissions.length < submissions.length"
+              class="text-center py-2"
+            >
+              <v-btn
+                variant="text"
+                color="primary"
+                @click="loadMoreSubmissions"
+              >
                 Load More
               </v-btn>
             </div>
@@ -81,12 +84,15 @@
         <v-card-text v-else class="pa-0">
           <div class="scroll-container pa-3" @scroll="handleScroll">
             <SuburbCard
-              v-for="suburb in displayedSuburbs"
-              :key="`${suburb.postcode}-${suburb.suburb}`"
-              :suburb="suburb"
+              v-for="nearbySuburb in displayedSuburbs"
+              :key="`${nearbySuburb.postcode}-${nearbySuburb.suburb}`"
+              :suburb="nearbySuburb"
             />
 
-            <div v-if="displayedSuburbs.length < nearestSuburbs.length" class="text-center py-2">
+            <div
+              v-if="displayedSuburbs.length < nearestSuburbs.length"
+              class="text-center py-2"
+            >
               <v-btn variant="text" color="primary" @click="loadMoreSuburbs">
                 Load More
               </v-btn>
@@ -99,183 +105,212 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import ParkingCard from './ParkingCard.vue';
-import SuburbCard from './SuburbCard.vue';
-import { parkingService, postcodeService, riskService } from '../services';
+  import { ref, watch, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
 
-interface Facility {
-  facility_id: number;
-  facility_name: string;
-}
+  import { parkingService, postcodeService, riskService } from '../services';
 
-interface ParkingSubmission {
-  parking_id: number;
-  address: string;
-  suburb: string;
-  postcode: string;
-  type: string;
-  lighting: number | null;
-  cctv: boolean | null;
-  created_at: string;
-  facilities: Facility[];
-}
+  import ParkingCard from './ParkingCard.vue';
+  import SuburbCard from './SuburbCard.vue';
 
-interface NearestSuburb {
-  postcode: string;
-  suburb: string;
-  lga: string;
-  distance_in_meters: number;
-  parking_count?: number;
-  risk_score?: number;
-}
-
-const route = useRoute();
-
-const props = defineProps<{
-  postcode: string;
-  suburb?: string;
-}>();
-
-const submissions = ref<ParkingSubmission[]>([]);
-const displayedSubmissions = ref<ParkingSubmission[]>([]);
-const nearestSuburbs = ref<NearestSuburb[]>([]);
-const displayedSuburbs = ref<NearestSuburb[]>([]);
-
-const loading = ref(false);
-const nearestLoading = ref(false);
-
-const tab = ref('Parking Feed');
-
-const ITEMS_PER_PAGE = 3;
-const currentDisplayCount = ref(ITEMS_PER_PAGE);
-const currentSubmissionDisplayCount = ref(ITEMS_PER_PAGE);
-
-const fetchSubmissions = async () => {
-  if (!props.postcode) return;
-
-  loading.value = true;
-  try {
-    submissions.value = await parkingService.getParkingByPostcode(props.postcode);
-    displayedSubmissions.value = submissions.value.slice(0, ITEMS_PER_PAGE);
-    currentSubmissionDisplayCount.value = ITEMS_PER_PAGE;
-  } catch (error) {
-    submissions.value = [];
-    displayedSubmissions.value = [];
-  } finally {
-    loading.value = false;
+  interface Facility {
+    facility_id: number;
+    facility_name: string;
   }
-};
 
-const fetchNearestSuburbs = async () => {
-  if (!props.postcode) return;
+  interface ParkingSubmission {
+    parking_id: number;
+    address: string;
+    suburb: string;
+    postcode: string;
+    type: string;
+    lighting: number | null;
+    cctv: boolean | null;
+    created_at: string;
+    facilities: Facility[];
+  }
 
-  nearestLoading.value = true;
-  try {
-    const suburbs = await postcodeService.getNearestSuburbs(props.postcode);
+  interface NearestSuburb {
+    postcode: string;
+    suburb: string;
+    lga: string;
+    distance_in_meters: number;
+    parking_count?: number;
+    risk_score?: number;
+  }
 
-    const suburbsWithData = await Promise.all(
-      suburbs.map(async (suburb: NearestSuburb) => {
-        let parking_count = 0;
-        let risk_score: number | undefined = undefined;
+  const route = useRoute();
 
-        try {
-          const parkingData = await parkingService.getParkingByPostcode(suburb.postcode);
-          parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
-        } catch (error) {
-          console.warn(`Failed to fetch parking count for ${suburb.postcode}:`, error);
-        }
+  const props = defineProps<{
+    postcode: string;
+    suburb?: string;
+  }>();
 
-        try {
-          const riskData = await riskService.compareRisk(suburb.postcode);
-          if (riskData && riskData.base && riskData.base.risk_score !== undefined) {
-            risk_score = riskData.base.risk_score;
+  const submissions = ref<ParkingSubmission[]>([]);
+  const displayedSubmissions = ref<ParkingSubmission[]>([]);
+  const nearestSuburbs = ref<NearestSuburb[]>([]);
+  const displayedSuburbs = ref<NearestSuburb[]>([]);
+
+  const loading = ref(false);
+  const nearestLoading = ref(false);
+
+  const tab = ref('Parking Feed');
+
+  const ITEMS_PER_PAGE = 3;
+  const currentDisplayCount = ref(ITEMS_PER_PAGE);
+  const currentSubmissionDisplayCount = ref(ITEMS_PER_PAGE);
+
+  const fetchSubmissions = async () => {
+    if (!props.postcode) return;
+
+    loading.value = true;
+    try {
+      submissions.value = await parkingService.getParkingByPostcode(
+        props.postcode
+      );
+      displayedSubmissions.value = submissions.value.slice(0, ITEMS_PER_PAGE);
+      currentSubmissionDisplayCount.value = ITEMS_PER_PAGE;
+    } catch {
+      submissions.value = [];
+      displayedSubmissions.value = [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchNearestSuburbs = async () => {
+    if (!props.postcode) return;
+
+    nearestLoading.value = true;
+    try {
+      const suburbs = await postcodeService.getNearestSuburbs(props.postcode);
+
+      const suburbsWithData = await Promise.all(
+        suburbs.map(async (suburb: NearestSuburb) => {
+          let parking_count = 0;
+          let risk_score: number | undefined = undefined;
+
+          try {
+            const parkingData = await parkingService.getParkingByPostcode(
+              suburb.postcode
+            );
+            parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
+          } catch (error) {
+            console.warn(
+              `Failed to fetch parking count for ${suburb.postcode}:`,
+              error
+            );
           }
-        } catch (error) {
-          console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
-        }
 
-        return {
-          ...suburb,
-          parking_count,
-          risk_score
-        };
-      })
+          try {
+            const riskData = await riskService.compareRisk(suburb.postcode);
+            if (
+              riskData &&
+              riskData.base &&
+              riskData.base.risk_score !== undefined
+            ) {
+              risk_score = riskData.base.risk_score;
+            }
+          } catch (error) {
+            console.warn(
+              `Failed to fetch risk score for ${suburb.suburb}:`,
+              error
+            );
+          }
+
+          return {
+            ...suburb,
+            parking_count,
+            risk_score,
+          };
+        })
+      );
+
+      nearestSuburbs.value = suburbsWithData;
+      displayedSuburbs.value = suburbsWithData.slice(0, ITEMS_PER_PAGE);
+      currentDisplayCount.value = ITEMS_PER_PAGE;
+    } catch {
+      nearestSuburbs.value = [];
+      displayedSuburbs.value = [];
+    } finally {
+      nearestLoading.value = false;
+    }
+  };
+
+  const loadMoreSuburbs = () => {
+    const nextCount = Math.min(
+      currentDisplayCount.value + ITEMS_PER_PAGE,
+      nearestSuburbs.value.length
     );
 
-    nearestSuburbs.value = suburbsWithData;
-    displayedSuburbs.value = suburbsWithData.slice(0, ITEMS_PER_PAGE);
-    currentDisplayCount.value = ITEMS_PER_PAGE;
-  } catch (error) {
-    nearestSuburbs.value = [];
-    displayedSuburbs.value = [];
-  } finally {
-    nearestLoading.value = false;
-  }
-};
+    if (nextCount > currentDisplayCount.value) {
+      displayedSuburbs.value = nearestSuburbs.value.slice(0, nextCount);
+      currentDisplayCount.value = nextCount;
+    }
+  };
 
-const loadMoreSuburbs = () => {
-  const nextCount = Math.min(currentDisplayCount.value + ITEMS_PER_PAGE, nearestSuburbs.value.length);
+  const loadMoreSubmissions = () => {
+    const nextCount = Math.min(
+      currentSubmissionDisplayCount.value + ITEMS_PER_PAGE,
+      submissions.value.length
+    );
 
-  if (nextCount > currentDisplayCount.value) {
-    displayedSuburbs.value = nearestSuburbs.value.slice(0, nextCount);
-    currentDisplayCount.value = nextCount;
-  }
-};
+    if (nextCount > currentSubmissionDisplayCount.value) {
+      displayedSubmissions.value = submissions.value.slice(0, nextCount);
+      currentSubmissionDisplayCount.value = nextCount;
+    }
+  };
 
-const loadMoreSubmissions = () => {
-  const nextCount = Math.min(currentSubmissionDisplayCount.value + ITEMS_PER_PAGE, submissions.value.length);
+  const createScrollHandler = (loadMoreFn: () => void) => (event: Event) => {
+    const target = event.target as HTMLElement;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    const SCROLL_THRESHOLD = 10;
 
-  if (nextCount > currentSubmissionDisplayCount.value) {
-    displayedSubmissions.value = submissions.value.slice(0, nextCount);
-    currentSubmissionDisplayCount.value = nextCount;
-  }
-};
+    if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD) {
+      loadMoreFn();
+    }
+  };
 
-const createScrollHandler = (loadMoreFn: () => void) => (event: Event) => {
-  const target = event.target as HTMLElement;
-  const { scrollTop, scrollHeight, clientHeight } = target;
-  const SCROLL_THRESHOLD = 10;
+  const handleScroll = createScrollHandler(loadMoreSuburbs);
+  const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions);
 
-  if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD) {
-    loadMoreFn();
-  }
-};
+  watch(
+    () => props.postcode,
+    () => {
+      fetchSubmissions();
+      fetchNearestSuburbs();
+    }
+  );
 
-const handleScroll = createScrollHandler(loadMoreSuburbs);
-const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions);
+  watch(
+    () => route.query.tab,
+    (newTab) => {
+      if (newTab === 'parking-feed') {
+        tab.value = 'Parking Feed';
+      }
+    },
+    { immediate: true }
+  );
 
-watch(() => props.postcode, () => {
-  fetchSubmissions();
-  fetchNearestSuburbs();
-});
+  onMounted(() => {
+    fetchSubmissions();
+    fetchNearestSuburbs();
+  });
 
-watch(() => route.query.tab, (newTab) => {
-  if (newTab === 'parking-feed') {
-    tab.value = 'Parking Feed';
-  }
-}, { immediate: true });
-
-onMounted(() => {
-  fetchSubmissions();
-  fetchNearestSuburbs();
-});
-
-defineExpose({
-  fetchSubmissions,
-  fetchNearestSuburbs
-});
+  defineExpose({
+    fetchSubmissions,
+    fetchNearestSuburbs,
+  });
 </script>
 
 <style scoped>
-.parking-feed {
-  max-width: 800px;
-  margin: 0 auto;
-}
+  .parking-feed {
+    max-width: 800px;
+    margin: 0 auto;
+  }
 
-.scroll-container {
-  height: 500px;
-  overflow-y: auto;
-}
+  .scroll-container {
+    height: 500px;
+    overflow-y: auto;
+  }
 </style>

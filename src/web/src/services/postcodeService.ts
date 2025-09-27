@@ -10,7 +10,5 @@ export interface NearestSuburb {
 }
 
 export const postcodeService = {
-  async getNearestSuburbs(postcode: string): Promise<NearestSuburb[]> {
-    return apiRequest(`/postcode/${postcode}/nearest`);
-  },
+  getNearestSuburbs: async (postcode: string): Promise<NearestSuburb[]> => apiRequest(`/postcode/${postcode}/nearest`),
 };

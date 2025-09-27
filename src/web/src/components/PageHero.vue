@@ -9,26 +9,18 @@
       >
         <v-card-title class="pa-0 mb-6">
           <div class="d-flex d-sm-none flex-column align-center">
-            <v-avatar
-              size="48"
-              class="mb-3"
-              color="primary"
-              variant="tonal"
-            >
+            <v-avatar size="48" class="mb-3" color="primary" variant="tonal">
               <v-icon size="28" color="primary">{{ icon }}</v-icon>
             </v-avatar>
-            <span class="text-h4 text-sm-h3 font-weight-bold text-high-emphasis text-center">
+            <span
+              class="text-h4 text-sm-h3 font-weight-bold text-high-emphasis text-center"
+            >
               {{ title }}
             </span>
           </div>
 
           <div class="d-none d-sm-flex align-center justify-center">
-            <v-avatar
-              size="48"
-              class="mr-4"
-              color="primary"
-              variant="tonal"
-            >
+            <v-avatar size="48" class="mr-4" color="primary" variant="tonal">
               <v-icon size="28" color="primary">{{ icon }}</v-icon>
             </v-avatar>
             <span class="text-h3 font-weight-bold text-high-emphasis">
@@ -37,7 +29,9 @@
           </div>
         </v-card-title>
 
-        <div class="text-caption text-sm-body-1 text-medium-emphasis mb-4 mb-sm-6 px-2">
+        <div
+          class="text-caption text-sm-body-1 text-medium-emphasis mb-4 mb-sm-6 px-2"
+        >
           {{ subtitle }}
         </div>
 
@@ -47,7 +41,7 @@
           color="primary"
           thickness="3"
           length="100"
-          style="max-width: 140px;"
+          style="max-width: 140px"
         />
 
         <v-card-text v-if="$slots.default" class="pa-0">
@@ -59,9 +53,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  title: string
-  subtitle: string
-  icon: string
-}>()
+  defineProps<{
+    title: string;
+    subtitle: string;
+    icon: string;
+  }>();
 </script>

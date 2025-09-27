@@ -1,11 +1,12 @@
 import { apiRequest } from './api';
 
 export interface StatsSummary {
-  [key: string]: any;
+  total_submissions: number;
+  total_suburbs: number;
+  total_postcodes: number;
+  average_risk_score: number;
 }
 
 export const statsService = {
-  async getSummary(): Promise<StatsSummary> {
-    return apiRequest('/stats/summary');
-  },
+  getSummary: async (): Promise<StatsSummary> => apiRequest('/stats/summary'),
 };

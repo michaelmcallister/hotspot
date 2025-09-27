@@ -9,7 +9,5 @@ export interface SearchResult {
 }
 
 export const searchService = {
-  async search(query: string): Promise<SearchResult[]> {
-    return apiRequest(`/search?q=${encodeURIComponent(query)}`);
-  },
+  search: async (query: string): Promise<SearchResult[]> => apiRequest(`/search?q=${encodeURIComponent(query)}`),
 };

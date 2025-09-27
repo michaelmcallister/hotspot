@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --open",
     "prepare": "husky install",
-    "lint": "eslint src/**/*.{js,ts,vue}",
-    "lint:fix": "eslint --fix src/**/*.{js,ts,vue}",
+    "lint": "eslint src/**/*.{ts,vue}",
+    "lint:fix": "eslint --fix src/**/*.{ts,vue}",
     "format": "prettier --write src/**/*.{js,ts,vue} *.{js,ts,json,md}",
     "format:check": "prettier --check src/**/*.{js,ts,vue} *.{js,ts,json,md}"
   },
@@ -42,11 +42,11 @@
     "vue-tsc": "^3.0.6"
   },
   "lint-staged": {
-    "*.{js,ts,vue}": [
+    "*.{ts,vue}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md}": [
+    "*.{js,json,md}": [
       "prettier --write"
     ]
   }

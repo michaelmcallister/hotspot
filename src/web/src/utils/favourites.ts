@@ -1,7 +1,7 @@
 const FAVOURITES_KEY = 'parkingFavourites';
 const CACHE_KEY = 'parkingDataCache';
 
-export function getFavouriteIds(): number[] {
+export const getFavouriteIds = (): number[] => {
   try {
     const stored = localStorage.getItem(FAVOURITES_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -11,12 +11,12 @@ export function getFavouriteIds(): number[] {
   }
 }
 
-export function isFavourite(parkingId: number): boolean {
+export const isFavourite = (parkingId: number): boolean => {
   const favourites = getFavouriteIds();
   return favourites.includes(parkingId);
 }
 
-export function addToFavourites(parkingId: number): void {
+export const addToFavourites = (parkingId: number): void => {
   const favourites = getFavouriteIds();
   if (!favourites.includes(parkingId)) {
     favourites.push(parkingId);
@@ -24,13 +24,13 @@ export function addToFavourites(parkingId: number): void {
   }
 }
 
-export function removeFromFavourites(parkingId: number): void {
+export const removeFromFavourites = (parkingId: number): void => {
   const favourites = getFavouriteIds();
-  const filtered = favourites.filter(id => id !== parkingId);
+  const filtered = favourites.filter((id) => id !== parkingId);
   saveFavourites(filtered);
 }
 
-export function toggleFavourite(parkingId: number): boolean {
+export const toggleFavourite = (parkingId: number): boolean => {
   const isCurrentlyFavourite = isFavourite(parkingId);
   if (isCurrentlyFavourite) {
     removeFromFavourites(parkingId);
@@ -40,7 +40,7 @@ export function toggleFavourite(parkingId: number): boolean {
   return !isCurrentlyFavourite;
 }
 
-function saveFavourites(favourites: number[]): void {
+const saveFavourites = (favourites: number[]): void => {
   try {
     localStorage.setItem(FAVOURITES_KEY, JSON.stringify(favourites));
   } catch (error) {
@@ -48,7 +48,22 @@ function saveFavourites(favourites: number[]): void {
   }
 }
 
-export function getCachedParkingData(): Record<number, any> {
+interface CachedParkingData {
+  parking_id: number;
+  address: string;
+  suburb: string;
+  postcode: string;
+  type: string;
+  lighting: number | null;
+  cctv: boolean | null;
+  created_at: string;
+  facilities: Array<{
+    facility_id: number;
+    facility_name: string;
+  }>;
+}
+
+export const getCachedParkingData = (): Record<number, CachedParkingData> => {
   try {
     const stored = localStorage.getItem(CACHE_KEY);
     return stored ? JSON.parse(stored) : {};
@@ -58,7 +73,7 @@ export function getCachedParkingData(): Record<number, any> {
   }
 }
 
-export function setCachedParkingData(data: Record<number, any>): void {
+export const setCachedParkingData = (data: Record<number, CachedParkingData>): void => {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch (error) {
@@ -66,7 +81,7 @@ export function setCachedParkingData(data: Record<number, any>): void {
   }
 }
 
-export function clearAllFavouriteData(): void {
+export const clearAllFavouriteData = (): void => {
   try {
     localStorage.removeItem(FAVOURITES_KEY);
     localStorage.removeItem(CACHE_KEY);

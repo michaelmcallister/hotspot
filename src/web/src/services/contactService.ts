@@ -1,14 +1,20 @@
 import { apiRequest } from './api';
 
 export interface ContactData {
-  [key: string]: any;
+  name: string;
+  email: string;
+  message: string;
+  suburb?: string;
+}
+
+export interface ContactResponse {
+  success: boolean;
+  message: string;
 }
 
 export const contactService = {
-  async submitContact(data: ContactData): Promise<any> {
-    return apiRequest('/contact', {
+  submitContact: async (data: ContactData): Promise<ContactResponse> => apiRequest('/contact', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
-  },
+    }),
 };

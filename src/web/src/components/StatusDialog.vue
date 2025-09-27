@@ -27,15 +27,15 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  show: boolean
-  type: 'success' | 'error'
-  title: string
-  message: string
-  buttonText?: string
-}>()
+  defineProps<{
+    show: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+    buttonText?: string;
+  }>();
 
-defineEmits<{
-  close: []
-}>()
+  defineEmits<{
+    close: [];
+  }>();
 </script>

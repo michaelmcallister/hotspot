@@ -35,16 +35,16 @@ clean:
 
 format: install
 	@echo "Formatting code with Prettier..."
-	@$(NPM) exec prettier --write "src/**/*.{js,ts,vue}" "*.{js,ts,json,md}"
+	@$(NPM) run format
 
 format-check: install
 	@echo "Checking code formatting with Prettier..."
-	@$(NPM) exec prettier --check "src/**/*.{js,ts,vue}" "*.{js,ts,json,md}"
+	@$(NPM) run format:check
 
 lint: install
 	@echo "Linting code with ESLint..."
-	@$(NPM) exec eslint --fix "src/**/*.{js,ts,vue}"
+	@$(NPM) run lint:fix
 
 lint-check: install
 	@echo "Checking code with ESLint..."
-	@$(NPM) exec eslint "src/**/*.{js,ts,vue}"
+	@$(NPM) run lint

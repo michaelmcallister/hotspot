@@ -1,11 +1,12 @@
 import slugify from 'slugify';
+
 import { searchService } from '../services';
 
-export function createSlug(suburb: string, postcode: string): string {
-  return slugify(`${suburb} ${postcode}`, { lower: true, strict: true });
-}
+export const createSlug = (suburb: string, postcode: string): string => slugify(`${suburb} ${postcode}`, { lower: true, strict: true })
 
-export function parseSlug(slug: string): { suburb: string; postcode: string } | null {
+export const parseSlug = (
+  slug: string
+): { suburb: string; postcode: string } | null => {
   const parts = slug.split('-');
   if (parts.length < 2) return null;
 
@@ -15,15 +16,15 @@ export function parseSlug(slug: string): { suburb: string; postcode: string } | 
   return { suburb, postcode };
 }
 
-export async function lookupSuburbBySlug(slug: string): Promise<any | null> {
+export const lookupSuburbBySlug = async (slug: string): Promise<import('../services/searchService').SearchResult | null> => {
   try {
     const parsed = parseSlug(slug);
     if (parsed) {
       const results = await searchService.search(parsed.suburb);
 
       if (results.length > 0) {
-        const exactMatch = results.find((suburb: any) =>
-          suburb.postcode === parsed.postcode
+        const exactMatch = results.find(
+          (suburb) => suburb.postcode === parsed.postcode
         );
         if (exactMatch) return exactMatch;
 

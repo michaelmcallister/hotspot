@@ -1,7 +1,17 @@
 import { apiRequest } from './api';
 
 export interface RiskData {
-  [key: string]: any;
+  base?: {
+    risk_score: number;
+    suburb: string;
+    postcode: string;
+  };
+  comparisons?: Array<{
+    risk_score: number;
+    suburb: string;
+    postcode: string;
+    distance_km: number;
+  }>;
 }
 
 export interface TopRiskParams {
@@ -12,7 +22,7 @@ export interface TopRiskParams {
 }
 
 export const riskService = {
-  async getTopRisk(params: TopRiskParams = {}): Promise<RiskData[]> {
+  getTopRisk: async (params: TopRiskParams = {}): Promise<RiskData[]> => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -22,7 +32,5 @@ export const riskService = {
     return apiRequest(`/risk/top?${searchParams.toString()}`);
   },
 
-  async compareRisk(postcode: string): Promise<RiskData> {
-    return apiRequest(`/risk/compare?postcode=${postcode}`);
-  },
+  compareRisk: async (postcode: string): Promise<RiskData> => apiRequest(`/risk/compare?postcode=${postcode}`),
 };
