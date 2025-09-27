@@ -1,48 +1,31 @@
 <template>
   <v-main>
-    <v-container>
-      <v-row>
-        <v-col cols="12" class="text-center">
-          <h1 class="text-h3 font-weight-bold text-primary mb-2">Search Suburb</h1>
-          <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
-            Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
-          </p>
+    <v-container class="py-2 py-md-8">
 
-          <SearchBar
-            ref="searchBarRef"
-            v-model="searchQuery"
-            @search="showStaticReport"
-            @select="handleSuburbSelect"
-          />
-        </v-col>
-      </v-row>
+    <PageHero
+      title="Search Suburb"
+      subtitle="Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike"
+      icon="mdi-map-search"
+    >
+      <SearchBar
+        ref="searchBarRef"
+        v-model="searchQuery"
+        @search="showStaticReport"
+        @select="handleSuburbSelect"
+        class="hero-search-bar"
+      />
+    </PageHero>
+
 
       <v-row v-if="selectedSuburb">
-        <v-col
-          cols="12"
-          md="3"
-        >
-          <v-sheet
-            rounded="lg"
-            class="pa-4"
-            color="white"
-          >
-            <ScoreCard
-              :suburb="selectedSuburb.suburb"
-              :score="safetyScore"
-            />
+        <v-col cols="12" md="3">
+          <v-sheet rounded="lg" class="pa-4" color="white">
+            <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
           </v-sheet>
         </v-col>
 
-        <v-col
-          cols="12"
-          md="6"
-        >
-          <v-sheet
-            rounded="lg"
-            class="pa-4"
-            color="white"
-          >
+        <v-col cols="12" md="6">
+          <v-sheet rounded="lg" class="pa-4" color="white">
             <ParkingFeed
               ref="parkingFeedRef"
               :postcode="selectedSuburb.postcode"
@@ -51,84 +34,48 @@
           </v-sheet>
         </v-col>
 
-        <v-col
-          cols="12"
-          md="3"
-        >
-          <v-sheet
-            rounded="lg"
-            class="pa-4 mb-4"
-            color="white"
-          >
+        <v-col cols="12" md="3">
+          <v-sheet rounded="lg" class="pa-4 mb-4" color="white">
             <ParkingLocationForm
               :postcode="selectedSuburb.postcode"
               :suburb="selectedSuburb.suburb"
               @submit="handleParkingSubmit"
             />
           </v-sheet>
-
         </v-col>
       </v-row>
     </v-container>
   </v-main>
 
+  <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
+    <v-card>
+      <v-card-text class="text-center pa-6">
+        <v-icon color="success" size="80" class="mb-4">mdi-check-circle</v-icon>
+        <h3 class="text-h5 mb-2">Thank you!</h3>
+        <p class="text-body-1 mb-0">{{ successMessage }}</p>
+      </v-card-text>
+      <v-card-actions class="justify-center pb-4">
+        <v-btn color="primary" variant="flat" rounded="lg" @click="showSuccessDialog = false">
+          Got it
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 
-    <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-text class="text-center pa-6">
-          <v-icon
-            color="success"
-            size="80"
-            class="mb-4"
-          >
-            mdi-check-circle
-          </v-icon>
-          <h3 class="text-h5 mb-2">Thank you!</h3>
-          <p class="text-body-1 mb-0">
-            {{ successMessage }}
-          </p>
-        </v-card-text>
-        <v-card-actions class="justify-center pb-4">
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="lg"
-            @click="showSuccessDialog = false"
-          >
-            Got it
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="showErrorDialog" max-width="500" persistent>
-      <v-card>
-        <v-card-text class="text-center pa-6">
-          <v-icon
-            color="error"
-            size="80"
-            class="mb-4"
-          >
-            mdi-alert-circle
-          </v-icon>
-          <h3 class="text-h5 mb-2">Error</h3>
-          <p class="text-body-1 mb-0">
-            {{ errorMessage }}
-          </p>
-        </v-card-text>
-        <v-card-actions class="justify-center pb-4">
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="lg"
-            @click="showErrorDialog = false"
-          >
-            OK
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
+  <v-dialog v-model="showErrorDialog" max-width="500" persistent>
+    <v-card>
+      <v-card-text class="text-center pa-6">
+        <v-icon color="error" size="80" class="mb-4">mdi-alert-circle</v-icon>
+        <h3 class="text-h5 mb-2">Error</h3>
+        <p class="text-body-1 mb-0">{{ errorMessage }}</p>
+      </v-card-text>
+      <v-card-actions class="justify-center pb-4">
+        <v-btn color="primary" variant="flat" rounded="lg" @click="showErrorDialog = false">
+          OK
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -138,8 +85,9 @@ import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
+import PageHero from './components/PageHero.vue';
 import { searchService, parkingService } from './services';
-import { createSlug, riskToSafetyScore } from './utils';
+import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
 
 const props = defineProps<{
   slug?: string;
@@ -171,39 +119,6 @@ const safetyScore = computed(() => {
 });
 
 
-const lookupSuburbBySlug = async (slug: string): Promise<Suburb | null> => {
-  try {
-    let searchTerm = slug.replace(/-/g, ' ');
-    let results = await searchService.search(searchTerm);
-
-    if (results.length > 0) {
-      const targetSlug = slug.toLowerCase();
-      const match = results.find((suburb: Suburb) => {
-        const suburbSlug = createSlug(suburb.suburb, suburb.postcode);
-        return suburbSlug === targetSlug;
-      });
-
-      if (match) return match;
-    }
-
-    const parts = slug.split('-');
-    if (parts.length > 1) {
-      const suburbOnly = parts.slice(0, -1).join(' ');
-      results = await searchService.search(suburbOnly);
-
-      if (results.length > 0) {
-        const targetPostcode = parts[parts.length - 1];
-        const postcodeMatch = results.find((suburb: Suburb) =>
-          suburb.postcode === targetPostcode
-        );
-        return postcodeMatch || results[0];
-      }
-    }
-  } catch (error) {
-    console.error('Error looking up suburb by slug:', error);
-  }
-  return null;
-};
 
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
@@ -270,4 +185,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.hero-search-bar {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-search-bar :deep(.v-field) {
+  font-size: 1.1rem;
+}
 </style>

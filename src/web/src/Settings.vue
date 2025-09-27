@@ -1,12 +1,17 @@
 <template>
   <v-main>
-    <v-container class="pa-6">
+    <v-container class="py-2 py-md-8">
+      <PageHero
+        title="Settings"
+        subtitle="Customize your preferences and app behaviour"
+        icon="mdi-cog"
+      />
+
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6">
-          <h1 class="text-h3 font-weight-bold text-primary mb-6 text-center">Settings</h1>
 
           <v-card class="pa-4">
-            <v-card-title class="text-h5 mb-4">Navigation Preferences</v-card-title>
+            <v-card-title class="text-h6 text-sm-h5 mb-4">Navigation Preferences</v-card-title>
 
             <v-card-text>
               <p class="text-body-1 mb-4 text-grey-darken-1">
@@ -56,6 +61,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import PageHero from './components/PageHero.vue'
 
 const navigationApp = ref('google')
 const showSaveMessage = ref(false)
