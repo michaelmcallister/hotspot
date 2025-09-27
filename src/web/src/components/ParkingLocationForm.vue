@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto pa-6" max-width="600" elevation="1">
+  <v-card class="mx-auto pa-6" elevation="1" max-width="600">
     <h3 class="mb-4">
       <v-icon start>mdi-plus</v-icon>
       Add Parking Location
