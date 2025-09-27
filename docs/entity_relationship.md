@@ -5,6 +5,8 @@ erDiagram
     TEXT brand
     TEXT model
     INTEGER total
+    TEXT best_match
+    INTEGER score
     DOUBLE_PRECISION percentage
     DOUBLE_PRECISION model_risk
   }
