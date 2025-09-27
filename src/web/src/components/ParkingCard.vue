@@ -195,12 +195,22 @@ const navigateToSuburb = () => {
   router.push({ name: 'suburb', params: { slug } });
 };
 
-//  This works surprisingly well, Google will fill in the blanks on your current location
+//  This works surprisingly well both providers don't need specifically formatted addresses.
 const openDirections = () => {
   const fullAddress = `${props.submission.address}, ${props.submission.suburb}, ${props.submission.postcode}`;
   const encodedAddress = encodeURIComponent(fullAddress);
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-  window.open(googleMapsUrl, '_blank');
+
+  const navigationApp = localStorage.getItem('navigationApp') || 'google';
+
+  let directionsUrl: string;
+
+  if (navigationApp === 'waze') {
+    directionsUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
+  } else {
+    directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+  }
+
+  window.open(directionsUrl, '_blank');
 };
 </script>
 
