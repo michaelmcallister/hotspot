@@ -18,13 +18,13 @@
 
 
       <v-row v-if="selectedSuburb">
-        <v-col cols="12" md="3">
+        <v-col cols="12" lg="6" xl="3">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
           </v-sheet>
         </v-col>
 
-        <v-col cols="12" md="6">
+        <v-col cols="12" lg="6" xl="6">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ParkingFeed
               ref="parkingFeedRef"
@@ -34,7 +34,7 @@
           </v-sheet>
         </v-col>
 
-        <v-col cols="12" md="3">
+        <v-col cols="12" xl="3">
           <v-sheet rounded="lg" class="pa-4 mb-4" color="white">
             <ParkingLocationForm
               :postcode="selectedSuburb.postcode"
