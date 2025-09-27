@@ -223,7 +223,6 @@ const postcodeRules = [
   }
 ]
 
-
 const resetRecaptcha = () => {
   recaptchaToken.value = ''
 }
@@ -250,7 +249,6 @@ const resetRecaptchaWidget = () => {
   }
   recaptchaToken.value = ''
 }
-
 
 const handleSubmit = async (event?: Event) => {
   if (event) {
@@ -289,9 +287,6 @@ const handleSubmit = async (event?: Event) => {
     resetRecaptchaWidget()
   }
 }
-
-
-
 </script>
 
 <style scoped>
@@ -306,3 +301,4 @@ const handleSubmit = async (event?: Event) => {
   flex-shrink: 0;
 }
 </style>
+

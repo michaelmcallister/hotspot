@@ -67,26 +67,11 @@
             />
           </v-sheet>
 
-          <v-sheet
-            rounded="lg"
-            class="pa-4 text-center"
-            color="white"
-          >
-            <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
-              Resources & Contacts
-            </v-btn>
-          </v-sheet>
         </v-col>
       </v-row>
     </v-container>
   </v-main>
 
-    <ResourcesModal
-      v-if="selectedSuburb"
-      :show="showResources"
-      :suburb="selectedSuburb.suburb"
-      @close="showResources = false"
-    />
 
     <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
       <v-card>
@@ -151,7 +136,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
-import ResourcesModal from './components/ResourcesModal.vue';
 import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
 import { searchService, parkingService } from './services';
@@ -174,7 +158,6 @@ interface Suburb {
 
 const searchQuery = ref('');
 const selectedSuburb = ref<Suburb | null>(null);
-const showResources = ref(false);
 const showSuccessDialog = ref(false);
 const showErrorDialog = ref(false);
 const successMessage = ref('');
