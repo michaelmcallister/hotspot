@@ -6,7 +6,7 @@ NPM := npm
 HOST := localhost
 PORT := 5173
 
-.PHONY: all install run dev build preview clean
+.PHONY: all install run dev build preview clean format lint format-check lint-check
 
 all: run
 
@@ -32,3 +32,19 @@ clean:
 	@echo "Cleaning up..."
 	@rm -rf node_modules dist
 	@rm -f package-lock.json
+
+format: install
+	@echo "Formatting code with Prettier..."
+	@$(NPM) exec prettier --write "src/**/*.{js,ts,vue}" "*.{js,ts,json,md}"
+
+format-check: install
+	@echo "Checking code formatting with Prettier..."
+	@$(NPM) exec prettier --check "src/**/*.{js,ts,vue}" "*.{js,ts,json,md}"
+
+lint: install
+	@echo "Linting code with ESLint..."
+	@$(NPM) exec eslint --fix "src/**/*.{js,ts,vue}"
+
+lint-check: install
+	@echo "Checking code with ESLint..."
+	@$(NPM) exec eslint "src/**/*.{js,ts,vue}"

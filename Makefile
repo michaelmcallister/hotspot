@@ -2,7 +2,7 @@ SHELL := bash
 .ONESHELL:
 .DELETE_ON_ERROR:
 
-.PHONY: all db api web run run-api run-web dev dev-api dev-web clean clean-db clean-api clean-web build
+.PHONY: all db api web run run-api run-web dev dev-api dev-web clean clean-db clean-api clean-web build format lint format-check lint-check
 
 all: db run
 
@@ -77,3 +77,19 @@ docker-logs:
 
 docker-shell:
 	@docker exec -it hotspot /bin/sh
+
+format:
+	@echo "Formatting web code..."
+	@$(MAKE) -C src/web format
+
+format-check:
+	@echo "Checking web code formatting..."
+	@$(MAKE) -C src/web format-check
+
+lint:
+	@echo "Linting web code..."
+	@$(MAKE) -C src/web lint
+
+lint-check:
+	@echo "Checking web code with linter..."
+	@$(MAKE) -C src/web lint-check
