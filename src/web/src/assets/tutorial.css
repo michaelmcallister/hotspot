@@ -1,0 +1,85 @@
+.shepherd-theme-hotspot {
+  max-width: 400px;
+  z-index: 10000;
+}
+
+.shepherd-theme-hotspot .shepherd-content {
+  border-radius: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  font-family: 'Roboto', sans-serif;
+}
+
+.shepherd-theme-hotspot .shepherd-header {
+  background: #07a377 !important;
+  color: white !important;
+  border-radius: 0 !important;
+  padding: 16px 20px 12px !important;
+}
+
+.shepherd-theme-hotspot .shepherd-title {
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  margin: 0 !important;
+  color: white !important;
+}
+
+.shepherd-theme-hotspot.shepherd-has-title .shepherd-content .shepherd-header {
+  background: #07a377 !important;
+}
+
+.shepherd-theme-hotspot .shepherd-text {
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #424242;
+}
+
+.shepherd-theme-hotspot .shepherd-footer {
+  padding: 12px 20px 20px;
+  border-top: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.shepherd-theme-hotspot .shepherd-button {
+  border: none;
+  border-radius: 0;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shepherd-theme-hotspot .shepherd-button-primary {
+  background: #07a377;
+  color: white;
+}
+
+.shepherd-theme-hotspot .shepherd-button-primary:hover {
+  background: #059960;
+}
+
+.shepherd-theme-hotspot .shepherd-button-secondary {
+  background: transparent;
+  color: #757575;
+  border: 1px solid #e0e0e0;
+}
+
+.shepherd-theme-hotspot .shepherd-button-secondary:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+}
+
+@media (max-width: 767px) {
+  .shepherd-theme-hotspot {
+    max-width: calc(100vw - 32px);
+    width: calc(100vw - 32px);
+    left: 16px;
+    right: 16px;
+    margin: 0;
+  }
+}
