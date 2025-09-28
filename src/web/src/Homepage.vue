@@ -32,11 +32,22 @@
           <v-col cols="12" md="8" lg="6" xl="6" class="mx-auto">
             <v-sheet rounded="lg" class="pa-4" color="primary-lighten-5" border>
               <h3 class="text-h5 text-primary font-weight-bold mb-3 text-center text-lg-left">Find Safe Parking Spots</h3>
-              <p class="text-body-1 mb-0 text-center text-lg-left">
+              <p class="text-body-1 mb-3 text-center text-lg-left">
                 Discover the safest places to park your motorbike in Melbourne.
                 Get safety scores based on real data and contribute to the community
                 by sharing your favourite secure parking locations
               </p>
+              <div class="text-center text-lg-right">
+                <v-btn
+                  @click="handleStartTutorial"
+                  color="primary"
+                  variant="outlined"
+                  prepend-icon="mdi-help-circle"
+                  size="large"
+                >
+                  Take a Tour
+                </v-btn>
+              </div>
             </v-sheet>
           </v-col>
         </v-row>
@@ -103,6 +114,7 @@ import PageHero from './components/PageHero.vue';
 import StatusDialog from './components/StatusDialog.vue';
 import { searchService, parkingService } from './services';
 import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
+import { useTutorial } from './composables/useTutorial';
 
 const props = defineProps<{
   slug?: string;
@@ -110,6 +122,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
+const { startTutorial } = useTutorial();
 
 interface Suburb {
   label: string;
@@ -192,6 +205,33 @@ const handleRouteChange = async () => {
       searchBarRef.value.updateSelection(null);
     }
   }
+};
+
+const handleStartTutorial = () => {
+  const performSearch = async (query: string) => {
+    selectedSuburb.value = null;
+    searchQuery.value = '';
+    await router.push({ name: 'home' });
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    searchQuery.value = query;
+
+    try {
+      const results = await searchService.search(query);
+
+      if (results.length > 0) {
+        selectedSuburb.value = results[0];
+
+        const slug = createSlug(results[0].suburb, results[0].postcode);
+        await router.push({ name: 'suburb', params: { slug } });
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  };
+
+  startTutorial(performSearch);
 };
 
 watch(() => [props.slug, route.params.slug], handleRouteChange);

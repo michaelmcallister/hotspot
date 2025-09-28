@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto pa-6 text-center" max-width="500" elevation="1" aria-labelledby="score-title">
+  <v-card class="mx-auto pa-6 text-center" max-width="500" elevation="1" aria-labelledby="score-title" data-testid="safety-score">
     <template v-if="isLoading">
       <v-skeleton-loader
         type="heading, subtitle, chip, paragraph"
