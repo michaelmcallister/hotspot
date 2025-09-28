@@ -269,4 +269,5 @@ onMounted(() => {
     max-width: 250px;
   }
 }
+
 </style>
