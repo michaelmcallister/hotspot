@@ -69,6 +69,12 @@ CREATE TABLE postcode_distances (
     distance_meters REAL NOT NULL
 );
 
+CREATE TABLE postcode_yearly_theft (
+    year INTEGER NOT NULL,
+    postcode TEXT NOT NULL,
+    yearly_thefts REAL
+);
+
 -- Add unique constraint to prevent duplicate parking locations, this ensures each unique address/suburb/postcode combination can only exist once
 CREATE UNIQUE INDEX idx_user_contribution_unique_location
 ON user_contribution(address, suburb, postcode);
