@@ -12,12 +12,38 @@
         v-model="searchQuery"
         @search="showStaticReport"
         @select="handleSuburbSelect"
+        @clear="handleSearchClear"
         class="hero-search-bar"
       />
     </PageHero>
 
+    <div v-if="!selectedSuburb" class="illustration-section">
+      <v-container>
+        <v-row class="justify-center align-center">
+          <v-col cols="12" lg="5" xl="4" class="text-center">
+            <div class="d-inline-block">
+              <img
+                src="/dude.png"
+                alt="Rider with motorbike"
+                class="dude-illustration"
+              />
+            </div>
+          </v-col>
+          <v-col cols="12" md="8" lg="6" xl="6" class="mx-auto">
+            <v-sheet rounded="lg" class="pa-4" color="primary-lighten-5" border>
+              <h3 class="text-h5 text-primary font-weight-bold mb-3 text-center text-lg-left">Find Safe Parking Spots</h3>
+              <p class="text-body-1 mb-0 text-center text-lg-left">
+                Discover the safest places to park your motorbike in Melbourne.
+                Get safety scores based on real data and contribute to the community
+                by sharing your favourite secure parking locations
+              </p>
+            </v-sheet>
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
 
-      <v-row v-if="selectedSuburb">
+    <v-row v-if="selectedSuburb">
         <v-col cols="12" lg="6" xl="3">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
@@ -107,12 +133,16 @@ const safetyScore = computed(() => {
   return riskToSafetyScore(selectedSuburb.value.risk_score);
 });
 
-
-
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
   const slug = createSlug(suburb.suburb, suburb.postcode);
   router.push({ name: 'suburb', params: { slug } });
+};
+
+const handleSearchClear = () => {
+  selectedSuburb.value = null;
+  searchQuery.value = '';
+  router.push({ name: 'home' });
 };
 
 const showStaticReport = async () => {
@@ -181,5 +211,22 @@ onMounted(() => {
 
 .hero-search-bar :deep(.v-field) {
   font-size: 1.1rem;
+}
+
+.illustration-section {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.dude-illustration {
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .dude-illustration {
+    max-width: 250px;
+  }
 }
 </style>
