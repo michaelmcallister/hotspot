@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-container class="py-2 py-md-8">
+    <v-container class="pt-1 pt-md-3 pb-1 pb-md-4">
       <PageHero
         title="Top Suburbs"
         subtitle="Explore suburbs and LGAs ranked by safety score"
