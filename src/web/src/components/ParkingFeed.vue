@@ -6,18 +6,18 @@
       grow
     >
       <v-tab value="Parking Feed">
-        <v-icon start size="20">mdi-parking</v-icon>
-        Parking Feed
-        <v-spacer />
-        <v-chip size="small">{{ submissions.length }}</v-chip>
+        <v-icon size="20">mdi-parking</v-icon>
+        <span class="d-none d-sm-inline ml-2">Parking Feed</span>
+        <v-spacer class="d-none d-sm-flex" />
+        <v-chip size="small" class="d-none d-sm-flex ml-2">{{ submissions.length }}</v-chip>
       </v-tab>
       <v-tab value="Nearest Suburbs">
-        <v-icon start size="20">mdi-map-marker-multiple</v-icon>
-        Nearest Suburbs
+        <v-icon size="20">mdi-map-marker-multiple</v-icon>
+        <span class="d-none d-sm-inline ml-2">Nearest Suburbs</span>
       </v-tab>
       <v-tab value="Trends">
-        <v-icon start size="20">mdi-chart-line</v-icon>
-        Trends
+        <v-icon size="20">mdi-chart-line</v-icon>
+        <span class="d-none d-sm-inline ml-2">Trends</span>
       </v-tab>
     </v-tabs>
 
@@ -289,6 +289,7 @@ defineExpose({
   max-width: 800px;
   margin: 0 auto;
 }
+
 
 .scroll-container {
   height: 500px;

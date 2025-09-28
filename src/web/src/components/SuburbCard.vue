@@ -43,7 +43,7 @@
         <v-chip
           v-if="safetyScore !== null"
           size="small"
-          :color="safetyColor(safetyScore)"
+          :color="safetyColour(safetyScore)"
           variant="tonal"
           label
         >
@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { safetyLabel, safetyColor, createSlug, riskToSafetyScore, formatDistance } from '../utils';
+import { safetyLabel, safetyColour, createSlug, riskToSafetyScore, formatDistance } from '../utils';
 
 const router = useRouter();
 

@@ -4,7 +4,7 @@ export function safetyLabel(score: number): string {
   return 'High Risk'
 }
 
-export function safetyColor(score: number): string {
+export function safetyColour(score: number): string {
   if (score >= 80) return 'success'
   if (score >= 50) return 'warning'
   return 'error'
