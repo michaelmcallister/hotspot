@@ -15,6 +15,10 @@
         <v-icon start size="20">mdi-map-marker-multiple</v-icon>
         Nearest Suburbs
       </v-tab>
+      <v-tab value="Trends">
+        <v-icon start size="20">mdi-chart-line</v-icon>
+        Trends
+      </v-tab>
     </v-tabs>
 
     <v-tabs-window v-model="tab">
@@ -24,8 +28,8 @@
             <v-skeleton-loader
               v-for="n in 3"
               :key="n"
-              type="card"
-              class="mb-3"
+              type="list-item-two-line"
+              class="mb-2"
             />
           </div>
         </v-card-text>
@@ -94,6 +98,15 @@
           </div>
         </v-card-text>
       </v-tabs-window-item>
+
+      <v-tabs-window-item value="Trends">
+        <v-card-text class="pa-0">
+          <TrendsCard
+            ref="trendsCardRef"
+            :postcode="props.postcode"
+          />
+        </v-card-text>
+      </v-tabs-window-item>
     </v-tabs-window>
   </v-card>
 </template>
@@ -103,6 +116,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ParkingCard from './ParkingCard.vue';
 import SuburbCard from './SuburbCard.vue';
+import TrendsCard from './TrendsCard.vue';
 import { parkingService, postcodeService, riskService } from '../services';
 
 interface Facility {
@@ -142,6 +156,8 @@ const submissions = ref<ParkingSubmission[]>([]);
 const displayedSubmissions = ref<ParkingSubmission[]>([]);
 const nearestSuburbs = ref<NearestSuburb[]>([]);
 const displayedSuburbs = ref<NearestSuburb[]>([]);
+
+const trendsCardRef = ref<any>(null);
 
 const loading = ref(false);
 const nearestLoading = ref(false);
