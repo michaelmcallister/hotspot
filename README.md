@@ -19,7 +19,8 @@ You can try out **Hotspot - Motorbike Theft Web App** here:
 *Iteration 1 is no longer updated and is frozen at commit [336fd28](https://github.com/michaelmcallister/hotspot/tree/336fd28919edad49d9133a57412ab5a945a90fe8)
 
 Below is a preview of the app interface:
-![Hotspot Screenshot](docs/app-screenshot.png?raw=true)
+![Hotspot Screenshot](docs/pc.png?raw=true)
+![Hotspot Screenshot](docs/mobile.png?raw=true)
 
 ## Project Structure
 
@@ -35,7 +36,7 @@ The **Makefile** in the project root provides shortcuts to work with all compone
 
 ### For Local Development
 - **Python 3.11+** with [`uv`](https://docs.astral.sh/uv/getting-started/installation/) for the API
-- **Node.js 20+** and npm for the web frontend
+- **Node.js 20+** and npm for the web frontend built with Vue
 - **SQLite3** CLI for building the local database
 
 ### For Docker
