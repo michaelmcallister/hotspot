@@ -87,5 +87,3 @@ const showResources = ref(false);
   margin-top: auto !important;
 }
 </style>
-
-

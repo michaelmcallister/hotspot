@@ -43,12 +43,37 @@
               <template v-slot:title>
                 <h3 class="text-grey">No parking suggestions yet</h3>
               </template>
+              <template v-slot:text>
+                <div class="text-center mt-4">
+                  <v-btn
+                    color="primary"
+                    variant="elevated"
+                    @click="showAddParkingModal = true"
+                    size="large"
+                  >
+                    <v-icon start>mdi-plus</v-icon>
+                    Add First Location
+                  </v-btn>
+                </div>
+              </template>
             </v-empty-state>
           </div>
         </v-card-text>
 
         <v-card-text v-else class="pa-0">
           <div class="scroll-container pa-3" @scroll="handleSubmissionScroll">
+            <div class="d-flex justify-end align-center mb-3">
+              <v-btn
+                color="primary"
+                variant="tonal"
+                size="small"
+                @click="showAddParkingModal = true"
+              >
+                <v-icon start size="18">mdi-plus</v-icon>
+                Add Location
+              </v-btn>
+            </div>
+
             <ParkingCard
               v-for="submission in displayedSubmissions"
               :key="submission.parking_id"
@@ -108,6 +133,14 @@
         </v-card-text>
       </v-tabs-window-item>
     </v-tabs-window>
+
+    <ParkingLocationModal
+      :show="showAddParkingModal"
+      :postcode="props.postcode"
+      :suburb="props.suburb"
+      @close="showAddParkingModal = false"
+      @submit="handleParkingSubmit"
+    />
   </v-card>
 </template>
 
@@ -117,6 +150,7 @@ import { useRoute } from 'vue-router';
 import ParkingCard from './ParkingCard.vue';
 import SuburbCard from './SuburbCard.vue';
 import TrendsCard from './TrendsCard.vue';
+import ParkingLocationModal from './ParkingLocationModal.vue';
 import { parkingService, postcodeService, riskService } from '../services';
 
 interface Facility {
@@ -163,6 +197,7 @@ const loading = ref(false);
 const nearestLoading = ref(false);
 
 const tab = ref('Parking Feed');
+const showAddParkingModal = ref(false);
 
 const ITEMS_PER_PAGE = 3;
 const currentDisplayCount = ref(ITEMS_PER_PAGE);
@@ -261,6 +296,15 @@ const createScrollHandler = (loadMoreFn: () => void) => (event: Event) => {
 
 const handleScroll = createScrollHandler(loadMoreSuburbs);
 const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions);
+
+const emit = defineEmits<{
+  'parking-submit': [data: any]
+}>();
+
+const handleParkingSubmit = (data: any) => {
+  emit('parking-submit', data);
+  fetchSubmissions(); // Refresh the parking feed
+};
 
 watch(() => props.postcode, () => {
   fetchSubmissions();

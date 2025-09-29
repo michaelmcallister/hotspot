@@ -191,6 +191,3 @@ const viewSuburbDetails = (item: any) => {
 
 watch([scope, order, limit], fetchData, { immediate: true })
 </script>
-
-<style scoped>
-</style>
