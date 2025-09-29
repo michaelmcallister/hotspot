@@ -102,8 +102,18 @@
         </v-card-text>
 
         <v-card-text v-else-if="nearestSuburbs.length === 0" class="pa-0">
-          <div class="scroll-container pa-3 d-flex align-center justify-center">
-            <p class="text-grey text-body-1">No nearby suburbs found</p>
+          <div class="scroll-container pa-3">
+            <v-empty-state>
+              <template v-slot:media>
+                <v-icon size="64" color="grey-lighten-1">mdi-map-marker-off</v-icon>
+              </template>
+              <template v-slot:title>
+                <h3 class="text-grey">No nearby suburbs found</h3>
+              </template>
+              <template v-slot:text>
+                <p class="text-grey">No data available for nearby areas</p>
+              </template>
+            </v-empty-state>
           </div>
         </v-card-text>
 
@@ -145,187 +155,143 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import ParkingCard from './ParkingCard.vue';
-import SuburbCard from './SuburbCard.vue';
-import TrendsCard from './TrendsCard.vue';
-import ParkingLocationModal from './ParkingLocationModal.vue';
-import { parkingService, postcodeService, searchService } from '../services';
+import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import ParkingCard from './ParkingCard.vue'
+import SuburbCard from './SuburbCard.vue'
+import TrendsCard from './TrendsCard.vue'
+import ParkingLocationModal from './ParkingLocationModal.vue'
+import { parkingService, postcodeService } from '../services'
 
 interface Facility {
-  facility_id: number;
-  facility_name: string;
+  facility_id: number
+  facility_name: string
 }
 
 interface ParkingSubmission {
-  parking_id: number;
-  address: string;
-  suburb: string;
-  postcode: string;
-  type: string;
-  lighting: number | null;
-  cctv: boolean | null;
-  created_at: string;
-  facilities: Facility[];
+  parking_id: number
+  address: string
+  suburb: string
+  postcode: string
+  type: string
+  lighting: number | null
+  cctv: boolean | null
+  created_at: string
+  facilities: Facility[]
 }
 
 interface NearestSuburb {
-  postcode: string;
-  suburb: string;
-  lga: string;
-  distance_in_meters: number;
-  parking_count?: number;
-  risk_score?: number;
+  postcode: string
+  suburb: string
+  lga: string
+  distance_in_meters: number
+  parking_count?: number
+  risk_score?: number
 }
 
-const route = useRoute();
+const route = useRoute()
+const props = defineProps<{ postcode: string; suburb?: string }>()
+const emit = defineEmits<{ 'parking-submit': [data: any] }>()
 
-const props = defineProps<{
-  postcode: string;
-  suburb?: string;
-}>();
+// State
+const ITEMS_PER_PAGE = 3
+const tab = ref('Parking Feed')
+const showAddParkingModal = ref(false)
 
-const submissions = ref<ParkingSubmission[]>([]);
-const displayedSubmissions = ref<ParkingSubmission[]>([]);
-const nearestSuburbs = ref<NearestSuburb[]>([]);
-const displayedSuburbs = ref<NearestSuburb[]>([]);
+const submissions = ref<ParkingSubmission[]>([])
+const displayedSubmissions = ref<ParkingSubmission[]>([])
+const nearestSuburbs = ref<NearestSuburb[]>([])
+const displayedSuburbs = ref<NearestSuburb[]>([])
 
-const trendsCardRef = ref<any>(null);
+const loading = ref(false)
+const nearestLoading = ref(false)
 
-const loading = ref(false);
-const nearestLoading = ref(false);
+const currentDisplayCount = ref(ITEMS_PER_PAGE)
+const currentSubmissionDisplayCount = ref(ITEMS_PER_PAGE)
 
-const tab = ref('Parking Feed');
-const showAddParkingModal = ref(false);
+// Fetch methods
+async function fetchData(
+  service: () => Promise<any>,
+  dataRef: any,
+  displayedRef: any,
+  countRef: any,
+  loadingRef: any
+) {
+  if (!props.postcode) return
 
-const ITEMS_PER_PAGE = 3;
-const currentDisplayCount = ref(ITEMS_PER_PAGE);
-const currentSubmissionDisplayCount = ref(ITEMS_PER_PAGE);
-
-const fetchSubmissions = async () => {
-  if (!props.postcode) return;
-
-  loading.value = true;
+  loadingRef.value = true
   try {
-    submissions.value = await parkingService.getParkingByPostcode(props.postcode);
-    displayedSubmissions.value = submissions.value.slice(0, ITEMS_PER_PAGE);
-    currentSubmissionDisplayCount.value = ITEMS_PER_PAGE;
-  } catch (error) {
-    submissions.value = [];
-    displayedSubmissions.value = [];
+    dataRef.value = await service()
+    displayedRef.value = dataRef.value.slice(0, ITEMS_PER_PAGE)
+    countRef.value = ITEMS_PER_PAGE
+  } catch {
+    dataRef.value = []
+    displayedRef.value = []
   } finally {
-    loading.value = false;
+    loadingRef.value = false
   }
-};
+}
 
-const fetchNearestSuburbs = async () => {
-  if (!props.postcode) return;
+const fetchSubmissions = () =>
+  fetchData(
+    () => parkingService.getParkingByPostcode(props.postcode),
+    submissions,
+    displayedSubmissions,
+    currentSubmissionDisplayCount,
+    loading
+  )
 
-  nearestLoading.value = true;
-  try {
-    const suburbs = await postcodeService.getNearestSuburbs(props.postcode);
+const fetchNearestSuburbs = () =>
+  fetchData(
+    () => postcodeService.getNearestSuburbs(props.postcode),
+    nearestSuburbs,
+    displayedSuburbs,
+    currentDisplayCount,
+    nearestLoading
+  )
 
-    const suburbsWithData = await Promise.all(
-      suburbs.map(async (suburb: NearestSuburb) => {
-        let parking_count = 0;
-        let risk_score: number | undefined = undefined;
-
-        try {
-          const parkingData = await parkingService.getParkingByPostcode(suburb.postcode);
-          parking_count = Array.isArray(parkingData) ? parkingData.length : 0;
-        } catch (error) {
-          console.warn(`Failed to fetch parking count for ${suburb.postcode}:`, error);
-        }
-
-        try {
-          const searchResults = await searchService.search(suburb.postcode);
-          if (searchResults && searchResults.length > 0 && searchResults[0].risk_score !== undefined) {
-            risk_score = searchResults[0].risk_score;
-          }
-        } catch (error) {
-          console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
-        }
-
-        return {
-          ...suburb,
-          parking_count,
-          risk_score
-        };
-      })
-    );
-
-    nearestSuburbs.value = suburbsWithData;
-    displayedSuburbs.value = suburbsWithData.slice(0, ITEMS_PER_PAGE);
-    currentDisplayCount.value = ITEMS_PER_PAGE;
-  } catch (error) {
-    nearestSuburbs.value = [];
-    displayedSuburbs.value = [];
-  } finally {
-    nearestLoading.value = false;
+// Pagination
+function loadMore(items: any[], displayedItems: any, countRef: any) {
+  const nextCount = Math.min(countRef.value + ITEMS_PER_PAGE, items.length)
+  if (nextCount > countRef.value) {
+    displayedItems.value = items.slice(0, nextCount)
+    countRef.value = nextCount
   }
-};
+}
 
-const loadMoreSuburbs = () => {
-  const nextCount = Math.min(currentDisplayCount.value + ITEMS_PER_PAGE, nearestSuburbs.value.length);
-
-  if (nextCount > currentDisplayCount.value) {
-    displayedSuburbs.value = nearestSuburbs.value.slice(0, nextCount);
-    currentDisplayCount.value = nextCount;
-  }
-};
-
-const loadMoreSubmissions = () => {
-  const nextCount = Math.min(currentSubmissionDisplayCount.value + ITEMS_PER_PAGE, submissions.value.length);
-
-  if (nextCount > currentSubmissionDisplayCount.value) {
-    displayedSubmissions.value = submissions.value.slice(0, nextCount);
-    currentSubmissionDisplayCount.value = nextCount;
-  }
-};
+const loadMoreSuburbs = () => loadMore(nearestSuburbs.value, displayedSuburbs, currentDisplayCount)
+const loadMoreSubmissions = () => loadMore(submissions.value, displayedSubmissions, currentSubmissionDisplayCount)
 
 const createScrollHandler = (loadMoreFn: () => void) => (event: Event) => {
-  const target = event.target as HTMLElement;
-  const { scrollTop, scrollHeight, clientHeight } = target;
-  const SCROLL_THRESHOLD = 10;
+  const { scrollTop, scrollHeight, clientHeight } = event.target as HTMLElement
+  if (scrollTop + clientHeight >= scrollHeight - 10) loadMoreFn()
+}
 
-  if (scrollTop + clientHeight >= scrollHeight - SCROLL_THRESHOLD) {
-    loadMoreFn();
-  }
-};
+const handleScroll = createScrollHandler(loadMoreSuburbs)
+const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions)
 
-const handleScroll = createScrollHandler(loadMoreSuburbs);
-const handleSubmissionScroll = createScrollHandler(loadMoreSubmissions);
+// Event handlers
+function handleParkingSubmit(data: any) {
+  emit('parking-submit', data)
+  fetchSubmissions()
+}
 
-const emit = defineEmits<{
-  'parking-submit': [data: any]
-}>();
-
-const handleParkingSubmit = (data: any) => {
-  emit('parking-submit', data);
-  fetchSubmissions(); // Refresh the parking feed
-};
-
+// Watchers
 watch(() => props.postcode, () => {
-  fetchSubmissions();
-  fetchNearestSuburbs();
-});
+  fetchSubmissions()
+  fetchNearestSuburbs()
+})
 
 watch(() => route.query.tab, (newTab) => {
-  if (newTab === 'parking-feed') {
-    tab.value = 'Parking Feed';
-  }
-}, { immediate: true });
+  if (newTab === 'parking-feed') tab.value = 'Parking Feed'
+}, { immediate: true })
 
 onMounted(() => {
-  fetchSubmissions();
-  fetchNearestSuburbs();
-});
+  fetchSubmissions()
+  fetchNearestSuburbs()
+})
 
-defineExpose({
-  fetchSubmissions,
-  fetchNearestSuburbs
-});
+defineExpose({ fetchSubmissions, fetchNearestSuburbs })
 </script>
 
 <style scoped>
