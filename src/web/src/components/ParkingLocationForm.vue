@@ -1,10 +1,5 @@
 <template>
-  <v-card class="mx-auto pa-6" elevation="1" max-width="600" data-testid="parking-form">
-    <h3 class="mb-4">
-      <v-icon start>mdi-plus</v-icon>
-      Add Parking Location
-    </h3>
-
+  <div data-testid="parking-form">
     <v-form @submit.prevent="handleSubmit">
       <v-autocomplete
         v-model="selectedAddress"
@@ -87,7 +82,7 @@
         Submit
       </v-btn>
     </v-form>
-  </v-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -229,14 +224,3 @@ const handleSubmit = () => {
   }, 1000);
 };
 </script>
-
-<style scoped>
-h3 {
-  color: rgb(var(--v-theme-on-surface));
-  font-size: 1.125rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-</style>

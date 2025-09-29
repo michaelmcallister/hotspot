@@ -1,11 +1,12 @@
 <template>
   <v-main>
-    <v-container class="pt-1 pt-md-3 pb-2 pb-md-8">
+    <v-container class="pt-0 pt-md-1 pb-2 pb-md-8 px-0 px-sm-3">
 
     <PageHero
       title="Search Suburb"
       subtitle="Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike"
       icon="mdi-map-search"
+      class="mt-n3 mt-sm-n2 mt-md-0"
     >
       <SearchBar
         ref="searchBarRef"
@@ -54,29 +55,20 @@
       </v-container>
     </div>
 
-    <v-row v-if="selectedSuburb">
-        <v-col cols="12" lg="6" xl="3">
+    <v-row v-if="selectedSuburb" class="mx-auto" style="max-width: 1200px;">
+        <v-col cols="12" lg="5" xl="4">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
           </v-sheet>
         </v-col>
 
-        <v-col cols="12" lg="6" xl="6">
+        <v-col cols="12" lg="7" xl="8">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ParkingFeed
               ref="parkingFeedRef"
               :postcode="selectedSuburb.postcode"
               :suburb="selectedSuburb.suburb"
-            />
-          </v-sheet>
-        </v-col>
-
-        <v-col cols="12" xl="3">
-          <v-sheet rounded="lg" class="pa-4 mb-4" color="white">
-            <ParkingLocationForm
-              :postcode="selectedSuburb.postcode"
-              :suburb="selectedSuburb.suburb"
-              @submit="handleParkingSubmit"
+              @parking-submit="handleParkingSubmit"
             />
           </v-sheet>
         </v-col>
@@ -108,7 +100,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
-import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
 import PageHero from './components/PageHero.vue';
 import StatusDialog from './components/StatusDialog.vue';
