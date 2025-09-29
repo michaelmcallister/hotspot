@@ -151,7 +151,7 @@ import ParkingCard from './ParkingCard.vue';
 import SuburbCard from './SuburbCard.vue';
 import TrendsCard from './TrendsCard.vue';
 import ParkingLocationModal from './ParkingLocationModal.vue';
-import { parkingService, postcodeService, riskService } from '../services';
+import { parkingService, postcodeService, searchService } from '../services';
 
 interface Facility {
   facility_id: number;
@@ -239,9 +239,9 @@ const fetchNearestSuburbs = async () => {
         }
 
         try {
-          const riskData = await riskService.compareRisk(suburb.postcode);
-          if (riskData && riskData.base && riskData.base.risk_score !== undefined) {
-            risk_score = riskData.base.risk_score;
+          const searchResults = await searchService.search(suburb.postcode);
+          if (searchResults && searchResults.length > 0 && searchResults[0].risk_score !== undefined) {
+            risk_score = searchResults[0].risk_score;
           }
         } catch (error) {
           console.warn(`Failed to fetch risk score for ${suburb.suburb}:`, error);
