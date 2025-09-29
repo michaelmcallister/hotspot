@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-container class="py-2 py-md-8">
+    <v-container class="pt-1 pt-md-3 pb-2 pb-md-8">
 
     <PageHero
       title="Search Suburb"
@@ -12,12 +12,49 @@
         v-model="searchQuery"
         @search="showStaticReport"
         @select="handleSuburbSelect"
+        @clear="handleSearchClear"
         class="hero-search-bar"
       />
     </PageHero>
 
+    <div v-if="!selectedSuburb" class="illustration-section">
+      <v-container>
+        <v-row class="justify-center align-center">
+          <v-col cols="12" lg="5" xl="4" class="text-center">
+            <div class="d-inline-block">
+              <img
+                src="/dude.png"
+                alt="Rider with motorbike"
+                class="dude-illustration"
+              />
+            </div>
+          </v-col>
+          <v-col cols="12" md="8" lg="6" xl="6" class="mx-auto">
+            <v-sheet rounded="lg" class="pa-4" color="primary-lighten-5" border>
+              <h3 class="text-h5 text-primary font-weight-bold mb-3 text-center text-lg-left">Find Safe Parking Spots</h3>
+              <p class="text-body-1 mb-3 text-center text-lg-left">
+                Discover the safest places to park your motorbike in Melbourne.
+                Get safety scores based on real data and contribute to the community
+                by sharing your favourite secure parking locations
+              </p>
+              <div class="text-center text-lg-right">
+                <v-btn
+                  @click="handleStartTutorial"
+                  color="primary"
+                  variant="outlined"
+                  prepend-icon="mdi-help-circle"
+                  size="large"
+                >
+                  Take a Tour
+                </v-btn>
+              </div>
+            </v-sheet>
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
 
-      <v-row v-if="selectedSuburb">
+    <v-row v-if="selectedSuburb">
         <v-col cols="12" lg="6" xl="3">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
@@ -77,6 +114,7 @@ import PageHero from './components/PageHero.vue';
 import StatusDialog from './components/StatusDialog.vue';
 import { searchService, parkingService } from './services';
 import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
+import { useTutorial } from './composables/useTutorial';
 
 const props = defineProps<{
   slug?: string;
@@ -84,6 +122,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
+const { startTutorial } = useTutorial();
 
 interface Suburb {
   label: string;
@@ -107,12 +146,16 @@ const safetyScore = computed(() => {
   return riskToSafetyScore(selectedSuburb.value.risk_score);
 });
 
-
-
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
   const slug = createSlug(suburb.suburb, suburb.postcode);
   router.push({ name: 'suburb', params: { slug } });
+};
+
+const handleSearchClear = () => {
+  selectedSuburb.value = null;
+  searchQuery.value = '';
+  router.push({ name: 'home' });
 };
 
 const showStaticReport = async () => {
@@ -164,6 +207,33 @@ const handleRouteChange = async () => {
   }
 };
 
+const handleStartTutorial = () => {
+  const performSearch = async (query: string) => {
+    selectedSuburb.value = null;
+    searchQuery.value = '';
+    await router.push({ name: 'home' });
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    searchQuery.value = query;
+
+    try {
+      const results = await searchService.search(query);
+
+      if (results.length > 0) {
+        selectedSuburb.value = results[0];
+
+        const slug = createSlug(results[0].suburb, results[0].postcode);
+        await router.push({ name: 'suburb', params: { slug } });
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  };
+
+  startTutorial(performSearch);
+};
+
 watch(() => [props.slug, route.params.slug], handleRouteChange);
 watch(() => route.name, handleRouteChange);
 
@@ -182,4 +252,22 @@ onMounted(() => {
 .hero-search-bar :deep(.v-field) {
   font-size: 1.1rem;
 }
+
+.illustration-section {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.dude-illustration {
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .dude-illustration {
+    max-width: 250px;
+  }
+}
+
 </style>

@@ -6,14 +6,18 @@
       grow
     >
       <v-tab value="Parking Feed">
-        <v-icon start size="20">mdi-parking</v-icon>
-        Parking Feed
-        <v-spacer />
-        <v-chip size="small">{{ submissions.length }}</v-chip>
+        <v-icon size="20">mdi-parking</v-icon>
+        <span class="d-none d-sm-inline ml-2">Parking Feed</span>
+        <v-spacer class="d-none d-sm-flex" />
+        <v-chip size="small" class="d-none d-sm-flex ml-2">{{ submissions.length }}</v-chip>
       </v-tab>
       <v-tab value="Nearest Suburbs">
-        <v-icon start size="20">mdi-map-marker-multiple</v-icon>
-        Nearest Suburbs
+        <v-icon size="20">mdi-map-marker-multiple</v-icon>
+        <span class="d-none d-sm-inline ml-2">Nearest Suburbs</span>
+      </v-tab>
+      <v-tab value="Trends">
+        <v-icon size="20">mdi-chart-line</v-icon>
+        <span class="d-none d-sm-inline ml-2">Trends</span>
       </v-tab>
     </v-tabs>
 
@@ -24,8 +28,8 @@
             <v-skeleton-loader
               v-for="n in 3"
               :key="n"
-              type="card"
-              class="mb-3"
+              type="list-item-two-line"
+              class="mb-2"
             />
           </div>
         </v-card-text>
@@ -94,6 +98,15 @@
           </div>
         </v-card-text>
       </v-tabs-window-item>
+
+      <v-tabs-window-item value="Trends">
+        <v-card-text class="pa-0">
+          <TrendsCard
+            ref="trendsCardRef"
+            :postcode="props.postcode"
+          />
+        </v-card-text>
+      </v-tabs-window-item>
     </v-tabs-window>
   </v-card>
 </template>
@@ -103,6 +116,7 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ParkingCard from './ParkingCard.vue';
 import SuburbCard from './SuburbCard.vue';
+import TrendsCard from './TrendsCard.vue';
 import { parkingService, postcodeService, riskService } from '../services';
 
 interface Facility {
@@ -142,6 +156,8 @@ const submissions = ref<ParkingSubmission[]>([]);
 const displayedSubmissions = ref<ParkingSubmission[]>([]);
 const nearestSuburbs = ref<NearestSuburb[]>([]);
 const displayedSuburbs = ref<NearestSuburb[]>([]);
+
+const trendsCardRef = ref<any>(null);
 
 const loading = ref(false);
 const nearestLoading = ref(false);
@@ -273,6 +289,7 @@ defineExpose({
   max-width: 800px;
   margin: 0 auto;
 }
+
 
 .scroll-container {
   height: 500px;

@@ -28,3 +28,30 @@ def get_nearest_postcodes(request: Request, postcode: str) -> List[Dict[str, Any
     """, {"postcode": postcode})
 
     return nearest_postcodes
+
+@router.get("/v1/postcode/{postcode}/thefts")
+def get_postcode_thefts(request: Request, postcode: str) -> List[Dict[str, Any]]:
+    db = request.app.state.db
+
+    postcode_exists = db.fetch_all("""
+        SELECT postcode FROM postcode_yearly_thefts WHERE postcode = :postcode LIMIT 1
+    """, {"postcode": postcode})
+
+    if not postcode_exists:
+        raise HTTPException(status_code=404, detail=f"No theft data found for postcode {postcode}")
+
+    theft_data = db.fetch_all("""
+        SELECT
+            year,
+            yearly_thefts as thefts
+        FROM postcode_yearly_thefts
+        WHERE postcode = :postcode
+        ORDER BY year ASC
+    """, {"postcode": postcode})
+
+    # Ensure all values are integers
+    for record in theft_data:
+        record['year'] = int(record['year'])
+        record['thefts'] = int(record['thefts'])
+
+    return theft_data

@@ -69,7 +69,7 @@ CREATE TABLE postcode_distances (
     distance_meters REAL NOT NULL
 );
 
-CREATE TABLE postcode_yearly_theft (
+CREATE TABLE postcode_yearly_thefts (
     year INTEGER NOT NULL,
     postcode TEXT NOT NULL,
     yearly_thefts REAL

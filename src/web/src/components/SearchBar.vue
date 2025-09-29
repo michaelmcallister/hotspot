@@ -42,6 +42,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
   'search': []
   'select': [suggestion: Suggestion]
+  'clear': []
 }>();
 
 const search = ref(props.modelValue || '');
@@ -111,11 +112,15 @@ const emitSearch = () => {
   emit('search');
 };
 
-watch(selected, (val) => {
+watch(selected, (val, oldVal) => {
   if (val && !isUpdatingExternally) {
     emit('update:modelValue', val.label);
     emit('select', val);
     emit('search');
+  } else if (!val && oldVal && !isUpdatingExternally) {
+    // User cleared the selection
+    emit('update:modelValue', '');
+    emit('clear');
   }
 });
 

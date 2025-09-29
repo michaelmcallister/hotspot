@@ -5,9 +5,9 @@
         rounded="xl"
         elevation="2"
         color="grey-lighten-5"
-        class="pa-6 pa-sm-8 pa-md-12 mb-4 mb-md-8 text-center"
+        class="pt-3 pt-sm-4 pt-md-6 px-6 px-sm-8 px-md-12 pb-4 pb-sm-6 pb-md-8 mb-3 mb-md-5 text-center"
       >
-        <v-card-title class="pa-0 mb-6">
+        <v-card-title class="pa-0 mb-4">
           <div class="d-flex d-sm-none flex-column align-center">
             <v-avatar
               size="48"
@@ -37,7 +37,7 @@
           </div>
         </v-card-title>
 
-        <div class="text-caption text-sm-body-1 text-medium-emphasis mb-4 mb-sm-6 px-2">
+        <div class="text-caption text-sm-body-1 text-medium-emphasis mb-3 mb-sm-4 px-2">
           {{ subtitle }}
         </div>
 

@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-container class="py-2 py-md-8">
+    <v-container class="pt-1 pt-md-3 pb-1 pb-md-4">
       <PageHero
         title="Top Suburbs"
         subtitle="Explore suburbs and LGAs ranked by safety score"
@@ -77,7 +77,7 @@
               <template #item.safety_score="{ item }">
                 <div class="d-inline-flex align-center">
                   <span class="mr-2">{{ item.safety_score }}</span>
-                  <v-chip :color="safetyColor(item.safety_score)" variant="tonal" size="small" label>
+                  <v-chip :color="safetyColour(item.safety_score)" variant="tonal" size="small" label>
                     {{ safetyLabel(item.safety_score) }}
                   </v-chip>
                 </div>
@@ -85,7 +85,7 @@
               <template #item.avg_safety="{ item }">
                 <div class="d-inline-flex align-center">
                   <span class="mr-2">{{ item.avg_safety }}</span>
-                  <v-chip :color="safetyColor(item.avg_safety)" variant="tonal" size="small" label>
+                  <v-chip :color="safetyColour(item.avg_safety)" variant="tonal" size="small" label>
                     {{ safetyLabel(item.avg_safety) }}
                   </v-chip>
                 </div>
@@ -113,7 +113,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHero from './components/PageHero.vue'
-import { safetyLabel, safetyColor } from './utils/safety'
+import { safetyLabel, safetyColour } from './utils/safety'
 import { riskService } from './services'
 import { createSlug, riskToSafetyScore } from './utils'
 

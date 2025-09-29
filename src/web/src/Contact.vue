@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-container class="py-2 py-md-8">
+    <v-container class="pt-1 pt-md-3 pb-1 pb-md-2">
       <PageHero
         title="Contact Us"
         subtitle="Get in touch with us for support, feedback, or questions"
@@ -18,7 +18,7 @@
               variant="outlined"
               :rules="emailRules"
               required
-              class="mb-4"
+              class="mb-3"
             />
 
             <v-select
@@ -28,7 +28,7 @@
               variant="outlined"
               :rules="categoryRules"
               required
-              class="mb-4"
+              class="mb-3"
             />
 
             <v-text-field
@@ -37,7 +37,7 @@
               variant="outlined"
               :rules="subjectRules"
               required
-              class="mb-4"
+              class="mb-3"
             />
 
             <v-text-field
@@ -46,7 +46,7 @@
               variant="outlined"
               type="text"
               :rules="postcodeRules"
-              class="mb-4"
+              class="mb-3"
             />
 
             <v-textarea
@@ -56,10 +56,10 @@
               rows="6"
               :rules="detailsRules"
               required
-              class="mb-6"
+              class="mb-4"
             />
 
-            <div class="recaptcha-send-container mb-6">
+            <div class="recaptcha-send-container mb-4">
               <div class="recaptcha-wrapper">
                 <div id="recaptcha-widget" v-show="recaptchaReady"></div>
                 <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
