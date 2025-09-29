@@ -21,6 +21,17 @@
           icon
           variant="plain"
           size="small"
+          @click.stop="copyAddress"
+          :color="copied ? 'success' : 'grey-lighten-1'"
+        >
+          <v-icon>
+            {{ copied ? 'mdi-check' : 'mdi-content-copy' }}
+          </v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          variant="plain"
+          size="small"
           @click.stop="toggleFavouriteHandler"
         >
           <v-icon
@@ -125,6 +136,7 @@ const emit = defineEmits<{
 }>();
 
 const favourites = ref<Set<number>>(new Set());
+const copied = ref(false);
 
 const loadFavourites = () => {
   const favouriteIds = getFavouriteIds();
@@ -139,6 +151,20 @@ onMounted(() => {
 const isFavourite = computed(() => {
   return favourites.value.has(props.submission.parking_id);
 });
+
+const copyAddress = async () => {
+  const fullAddress = `${props.submission.address}, ${props.submission.suburb} ${props.submission.postcode}`;
+
+  try {
+    await navigator.clipboard.writeText(fullAddress);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy address:', error);
+  }
+};
 
 const toggleFavouriteHandler = () => {
   const wasAdded = toggleFavourite(props.submission.parking_id);
