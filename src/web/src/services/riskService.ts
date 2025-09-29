@@ -6,13 +6,21 @@ export interface RiskData {
 
 export interface TopRiskParams {
   scope?: string;
-  order?: string;
-  limit?: string;
+  page?: string;
+  itemsPerPage?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  search?: string;
   [key: string]: string | undefined;
 }
 
+export interface TopRiskResponse {
+  items: RiskData[];
+  total: number;
+}
+
 export const riskService = {
-  async getTopRisk(params: TopRiskParams = {}): Promise<RiskData[]> {
+  async getTopRisk(params: TopRiskParams = {}): Promise<TopRiskResponse> {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -20,9 +28,5 @@ export const riskService = {
       }
     });
     return apiRequest(`/risk/top?${searchParams.toString()}`);
-  },
-
-  async compareRisk(postcode: string): Promise<RiskData> {
-    return apiRequest(`/risk/compare?postcode=${postcode}`);
   },
 };

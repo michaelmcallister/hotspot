@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from db_interface import get_database
-from routes import health, search, bikes, lgas, risk, stats, addresses, parking, contact, postcodes
+from routes import health, search, bikes, lgas, stats, addresses, parking, contact, postcodes
 
 
 logging.basicConfig(
@@ -66,7 +66,6 @@ app.state.db = db
 app.include_router(health.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(lgas.router, prefix="/api")
-app.include_router(risk.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(bikes.router, prefix="/api")
 app.include_router(addresses.router, prefix="/api")
