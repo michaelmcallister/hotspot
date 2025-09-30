@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from db_interface import get_database
-from routes import health, search, bikes, lgas, stats, addresses, parking, contact, postcodes
+from routes import health, search, bikes, stats, addresses, parking, contact, postcodes
 
 
 logging.basicConfig(
@@ -65,7 +65,6 @@ app.state.db = db
 
 app.include_router(health.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
-app.include_router(lgas.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(bikes.router, prefix="/api")
 app.include_router(addresses.router, prefix="/api")
@@ -85,10 +84,8 @@ if static_path.exists():
     # This must be defined last to avoid catching API routes
     @app.get("/{full_path:path}")
     async def catch_all(full_path: str):
-        # Don't catch API routes
         if full_path.startswith("api/"):
             return {"detail": "Not found"}
-        # Check if the path is a static file
         file_path = static_path / full_path
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)

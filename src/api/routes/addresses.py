@@ -3,7 +3,7 @@ from typing import Optional
 
 router = APIRouter()
 
-@router.get("/v1/addresses/{postcode}")
+@router.get("/v1/postcode/{postcode}/addresses")
 def get_addresses(
     request: Request,
     postcode: str = Path(..., description="Postcode to filter addresses"),
