@@ -1,6 +1,63 @@
+import logging
+import time
 from fastapi import APIRouter, Query, Request, HTTPException
+from typing import Dict, Any, Optional
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+_stats_cache: Optional[Dict[str, Any]] = None
+_cache_timestamp: float = 0
+CACHE_TTL_SECONDS = 300  # 5 minutes
+
+@router.get("/v1/statistics/summary")
+def get_statistics_summary(request: Request) -> Dict[str, Any]:
+    global _stats_cache, _cache_timestamp
+
+    current_time = time.time()
+    if _stats_cache and (current_time - _cache_timestamp) < CACHE_TTL_SECONDS:
+        logger.info(f"Returning cached statistics (age: {int(current_time - _cache_timestamp)}s)")
+        return _stats_cache
+
+    db = request.app.state.db
+
+    total_postcodes = db.fetch_all("""
+        SELECT COUNT(DISTINCT postcode) as count
+        FROM postcode_risk
+    """)[0]['count']
+
+    try:
+        total_addresses = db.fetch_all("""
+            SELECT COUNT(*) as count
+            FROM victorian_addresses
+        """)[0]['count']
+    except Exception as e:
+        logger.warning(f"Could not fetch address count: {e}")
+        total_addresses = 0
+
+    total_lgas = db.fetch_all("""
+        SELECT COUNT(DISTINCT local_government_area) as count
+        FROM postcode_risk
+    """)[0]['count']
+
+    try:
+        total_submissions = db.get_parking_submissions_count()
+    except Exception as e:
+        logger.error(f"Error fetching submission count: {e}")
+        total_submissions = 0
+
+    result = {
+        "total_postcodes": total_postcodes,
+        "total_addresses": total_addresses,
+        "total_lgas": total_lgas,
+        "total_submissions": total_submissions
+    }
+
+    _stats_cache = result
+    _cache_timestamp = time.time()
+    logger.info(f"Statistics cached at {_cache_timestamp}")
+
+    return result
 
 SCOPE_CONFIG = {
     "postcode": {

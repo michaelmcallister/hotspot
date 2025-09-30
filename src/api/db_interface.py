@@ -43,6 +43,10 @@ class DatabaseInterface(ABC):
     def get_facilities_for_parking(self, parking_id: int) -> List[Dict[str, Any]]:
         pass
 
+    @abstractmethod
+    def get_parking_submissions_count(self) -> int:
+        pass
+
 
 class SQLiteDatabase(DatabaseInterface):
     def __init__(self, db_path: str):
@@ -198,6 +202,13 @@ class SQLiteDatabase(DatabaseInterface):
             JOIN facilities f ON ucf.facility_id = f.facility_id
             WHERE ucf.parking_id = :parking_id
         """, {"parking_id": parking_id})
+
+    def get_parking_submissions_count(self) -> int:
+        result = self.fetch_all("""
+            SELECT COUNT(*) as count
+            FROM user_contribution
+        """)
+        return result[0]['count'] if result else 0
 
 
 class PersistentDatabase(DatabaseInterface):
@@ -458,6 +469,9 @@ class PersistentDatabase(DatabaseInterface):
 
         return facilities_list
 
+    def get_parking_submissions_count(self) -> int:
+        response = self.dynamodb.describe_table(TableName=self.table_name)
+        return response['Table']['ItemCount']
 
 def get_database() -> DatabaseInterface:
     """Factory function to get the appropriate database implementation based on environment"""
