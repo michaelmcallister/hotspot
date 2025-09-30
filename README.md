@@ -14,7 +14,7 @@ You can try out **Hotspot - Motorbike Theft Web App** here:
 | Version | URL |
 | --- | --- |
 | Iteration 1* | https://pnwuvfcpqp.ap-southeast-2.awsapprunner.com | 
-| Iteration 2 | https://shfzmndpgs.ap-southeast-2.awsapprunner.com | 
+| Iteration 2 | https://hotspot.sknk.ws | 
 
 *Iteration 1 is no longer updated and is frozen at commit [336fd28](https://github.com/michaelmcallister/hotspot/tree/336fd28919edad49d9133a57412ab5a945a90fe8)
 
