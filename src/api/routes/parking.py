@@ -63,18 +63,3 @@ def submit_parking(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to submit parking suggestion: {str(e)}")
-
-@router.get("/v1/parking/{postcode}")
-def get_parking_by_postcode(
-    request: Request,
-    postcode: str
-):
-    db = request.app.state.db
-
-    parking_list = db.get_parking_by_postcode(postcode)
-
-    for parking in parking_list:
-        facilities = db.get_facilities_for_parking(parking["parking_id"])
-        parking["facilities"] = facilities
-
-    return parking_list
