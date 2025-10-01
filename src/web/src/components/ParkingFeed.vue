@@ -235,6 +235,11 @@ watch(() => route.query.tab, (newTab) => {
 }, { immediate: true })
 
 onMounted(fetchFeedData)
+
+// Expose fetchFeedData so parent components can refresh the data
+defineExpose({
+  fetchSubmissions: fetchFeedData
+})
 </script>
 
 <style scoped>

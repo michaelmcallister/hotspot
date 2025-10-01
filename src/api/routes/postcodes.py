@@ -1,10 +1,20 @@
-from fastapi import APIRouter, Request, HTTPException
-from typing import List, Dict, Any
+from fastapi import APIRouter, Request, HTTPException, Path
+from typing import List
+from models import PostcodeFeedResponse, YearlyTheft, ParkingSubmission, SaferSuburb, CurrentLocation, ParkingFacility
 
-router = APIRouter()
+router = APIRouter(tags=["Postcodes"])
 
-@router.get("/v1/postcode/{postcode}/feed")
-def get_postcode_feed(request: Request, postcode: str) -> Dict[str, Any]:
+@router.get(
+    "/v1/postcode/{postcode}/feed",
+    summary="Get postcode feed",
+    description="Returns parking submissions and nearby safer suburbs for a given postcode",
+    response_description="Feed data including current location info, parking spots, and safer alternatives",
+    response_model=PostcodeFeedResponse
+)
+def get_postcode_feed(
+    request: Request,
+    postcode: str = Path(..., description="Victorian postcode", pattern="^[0-9]{4}$")
+) -> PostcodeFeedResponse:
     db = request.app.state.db
 
     target_postcode = db.fetch_all("""
@@ -61,18 +71,37 @@ def get_postcode_feed(request: Request, postcode: str) -> Dict[str, Any]:
         except:
             suburb_data['parking_count'] = 0
 
-    return {
-        "current": {
-            "postcode": postcode,
-            "suburb": current_suburb,
-            "risk_score": current_risk_score
-        },
-        "parking_submissions": parking_submissions,
-        "nearest_safer_suburbs": nearest_suburbs_query
-    }
+    parking_models = []
+    for submission in parking_submissions:
+        facilities = [ParkingFacility(**f) for f in submission.get('facilities', [])]
+        parking_models.append(ParkingSubmission(
+            **{k: v for k, v in submission.items() if k != 'facilities'},
+            facilities=facilities
+        ))
 
-@router.get("/v1/postcode/{postcode}/thefts")
-def get_postcode_thefts(request: Request, postcode: str) -> List[Dict[str, Any]]:
+    safer_suburb_models = [SaferSuburb(**suburb) for suburb in nearest_suburbs_query]
+
+    return PostcodeFeedResponse(
+        current=CurrentLocation(
+            postcode=postcode,
+            suburb=current_suburb,
+            risk_score=current_risk_score
+        ),
+        parking_submissions=parking_models,
+        nearest_safer_suburbs=safer_suburb_models
+    )
+
+@router.get(
+    "/v1/postcode/{postcode}/thefts",
+    summary="Get theft statistics",
+    description="Historical motorcycle theft data by year for a specific postcode",
+    response_description="List of yearly theft counts",
+    response_model=List[YearlyTheft]
+)
+def get_postcode_thefts(
+    request: Request,
+    postcode: str = Path(..., description="Victorian postcode", pattern="^[0-9]{4}$")
+) -> List[YearlyTheft]:
     db = request.app.state.db
 
     postcode_exists = db.fetch_all("""
@@ -91,9 +120,4 @@ def get_postcode_thefts(request: Request, postcode: str) -> List[Dict[str, Any]]
         ORDER BY year ASC
     """, {"postcode": postcode})
 
-    # Ensure all values are integers
-    for record in theft_data:
-        record['year'] = int(record['year'])
-        record['thefts'] = int(record['thefts'])
-
-    return theft_data
+    return [YearlyTheft(year=int(record['year']), thefts=int(record['thefts'])) for record in theft_data]
