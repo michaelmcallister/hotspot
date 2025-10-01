@@ -60,7 +60,13 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down...")
 
 
-app = FastAPI(title="Hotspot API", version="0.0.1", lifespan=lifespan)
+app = FastAPI(
+    title="Hotspot API",
+    version="1.0.0",
+    description="Community driven motorcycle parking suggestions for Victoria, Australia",
+    servers=[{"url": "https://hotspot.sknk.ws", "description": "Production server"}],
+    lifespan=lifespan
+)
 app.state.db = db
 
 app.include_router(health.router, prefix="/api")

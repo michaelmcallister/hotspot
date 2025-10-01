@@ -1,0 +1,1316 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hotspot API",
+    "description": "Community driven motorcycle parking suggestions for Victoria, Australia",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://hotspot.sknk.ws",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "description": "Simple health check endpoint for monitoring",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Returns 'ok' when service is running",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search suburbs",
+        "description": "Search for Victorian suburbs by name or postcode with risk scoring",
+        "operationId": "search_api_v1_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search term (suburb name or postcode)",
+              "title": "Q"
+            },
+            "description": "Search term (suburb name or postcode)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching suburbs with risk scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SuburbSearchResult"
+                  },
+                  "title": "Response Search Api V1 Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statistics/summary": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Get platform statistics",
+        "description": "Returns aggregated platform-wide statistics including coverage and submission counts",
+        "operationId": "get_statistics_summary_api_v1_statistics_summary_get",
+        "responses": {
+          "200": {
+            "description": "Summary statistics with caching for performance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/risk/top": {
+      "get": {
+        "tags": [
+          "Statistics"
+        ],
+        "summary": "Get risk rankings",
+        "description": "Paginated list of suburbs or LGAs ranked by safety scores with search and sorting",
+        "operationId": "risk_top_api_v1_risk_top_get",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(postcode|lga)$",
+              "description": "Group by postcode or lga",
+              "default": "postcode",
+              "title": "Scope"
+            },
+            "description": "Group by postcode or lga"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Page number",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "itemsPerPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Results per page",
+              "default": 20,
+              "title": "Itemsperpage"
+            },
+            "description": "Results per page"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Column to sort by",
+              "title": "Sortby"
+            },
+            "description": "Column to sort by"
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort direction",
+              "default": "desc",
+              "title": "Sortorder"
+            },
+            "description": "Sort direction"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Search filter text",
+              "title": "Search"
+            },
+            "description": "Search filter text"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated risk data with total count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedRiskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models": {
+      "get": {
+        "tags": [
+          "Motorcycles"
+        ],
+        "summary": "List motorcycle models",
+        "description": "Search and filter motorcycle models with theft risk data",
+        "operationId": "list_models_api_v1_models_get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by brand name",
+              "title": "Brand"
+            },
+            "description": "Filter by brand name"
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by model name",
+              "title": "Model"
+            },
+            "description": "Filter by model name"
+          },
+          {
+            "name": "min_total",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum total theft count",
+              "default": 0,
+              "title": "Min Total"
+            },
+            "description": "Minimum total theft count"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(risk_desc|risk_asc|total_desc|total_asc|brand|model)$",
+              "description": "Sort order",
+              "default": "risk_desc",
+              "title": "Sort"
+            },
+            "description": "Sort order"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "Maximum results to return",
+              "default": 100,
+              "title": "Limit"
+            },
+            "description": "Maximum results to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of motorcycle models with risk scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MotorcycleModel"
+                  },
+                  "title": "Response List Models Api V1 Models Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models/{brand}/{model}": {
+      "get": {
+        "tags": [
+          "Motorcycles"
+        ],
+        "summary": "Get motorcycle details",
+        "description": "Get detailed theft risk data for a specific motorcycle model",
+        "operationId": "model_detail_api_v1_models__brand___model__get",
+        "parameters": [
+          {
+            "name": "brand",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Motorcycle brand name",
+              "title": "Brand"
+            },
+            "description": "Motorcycle brand name"
+          },
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Motorcycle model name",
+              "title": "Model"
+            },
+            "description": "Motorcycle model name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Motorcycle model with complete theft statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotorcycleModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/postcode/{postcode}/addresses": {
+      "get": {
+        "tags": [
+          "Addresses"
+        ],
+        "summary": "Get addresses by postcode",
+        "description": "Retrieve validated Victorian addresses for a specific postcode with optional search filtering",
+        "operationId": "get_addresses_api_v1_postcode__postcode__addresses_get",
+        "parameters": [
+          {
+            "name": "postcode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$",
+              "description": "Victorian postcode",
+              "title": "Postcode"
+            },
+            "description": "Victorian postcode"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter addresses by partial match",
+              "title": "Q"
+            },
+            "description": "Filter addresses by partial match"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching addresses with full details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Address"
+                  },
+                  "title": "Response Get Addresses Api V1 Postcode  Postcode  Addresses Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parking": {
+      "post": {
+        "tags": [
+          "Parking"
+        ],
+        "summary": "Submit parking location",
+        "description": "Submit a community contributed safe parking location. Address must be valid Victorian address.",
+        "operationId": "submit_parking_api_v1_parking_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParkingSubmissionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Confirmation of parking submission with unique ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSubmissionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contact": {
+      "post": {
+        "tags": [
+          "Contact"
+        ],
+        "summary": "Submit contact form",
+        "description": "Submit feedback or report issues. Creates GitHub issue for tracking. Requires reCAPTCHA verification.",
+        "operationId": "submit_contact_form_api_v1_contact_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactFormSubmission"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactFormResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/postcode/{postcode}/feed": {
+      "get": {
+        "tags": [
+          "Postcodes"
+        ],
+        "summary": "Get postcode feed",
+        "description": "Returns parking submissions and nearby safer suburbs for a given postcode",
+        "operationId": "get_postcode_feed_api_v1_postcode__postcode__feed_get",
+        "parameters": [
+          {
+            "name": "postcode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$",
+              "description": "Victorian postcode",
+              "title": "Postcode"
+            },
+            "description": "Victorian postcode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feed data including current location info, parking spots, and safer alternatives",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostcodeFeedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/postcode/{postcode}/thefts": {
+      "get": {
+        "tags": [
+          "Postcodes"
+        ],
+        "summary": "Get theft statistics",
+        "description": "Historical motorcycle theft data by year for a specific postcode",
+        "operationId": "get_postcode_thefts_api_v1_postcode__postcode__thefts_get",
+        "parameters": [
+          {
+            "name": "postcode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$",
+              "description": "Victorian postcode",
+              "title": "Postcode"
+            },
+            "description": "Victorian postcode"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of yearly theft counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearlyTheft"
+                  },
+                  "title": "Response Get Postcode Thefts Api V1 Postcode  Postcode  Thefts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Read Index",
+        "operationId": "read_index__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{full_path}": {
+      "get": {
+        "summary": "Catch All",
+        "operationId": "catch_all__full_path__get",
+        "parameters": [
+          {
+            "name": "full_path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Full Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Address": {
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "description": "Full street address"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "4-digit postcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "address",
+          "suburb",
+          "postcode"
+        ],
+        "title": "Address",
+        "description": "Victorian address"
+      },
+      "ContactFormResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether submission was successful"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "ContactFormResponse",
+        "description": "Contact form submission response"
+      },
+      "ContactFormSubmission": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Contact email address"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Issue category"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "description": "Issue subject"
+          },
+          "postcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postcode",
+            "description": "Related postcode"
+          },
+          "details": {
+            "type": "string",
+            "title": "Details",
+            "description": "Issue details"
+          },
+          "recaptchaToken": {
+            "type": "string",
+            "title": "Recaptchatoken",
+            "description": "reCAPTCHA verification token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "category",
+          "subject",
+          "details",
+          "recaptchaToken"
+        ],
+        "title": "ContactFormSubmission",
+        "description": "Contact form submission request"
+      },
+      "CurrentLocation": {
+        "properties": {
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "4-digit postcode"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score",
+            "description": "Risk score from 0 (safe) to 1 (high risk)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "postcode",
+          "suburb",
+          "risk_score"
+        ],
+        "title": "CurrentLocation",
+        "description": "Current postcode information"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MotorcycleModel": {
+        "properties": {
+          "brand": {
+            "type": "string",
+            "title": "Brand",
+            "description": "Motorcycle brand"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "Model name"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of thefts"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage",
+            "description": "Percentage of total thefts"
+          },
+          "model_risk": {
+            "type": "number",
+            "title": "Model Risk",
+            "description": "Risk score from 0 (safe) to 1 (high risk)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "brand",
+          "model",
+          "total",
+          "percentage",
+          "model_risk"
+        ],
+        "title": "MotorcycleModel",
+        "description": "Motorcycle model with theft statistics"
+      },
+      "PaginatedRiskResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Risk ranking items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "PaginatedRiskResponse",
+        "description": "Paginated risk ranking response"
+      },
+      "ParkingFacility": {
+        "properties": {
+          "facility_id": {
+            "type": "integer",
+            "title": "Facility Id",
+            "description": "Unique facility identifier"
+          },
+          "facility_name": {
+            "type": "string",
+            "title": "Facility Name",
+            "description": "Facility name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "facility_id",
+          "facility_name"
+        ],
+        "title": "ParkingFacility",
+        "description": "Parking facility details"
+      },
+      "ParkingSubmission": {
+        "properties": {
+          "parking_id": {
+            "type": "integer",
+            "title": "Parking Id",
+            "description": "Unique parking submission ID"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "description": "Street address"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "4-digit postcode"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Parking type: on-street, off-street, or secure"
+          },
+          "lighting": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lighting",
+            "description": "Lighting quality: 1=poor to 4=excellent"
+          },
+          "cctv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cctv",
+            "description": "CCTV availability"
+          },
+          "facilities": {
+            "items": {
+              "$ref": "#/components/schemas/ParkingFacility"
+            },
+            "type": "array",
+            "title": "Facilities",
+            "description": "Available facilities at location",
+            "default": []
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Submission timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parking_id",
+          "address",
+          "suburb",
+          "postcode",
+          "type"
+        ],
+        "title": "ParkingSubmission",
+        "description": "Community submitted parking location"
+      },
+      "ParkingSubmissionRequest": {
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Address",
+            "description": "Street address"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "Postcode"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^(on-street|off-street|secure)$",
+            "title": "Type",
+            "description": "Parking type"
+          },
+          "lighting": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 4.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lighting",
+            "description": "Lighting quality: 1=poor, 2=fair, 3=good, 4=excellent"
+          },
+          "cctv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cctv",
+            "description": "CCTV availability: true, false, or null for unknown"
+          },
+          "facilities": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facilities",
+            "description": "List of facility IDs",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "address",
+          "suburb",
+          "postcode",
+          "type"
+        ],
+        "title": "ParkingSubmissionRequest",
+        "description": "Request model for submitting parking location"
+      },
+      "ParkingSubmissionResponse": {
+        "properties": {
+          "parking_id": {
+            "type": "integer",
+            "title": "Parking Id",
+            "description": "Unique parking submission ID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "Action performed: inserted, updated, or no_change"
+          }
+        },
+        "type": "object",
+        "required": [
+          "parking_id",
+          "message",
+          "action"
+        ],
+        "title": "ParkingSubmissionResponse",
+        "description": "Response model for parking submission"
+      },
+      "PostcodeFeedResponse": {
+        "properties": {
+          "current": {
+            "$ref": "#/components/schemas/CurrentLocation",
+            "description": "Current location details"
+          },
+          "parking_submissions": {
+            "items": {
+              "$ref": "#/components/schemas/ParkingSubmission"
+            },
+            "type": "array",
+            "title": "Parking Submissions",
+            "description": "Community parking submissions"
+          },
+          "nearest_safer_suburbs": {
+            "items": {
+              "$ref": "#/components/schemas/SaferSuburb"
+            },
+            "type": "array",
+            "title": "Nearest Safer Suburbs",
+            "description": "Nearby suburbs with lower risk"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "parking_submissions",
+          "nearest_safer_suburbs"
+        ],
+        "title": "PostcodeFeedResponse",
+        "description": "Feed data for a specific postcode"
+      },
+      "SaferSuburb": {
+        "properties": {
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "4-digit postcode"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "lga": {
+            "type": "string",
+            "title": "Lga",
+            "description": "Local government area"
+          },
+          "distance_in_meters": {
+            "type": "integer",
+            "title": "Distance In Meters",
+            "description": "Distance from target postcode in meters"
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score",
+            "description": "Risk score from 0 (safe) to 1 (high risk)"
+          },
+          "parking_count": {
+            "type": "integer",
+            "title": "Parking Count",
+            "description": "Number of community parking submissions",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "postcode",
+          "suburb",
+          "lga",
+          "distance_in_meters",
+          "risk_score"
+        ],
+        "title": "SaferSuburb",
+        "description": "Nearby suburb with lower risk score"
+      },
+      "StatisticsSummary": {
+        "properties": {
+          "total_postcodes": {
+            "type": "integer",
+            "title": "Total Postcodes",
+            "description": "Number of postcodes covered"
+          },
+          "total_addresses": {
+            "type": "integer",
+            "title": "Total Addresses",
+            "description": "Number of validated addresses"
+          },
+          "total_lgas": {
+            "type": "integer",
+            "title": "Total Lgas",
+            "description": "Number of local government areas"
+          },
+          "total_submissions": {
+            "type": "integer",
+            "title": "Total Submissions",
+            "description": "Number of community submissions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_postcodes",
+          "total_addresses",
+          "total_lgas",
+          "total_submissions"
+        ],
+        "title": "StatisticsSummary",
+        "description": "Platform-wide statistics"
+      },
+      "SuburbSearchResult": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Display label combining suburb and postcode"
+          },
+          "suburb": {
+            "type": "string",
+            "title": "Suburb",
+            "description": "Suburb name"
+          },
+          "postcode": {
+            "type": "string",
+            "title": "Postcode",
+            "description": "4-digit postcode"
+          },
+          "lga": {
+            "type": "string",
+            "title": "Lga",
+            "description": "Local government area"
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score",
+            "description": "Risk score from 0 (safe) to 1 (high risk)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "suburb",
+          "postcode",
+          "lga",
+          "risk_score"
+        ],
+        "title": "SuburbSearchResult",
+        "description": "Search result for suburb lookup"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "YearlyTheft": {
+        "properties": {
+          "year": {
+            "type": "integer",
+            "title": "Year",
+            "description": "Calendar year"
+          },
+          "thefts": {
+            "type": "integer",
+            "title": "Thefts",
+            "description": "Number of reported thefts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "year",
+          "thefts"
+        ],
+        "title": "YearlyTheft",
+        "description": "Yearly theft statistics"
+      }
+    }
+  }
+}

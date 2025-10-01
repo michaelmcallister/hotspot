@@ -2,22 +2,29 @@ import logging
 import time
 from fastapi import APIRouter, Query, Request, HTTPException
 from typing import Dict, Any, Optional
+from models import StatisticsSummary, PaginatedRiskResponse
 
-router = APIRouter()
+router = APIRouter(tags=["Statistics"])
 logger = logging.getLogger(__name__)
 
 _stats_cache: Optional[Dict[str, Any]] = None
 _cache_timestamp: float = 0
 CACHE_TTL_SECONDS = 300  # 5 minutes
 
-@router.get("/v1/statistics/summary")
-def get_statistics_summary(request: Request) -> Dict[str, Any]:
+@router.get(
+    "/v1/statistics/summary",
+    summary="Get platform statistics",
+    description="Returns aggregated platform-wide statistics including coverage and submission counts",
+    response_description="Summary statistics with caching for performance",
+    response_model=StatisticsSummary
+)
+def get_statistics_summary(request: Request) -> StatisticsSummary:
     global _stats_cache, _cache_timestamp
 
     current_time = time.time()
     if _stats_cache and (current_time - _cache_timestamp) < CACHE_TTL_SECONDS:
         logger.info(f"Returning cached statistics (age: {int(current_time - _cache_timestamp)}s)")
-        return _stats_cache
+        return StatisticsSummary(**_stats_cache)
 
     db = request.app.state.db
 
@@ -57,7 +64,7 @@ def get_statistics_summary(request: Request) -> Dict[str, Any]:
     _cache_timestamp = time.time()
     logger.info(f"Statistics cached at {_cache_timestamp}")
 
-    return result
+    return StatisticsSummary(**result)
 
 SCOPE_CONFIG = {
     "postcode": {
@@ -87,16 +94,22 @@ SCOPE_CONFIG = {
     }
 }
 
-@router.get("/v1/risk/top")
+@router.get(
+    "/v1/risk/top",
+    summary="Get risk rankings",
+    description="Paginated list of suburbs or LGAs ranked by safety scores with search and sorting",
+    response_description="Paginated risk data with total count",
+    response_model=PaginatedRiskResponse
+)
 def risk_top(
     request: Request,
-    scope: str = "postcode",
-    page: int = Query(1, ge=1),
-    itemsPerPage: int = Query(20, ge=1, le=100),
-    sortBy: str = Query(None),
-    sortOrder: str = Query("desc"),
-    search: str = Query(None)
-):
+    scope: str = Query("postcode", description="Group by postcode or lga", pattern="^(postcode|lga)$"),
+    page: int = Query(1, ge=1, description="Page number"),
+    itemsPerPage: int = Query(20, ge=1, le=100, description="Results per page"),
+    sortBy: str = Query(None, description="Column to sort by"),
+    sortOrder: str = Query("desc", description="Sort direction", pattern="^(asc|desc)$"),
+    search: str = Query(None, description="Search filter text")
+) -> PaginatedRiskResponse:
     if scope not in SCOPE_CONFIG:
         raise HTTPException(status_code=400, detail="scope must be postcode or lga")
 
@@ -129,4 +142,4 @@ def risk_top(
     """
     items = db.fetch_all(data_query, params)
 
-    return {"items": items, "total": total}
+    return PaginatedRiskResponse(items=items, total=total)
