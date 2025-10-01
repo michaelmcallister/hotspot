@@ -60,6 +60,12 @@ erDiagram
     REAL distance_meters "NOT NULL"
   }
 
+YEARLY_POSTCODE_THEFTS {
+    TEXT primary_postcode "NOT NULL"
+    TEXT secondary_postcode "NOT NULL"
+    REAL distance_meters "NOT NULL"
+  }
+
   %% Relationships
   USER_CONTRIBUTION ||--o{ USER_CONTRIBUTION_FACILITIES : "has"
   FACILITIES ||--o{ USER_CONTRIBUTION_FACILITIES : "has"
@@ -67,6 +73,7 @@ erDiagram
   %% Foreign key relationships through postcode matching
   POSTCODE_RISK ||--o{ USER_CONTRIBUTION : "postcode"
   POSTCODE_RISK ||--o{ VICTORIAN_ADDRESSES : "postcode"
+  POSTCODE_RISK ||--o{ YEARLY_POSTCODE_THEFTS : "postcode"
   POSTCODE_RISK ||--o{ POSTCODE_DISTANCES : "primary_postcode"
   POSTCODE_RISK ||--o{ POSTCODE_DISTANCES : "secondary_postcode"
 ```
