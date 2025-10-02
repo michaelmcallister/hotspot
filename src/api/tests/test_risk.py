@@ -1,82 +1,73 @@
-from fastapi.testclient import TestClient
-from main import app
-import os
-import pytest
+import requests
 
-os.environ["SQLITE_DB_PATH"] = "/Users/samanthamarriott/Documents/hotspot/src/data/hotspot.db"
+BASE_URL = "http://localhost:8000"
 
-client = TestClient(app)
-
-def test_risk_compare_success():
-    response = client.get("/api/v1/risk/compare?postcode=3067")
+def test_risk_top_default():
+    """Test default risk ranking (suburbs)"""
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top")
     assert response.status_code == 200
     data = response.json()
-    assert "base" in data
-    assert "defaults" in data
-    assert "postcode" in data["base"]
-    assert "risk_score" in data["base"]
+    assert "items" in data
+    for item in data["items"]:
+        assert "suburb" in item
+        assert "postcode" in item
+        assert "risk_score" in item
+        assert 0 <= item["risk_score"] <= 1
 
-def test_risk_compare_missing_params():
-    response = client.get("/api/v1/risk/compare")
-    assert response.status_code == 422
-
-def test_risk_compare_invalid_postcodes():
-    response = client.get("/api/v1/risk/compare?postcode1=abcd&postcode2=1234")
-    assert response.status_code == 422
-
-@pytest.mark.parametrize("method", ["post", "put", "delete", "patch"])
-def test_risk_compare_invalid_methods(method):
-    response = getattr(client, method)("/api/v1/risk/compare?postcode1=3067&postcode2=3737")
-    assert response.status_code == 405
-
-@pytest.mark.parametrize("pc", ["3067", "3737", "3000"])
-def test_risk_compare_multiple_valid_postcodes(pc):
-    response = client.get(f"/api/v1/risk/compare?postcode={pc}")
+def test_risk_top_scope_lga():
+    """Test risk ranking grouped by LGA"""
+    params = {"scope": "lga"}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
     assert response.status_code == 200
     data = response.json()
-    assert data["base"]["postcode"] == pc
+    assert "items" in data
+    for item in data["items"]:
+        assert "lga" in item
+        assert "avg_risk" in item
+        assert 0 <= item["avg_risk"] <= 1
+        assert "postcode_count" in item
 
-def test_risk_compare_field_types():
-    response = client.get("/api/v1/risk/compare?postcode=3067")
-    data = response.json()
-    base = data["base"]
-    assert isinstance(base["postcode"], str)
-    assert isinstance(base["risk_score"], (int, float))
-
-def test_risk_compare_defaults_empty():
-    response = client.get("/api/v1/risk/compare?postcode=3067")
-    data = response.json()
-    assert "defaults" in data
-
-def test_risk_compare_risk_score_range():
-    response = client.get("/api/v1/risk/compare?postcode=3067")
-    base = response.json()["base"]
-    assert 0 <= base["risk_score"] <= 100
-
-def test_risk_compare_defaults_keys():
-    response = client.get("/api/v1/risk/compare?postcode=3067")
-    data = response.json()
-    if data["defaults"]:
-        expected_keys = ["model_default_risk", "postcode_default_risk"]
-        for key in expected_keys:
-            assert key in data["defaults"]
-            
-def test_risk_compare_nonexistent_postcode():
-    """Non-existent postcode returns base as empty or defaults"""
-    response = client.get("/api/v1/risk/compare?postcode=9999")
+def test_risk_top_pagination():
+    """Test pagination parameters"""
+    params = {"page": 1, "itemsPerPage": 5}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
     assert response.status_code == 200
     data = response.json()
-    assert "base" in data
-    # base might be None or empty dict depending on DB
+    assert len(data["items"]) <= 5
+    assert "total" in data
 
-def test_risk_compare_response_time():
-    """Response should be reasonably fast"""
-    response = client.get("/api/v1/risk/compare?postcode=3067")
+def test_risk_top_sorting():
+    """Test sortBy and sortOrder parameters"""
+    params = {"sortBy": "risk_score", "sortOrder": "desc"}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
     assert response.status_code == 200
-    # Example: ensure request completes under 1 second
-    assert response.elapsed.total_seconds() < 1
+    data = response.json()
+    risk_scores = [item.get("risk_score", item.get("avg_risk")) for item in data["items"]]
+    assert risk_scores == sorted(risk_scores, reverse=True)
 
+def test_risk_top_search_filter():
+    """Test search filter for suburb"""
+    params = {"search": "Richmond"}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
+    assert response.status_code == 200
+    data = response.json()
+    for item in data["items"]:
+        if "suburb" in item:
+            assert "richmond" in item["suburb"].lower()
 
+def test_risk_top_search_filter_empty():
+    """Searching for a nonexistent suburb returns empty items list"""
+    params = {"search": "NotASuburb"}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
+    assert response.status_code == 200
+    data = response.json()
+    assert "items" in data
+    assert len(data["items"]) == 0
 
-
+def test_risk_top_invalid_params():
+    """Test invalid query parameters return 422 or default to normal behavior"""
+    params = {"scope": "invalid_scope", "page": -1, "itemsPerPage": -5}
+    response = requests.get(f"{BASE_URL}/api/v1/risk/top", params=params)
+    # Either validation error (422) or fallback/default response (200)
+    assert response.status_code in (200, 422)
 
