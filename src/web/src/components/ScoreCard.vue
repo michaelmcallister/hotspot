@@ -2,7 +2,27 @@
   <v-card class="mx-auto pa-6 text-center" max-width="500" elevation="1" aria-labelledby="score-title">
     <div id="score-title" class="suburb-name">{{ suburb }}</div>
     <div class="safety-score">{{ score }}</div>
-    <div class="score-label">Safety Score</div>
+    
+    <!-- Safety Score with Tooltip -->
+    <div class="score-label-container">
+      <div class="score-label">Safety Score</div>
+      <v-tooltip location="top">
+        <template v-slot:activator="{ props }">
+          <v-btn 
+            v-bind="props"
+            icon 
+            size="x-small"
+            variant="text"
+            color="grey"
+            @click="goToFAQ"
+            class="ml-1 info-btn"
+          >
+            <v-icon size="18">mdi-information</v-icon>
+          </v-btn>
+        </template>
+        <span>click to learn more</span>
+      </v-tooltip>
+    </div>
 
     <v-chip :color="chipColor" variant="tonal" size="small" class="mb-4 font-weight-bold">
       {{ riskLabel }}
@@ -17,14 +37,16 @@
       </template>
     </p>
   </v-card>
-  
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { safetyLabel, safetyColor } from '../utils/safety';
 import { statsService } from '../services';
 import { safetyToRiskScore, riskDifferencePercent } from '../utils';
+
+const router = useRouter();
 
 const props = defineProps<{
   suburb: string
@@ -60,6 +82,10 @@ const signedPercent = computed(() => {
   const absRounded = Math.round(Math.abs(deltaPct.value) * 10) / 10
   return `${sign}${absRounded}%`
 })
+
+const goToFAQ = () => {
+  router.push('/faq');
+};
 </script>
 
 <style scoped>
@@ -75,10 +101,27 @@ const signedPercent = computed(() => {
   font-weight: 800;
   margin: .25rem 0 0;
 }
+
+.score-label-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: .6rem;
+}
+
 .score-label {
   color: rgb(var(--v-theme-on-surface));
   opacity: 0.6;
-  margin-bottom: .6rem;
+}
+
+.info-btn {
+  min-width: 24px;
+  height: 24px;
+}
+
+.info-btn .v-icon {
+  font-size: 18px;
 }
 
 .description {
