@@ -1,364 +1,778 @@
-# API Specification – Hotspot Parking App
+# Hotspot API
 
-## Overview
-This document defines the REST API endpoints for the Hotspot app.
+Community driven motorcycle parking suggestions for Victoria, Australia
 
-The API allows riders to:
+# Base URL
 
-- Search for safe parking by suburb/postcode
-- View motorcycle theft risk scores by location
-- Compare motorcycle models by theft risk
-- Analyze risk data by Local Government Area (LGA)
-- Get comprehensive theft statistics
 
-**Base URL:** `/api/v1`
+| URL | Description |
+|-----|-------------|
+| https://hotspot.sknk.ws | Production server |
 
----
-## 1.0 Health Check
-### 1.1 System Health
-**Endpoint:**
-`GET /health`
 
-**Request Example:**
-`GET /health`
+# APIs
 
-**Response Example:**
-`ok`
+## GET /api/health
 
-## 2.0 Parking Safety Search & Discovery
+Health check
 
-### 2.1 Search for Safe Parking
-**Endpoint:**
-`GET /search`
+Simple health check endpoint for monitoring
 
-**Query Parameters:**
-- `q` (string, required) -> search query for suburb or postcode
 
-**Request Example:**
-`GET /search?q=Richmond`
 
-**Response Example:**
-```json
-[
-  {
-    "label": "Richmond, 3121",
-    "suburb": "Richmond",
-    "postcode": "3121",
-    "lga": "Yarra City",
-    "risk_score": 0.025476
-  },
-  {
-    "label": "Richmond North, 3121",
-    "suburb": "Richmond North",
-    "postcode": "3121",
-    "lga": "Yarra City",
-    "risk_score": 0.025476
-  }
-]
-```
-### 2.2 Submit Parking Suggestion
-**Endpoint:**
-`POST /parking`
 
-**Request Body:**
-```json
-  {
-    "address": "Richmond, 3121",
-    "suburb": "Richmond",
-    "postcode": "3121",
-    "type": "off-street",
-    "lighting": 4,
-    "cctv": true,
-    "facilities": [1, 2]
-  }
+### Responses
 
-```
-**Response Example:**
-```json
-{
-  "parking_id": 101,
-  "message": "Parking suggestion submitted successfully"
-}
-```
+#### 200
 
-### 2.3 Get Parking by Postcode
-**Endpoint:**
-`GET /parking/{postcode}`
 
-**Path Parameters:**
-- `{postcode}` (string, required) -> postcode to search for parking options
+Returns 'ok' when service is running
 
-**Request Example:**
-`GET /parking/3121`
 
-**Response Example:**
-```json
-[
-  {
-    "parking_id": 101,
-    "address": "123 Example St",
-    "suburb": "Richmond",
-    "postcode": "3121",
-    "type": "off-street",
-    "lighting": 4,
-    "cctv": true,
-    "created_at": "2025-09-19T16:46:31.212339",
-    "facilities": [
-      {"facility_id": 1, "facility_name": "Covered parking"},
-      {"facility_id": 2, "facility_name": "Security guard"}
-    ]
-  }
-]
-```
+string
 
-## 3.0 Risk Analysis
 
-### 3.1 Compare Risk for Postcode
-**Endpoint:**
-`GET /risk/compare`
 
-**Query Parameters:**
-- `postcode` (string, required) -> postcode to analyse
 
-**Request Example:**
-`GET /risk/compare?postcode=3121`
 
-**Response Example:**
-```json
-{
-  "base": {
-    "postcode": "3121",
-    "suburb": "Richmond",
-    "lga": "Yarra City",
-    "motorcycle_theft_rate": 2.547619,
-    "risk_score": 0.025476
-  },
-  "defaults": {
-    "default_risk": 0.014285,
-    "max_risk": 0.125000
-  }
-}
-```
 
-### 3.2 Top Risk Areas
-**Endpoint:**
-`GET /risk/top`
 
-**Query Parameters:**
-- `scope` (string, optional) -> `postcode` | `lga` (default: `postcode`)
-- `order` (string, optional) -> `desc` | `asc` (default: `desc`)
-- `limit` (integer, optional) -> 1-200 (default: 20)
+## GET /api/v1/search
 
-**Request Example:**
-`GET /risk/top?scope=postcode&order=desc&limit=10`
+Search suburbs
 
-**Response Example:**
-```json
-[
-  {
-    "postcode": "3000",
-    "suburb": "Melbourne",
-    "lga": "Melbourne City",
-    "risk_score": 0.125000
-  },
-  {
-    "postcode": "3141",
-    "suburb": "South Yarra",
-    "lga": "Stonnington City",
-    "risk_score": 0.098765
-  }
-]
-```
+Search for Victorian suburbs by name or postcode with risk scoring
 
-## 4.0 Motorcycle Model Risk
 
-### 4.1 List Motorcycle Models by Risk
-**Endpoint:**
-`GET /models`
-  
-**Query Parameters:**
-- `brand` (string, optional) -> filter by brand name
-- `model` (string, optional) -> filter by model name
-- `min_total` (integer, optional) -> minimum total thefts (default: 0)
-- `sort` (string, optional) -> `risk_desc` | `risk_asc` | `total_desc` | `total_asc` | `brand` | `model` (default: `risk_desc`)
-- `limit` (integer, optional) -> 1-500 (default: 100)
-- `offset` (integer, optional) -> pagination offset (default: 0)
+### Parameters
 
-**Request Example:**
-`GET /models?brand=honda&sort=risk_desc&limit=5`
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| q | string | True | Search term (suburb name or postcode) |
 
-**Response Example:**
-```json
-[
-  {
-    "brand": "honda",
-    "model": "cbr650",
-    "total": 17,
-    "percentage": 0.06073380729520203,
-    "model_risk": 0.01484327087198516
-  }
-]
-```
 
-### 4.2 Get Specific Model Risk
-**Endpoint:**
-`GET /models/{brand}/{model}`
+### Responses
 
-**Path Parameters:**
-- `{brand}` (string, required) -> motorcycle brand
-- `{model}` (string, required) -> motorcycle model
+#### 200
 
-**Request Example:**
-`GET /models/honda/cbr1000rr`
 
-**Response Example:**
-```json
-{
-  "brand": "honda",
-  "model": "cbr650",
-  "total": 17,
-  "percentage": 0.06073380729520203,
-  "model_risk": 0.01484327087198516
-}
-```
+List of matching suburbs with risk scores
 
-## 5.0 Local Government Area (LGA) Analysis
 
-### 5.1 LGA Risk Summary
-**Endpoint:**
-`GET /lgas`
+array
 
-**Query Parameters:**
-- `q` (string, optional) -> filter by LGA name
-- `sort` (string, optional) -> `avg_desc` | `avg_asc` | `count_desc` | `count_asc` | `lga` (default: `avg_desc`)
 
-**Request Example:**
-`GET /lgas?q=Melbourne&sort=avg_desc`
 
-**Response Example:**
-```json
-[
-  {
-    "lga": "Melbourne",
-    "postcode_count": 20,
-    "avg_risk": 0.632164,
-    "min_risk": 0.6321638896707255,
-    "max_risk": 0.6321638896707255
-  }
-]
-```
 
-### 5.2 LGA Postcode Details
-**Endpoint:**
-`GET /lgas/{lga}/postcodes`
 
-**Path Parameters:**
-- `{lga}` (string, required) -> Local Government Area name
 
-**Query Parameters:**
-- `order` (string, optional) -> `desc` | `asc` (default: `desc`)
 
-**Request Example:**
-`GET /lgas/Melbourne City/postcodes?order=desc`
+#### 422
 
-**Response Example:**
-```json
-[
-  {
-    "postcode": "3000",
-    "suburb": "MELBOURNE",
-    "long": 144.9825846,
-    "lat": -37.81443733,
-    "risk_score": 0.6321638896707255
-  },
-  {
-    "postcode": "3002",
-    "suburb": "EAST MELBOURNE",
-    "long": 144.9825846,
-    "lat": -37.81443733,
-    "risk_score": 0.6321638896707255
-  }
-]
-```
-## 6.0 Address Lookup
 
-### 6.1 Get Addresses by Postcode
-**Endpoint:**
-`GET /addresses/{postcode}`
+Validation Error
 
-**Path Parameters:**
-- `{postcode}` (string, required) -> postcode to filter addresses
 
-**Query Parameters:**
-- `q` (string, optional) -> search query to filter addresses within the postcode
+[HTTPValidationError](#httpvalidationerror)
 
-**Request Example:**
-`GET /addresses/3000?q=Collins`
 
-**Response Example:**
-```json
-[
-  {
-    "address": "123 Collins St",
-    "suburb": "Melbourne",
-    "postcode": "3000"
-  },
-  {
-    "address": "456 Collins St",
-    "suburb": "Melbourne",
-    "postcode": "3000"
-  }
-]
-```
-## 7.0 Statistics
 
-### 7.1 Overall Statistics Summary
-**Endpoint:**
-`GET /stats/summary`
 
-**Request Example:**
-`GET /stats/summary`
 
-**Response Example:**
-```json
-{
-  "total_postcodes": 3482,
-  "total_lgas": 78,
-  "avg_postcode_risk": 0.202648,
-  "total_models": 1529
-}
-```
 
-## 8.0 System
 
-### 8.1 Health Check
-**Endpoint:**
-`GET /health`
+## GET /api/v1/statistics/summary
 
-**Request Example:**
-`GET /health`
+Get platform statistics
 
-**Response:**
-```
-ok
-```
+Returns aggregated platform-wide statistics including coverage and submission counts
 
-## 9.0 Error Handling
 
-### 9.1 Resource Not Found
 
-**Response Example:**
-```json
-{
-  "detail": "Postcode not found"
-}
-```
 
-### 9.2 Invalid Parameters
+### Responses
 
-**Response Example:**
-```json
-{
-  "detail": "scope must be postcode or lga"
-}
-```
+#### 200
+
+
+Summary statistics with caching for performance
+
+
+[StatisticsSummary](#statisticssummary)
+
+
+
+
+
+
+
+## GET /api/v1/risk/top
+
+Get risk rankings
+
+Paginated list of suburbs or LGAs ranked by safety scores with search and sorting
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| scope | string | False | Group by postcode or lga |
+| page | integer | False | Page number |
+| itemsPerPage | integer | False | Results per page |
+| sortBy | string | False | Column to sort by |
+| sortOrder | string | False | Sort direction |
+| search | string | False | Search filter text |
+
+
+### Responses
+
+#### 200
+
+
+Paginated risk data with total count
+
+
+[PaginatedRiskResponse](#paginatedriskresponse)
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /api/v1/models
+
+List motorcycle models
+
+Search and filter motorcycle models with theft risk data
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| brand |  | False | Filter by brand name |
+| model |  | False | Filter by model name |
+| min_total | integer | False | Minimum total theft count |
+| sort | string | False | Sort order |
+| limit | integer | False | Maximum results to return |
+| offset | integer | False | Number of results to skip |
+
+
+### Responses
+
+#### 200
+
+
+List of motorcycle models with risk scores
+
+
+array
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /api/v1/models/{brand}/{model}
+
+Get motorcycle details
+
+Get detailed theft risk data for a specific motorcycle model
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| brand | string | True | Motorcycle brand name |
+| model | string | True | Motorcycle model name |
+
+
+### Responses
+
+#### 200
+
+
+Motorcycle model with complete theft statistics
+
+
+[MotorcycleModel](#motorcyclemodel)
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /api/v1/postcode/{postcode}/addresses
+
+Get addresses by postcode
+
+Retrieve validated Victorian addresses for a specific postcode with optional search filtering
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| postcode | string | True | Victorian postcode |
+| q |  | False | Filter addresses by partial match |
+
+
+### Responses
+
+#### 200
+
+
+List of matching addresses with full details
+
+
+array
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## POST /api/v1/parking
+
+Submit parking location
+
+Submit a community contributed safe parking location. Address must be valid Victorian address.
+
+
+
+
+### Request Body
+
+[ParkingSubmissionRequest](#parkingsubmissionrequest)
+
+
+
+
+
+
+
+### Responses
+
+#### 200
+
+
+Confirmation of parking submission with unique ID
+
+
+[ParkingSubmissionResponse](#parkingsubmissionresponse)
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## POST /api/v1/contact
+
+Submit contact form
+
+Submit feedback or report issues. Creates GitHub issue for tracking. Requires reCAPTCHA verification.
+
+
+
+
+### Request Body
+
+[ContactFormSubmission](#contactformsubmission)
+
+
+
+
+
+
+
+### Responses
+
+#### 200
+
+
+Success confirmation
+
+
+[ContactFormResponse](#contactformresponse)
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /api/v1/postcode/{postcode}/feed
+
+Get postcode feed
+
+Returns parking submissions and nearby safer suburbs for a given postcode
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| postcode | string | True | Victorian postcode |
+
+
+### Responses
+
+#### 200
+
+
+Feed data including current location info, parking spots, and safer alternatives
+
+
+[PostcodeFeedResponse](#postcodefeedresponse)
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /api/v1/postcode/{postcode}/thefts
+
+Get theft statistics
+
+Historical motorcycle theft data by year for a specific postcode
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| postcode | string | True | Victorian postcode |
+
+
+### Responses
+
+#### 200
+
+
+List of yearly theft counts
+
+
+array
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+## GET /
+
+Read Index
+
+
+
+
+
+### Responses
+
+#### 200
+
+
+Successful Response
+
+
+
+
+
+
+
+
+## GET /{full_path}
+
+Catch All
+
+
+
+### Parameters
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| full_path | string | True |  |
+
+
+### Responses
+
+#### 200
+
+
+Successful Response
+
+
+
+
+
+
+
+
+#### 422
+
+
+Validation Error
+
+
+[HTTPValidationError](#httpvalidationerror)
+
+
+
+
+
+
+
+# Components
+
+
+
+## Address
+
+
+Victorian address
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| address | string | Full street address |
+| suburb | string | Suburb name |
+| postcode | string | 4-digit postcode |
+
+
+## ContactFormResponse
+
+
+Contact form submission response
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| success | boolean | Whether submission was successful |
+
+
+## ContactFormSubmission
+
+
+Contact form submission request
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| email | string | Contact email address |
+| category | string | Issue category |
+| subject | string | Issue subject |
+| postcode |  | Related postcode |
+| details | string | Issue details |
+| recaptchaToken | string | reCAPTCHA verification token |
+
+
+## CurrentLocation
+
+
+Current postcode information
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| postcode | string | 4-digit postcode |
+| suburb | string | Suburb name |
+| risk_score | number | Risk score from 0 (safe) to 1 (high risk) |
+
+
+## HTTPValidationError
+
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| detail | array |  |
+
+
+## MotorcycleModel
+
+
+Motorcycle model with theft statistics
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| brand | string | Motorcycle brand |
+| model | string | Model name |
+| total | integer | Total number of thefts |
+| percentage | number | Percentage of total thefts |
+| model_risk | number | Risk score from 0 (safe) to 1 (high risk) |
+
+
+## PaginatedRiskResponse
+
+
+Paginated risk ranking response
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| items | array | Risk ranking items |
+| total | integer | Total number of items |
+
+
+## ParkingFacility
+
+
+Parking facility details
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| facility_id | integer | Unique facility identifier |
+| facility_name | string | Facility name |
+
+
+## ParkingSubmission
+
+
+Community submitted parking location
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| parking_id | integer | Unique parking submission ID |
+| address | string | Street address |
+| suburb | string | Suburb name |
+| postcode | string | 4-digit postcode |
+| type | string | Parking type: on-street, off-street, or secure |
+| lighting |  | Lighting quality: 1=poor to 4=excellent |
+| cctv |  | CCTV availability |
+| facilities | array | Available facilities at location |
+| created_at |  | Submission timestamp |
+
+
+## ParkingSubmissionRequest
+
+
+Request model for submitting parking location
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| address | string | Street address |
+| suburb | string | Suburb name |
+| postcode | string | Postcode |
+| type | string | Parking type |
+| lighting |  | Lighting quality: 1=poor, 2=fair, 3=good, 4=excellent |
+| cctv |  | CCTV availability: true, false, or null for unknown |
+| facilities |  | List of facility IDs |
+
+
+## ParkingSubmissionResponse
+
+
+Response model for parking submission
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| parking_id | integer | Unique parking submission ID |
+| message | string | Success message |
+| action | string | Action performed: inserted, updated, or no_change |
+
+
+## PostcodeFeedResponse
+
+
+Feed data for a specific postcode
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| current |  | Current location details |
+| parking_submissions | array | Community parking submissions |
+| nearest_safer_suburbs | array | Nearby suburbs with lower risk |
+
+
+## SaferSuburb
+
+
+Nearby suburb with lower risk score
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| postcode | string | 4-digit postcode |
+| suburb | string | Suburb name |
+| lga | string | Local government area |
+| distance_in_meters | integer | Distance from target postcode in meters |
+| risk_score | number | Risk score from 0 (safe) to 1 (high risk) |
+| parking_count | integer | Number of community parking submissions |
+
+
+## StatisticsSummary
+
+
+Platform-wide statistics
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| total_postcodes | integer | Number of postcodes covered |
+| total_addresses | integer | Number of validated addresses |
+| total_lgas | integer | Number of local government areas |
+| total_submissions | integer | Number of community submissions |
+
+
+## SuburbSearchResult
+
+
+Search result for suburb lookup
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| label | string | Display label combining suburb and postcode |
+| suburb | string | Suburb name |
+| postcode | string | 4-digit postcode |
+| lga | string | Local government area |
+| risk_score | number | Risk score from 0 (safe) to 1 (high risk) |
+
+
+## ValidationError
+
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| loc | array |  |
+| msg | string |  |
+| type | string |  |
+
+
+## YearlyTheft
+
+
+Yearly theft statistics
+
+
+| Field | Type | Description |
+|-------|------|-------------|
+| year | integer | Calendar year |
+| thefts | integer | Number of reported thefts |

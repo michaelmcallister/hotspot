@@ -1,13 +1,12 @@
 <template>
   <v-autocomplete
-    :items="suggestions"
-    item-title="label"
-    return-object
-    :loading="loading"
-    :search="search"
-    @update:search="onSearchUpdate"
-    @keyup.enter="emitSearch"
     v-model="selected"
+    v-model:search="searchText"
+    :items="suggestions"
+    :loading="loading"
+    item-title="label"
+    item-value="label"
+    return-object
     clearable
     variant="outlined"
     bg-color="white"
@@ -19,113 +18,113 @@
     placeholder="Enter suburb or postcode (e.g., Toorak, 3142)"
     class="mx-auto mb-8"
     style="max-width: 1200px;"
+    @update:model-value="onSelect"
+    @update:search="onSearchUpdate"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { searchService, riskService } from '../services';
+import { ref, onMounted, computed } from 'vue'
+import { searchService, riskService } from '../services'
 
 interface Suggestion {
-  label: string;
-  suburb: string;
-  postcode: string;
-  lga: string;
-  risk_score: number;
+  label: string
+  suburb: string
+  postcode: string
+  lga: string
+  risk_score: number
 }
 
 const props = defineProps<{
-  modelValue: string
-}>();
+  modelValue?: string
+}>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   'search': []
   'select': [suggestion: Suggestion]
-}>();
+  'clear': []
+}>()
 
-const search = ref(props.modelValue || '');
-const suggestions = ref<Suggestion[]>([]);
-const defaultSuggestions = ref<Suggestion[]>([]);
-const loading = ref(false);
-const selected = ref<Suggestion | null>(null);
-let debounceId: ReturnType<typeof setTimeout> | undefined;
 
-watch(() => props.modelValue, val => {
-  if (val !== search.value) search.value = val || '';
-});
+const searchText = ref('')
+const selected = ref<Suggestion | null>(null)
+const searchResults = ref<Suggestion[]>([])
+const defaultSuggestions = ref<Suggestion[]>([])
+const loading = ref(false)
+let searchTimeout: ReturnType<typeof setTimeout> | undefined
 
-const fetchSuggestions = async (q: string) => {
-  if (!q || q.trim().length < 2) {
-    // When query is empty/short, show default list so the dropdown isn't empty
-    suggestions.value = defaultSuggestions.value;
-    return;
+const suggestions = computed(() => {
+  if (searchText.value && searchText.value.length >= 2) {
+    return searchResults.value
   }
-  loading.value = true;
+  return defaultSuggestions.value
+})
+
+onMounted(async () => {
   try {
-    suggestions.value = await searchService.search(q);
+    const response = await riskService.getTopRisk({
+      scope: 'postcode',
+      sortOrder: 'desc',
+      itemsPerPage: '20'
+    })
+
+    const items = response.items || []
+    defaultSuggestions.value = items.map((r: any) => ({
+      label: `${r.suburb}, ${r.postcode}`,
+      suburb: String(r.suburb || ''),
+      postcode: String(r.postcode || ''),
+      lga: String(r.lga || ''),
+      risk_score: Number(r.risk_score || 0)
+    }))
   } catch (e) {
-    console.error('Search error:', e);
-    suggestions.value = [];
-  } finally {
-    loading.value = false;
+    console.warn('Failed to load default suggestions:', e)
+    defaultSuggestions.value = []
   }
-};
+})
 
-const fetchDefaultSuggestions = async () => {
-  try {
-    const rows = await riskService.getTopRisk({ scope: 'postcode', order: 'desc', limit: '50' });
-    const mapped: Suggestion[] = Array.isArray(rows)
-      ? rows.map((r: any) => ({
-          label: `${r.suburb}, ${r.postcode}`.trim(),
-          suburb: String(r.suburb ?? ''),
-          postcode: String(r.postcode ?? ''),
-          lga: String(r.lga ?? ''),
-          risk_score: Number(r.risk_score ?? 0),
-        }))
-      : [];
-    defaultSuggestions.value = mapped;
-    // If user hasn't typed anything yet we can offer some defaults
-    if (!search.value || search.value.trim().length < 2) {
-      suggestions.value = defaultSuggestions.value;
+async function onSearchUpdate(value: string) {
+  searchText.value = value
+
+  if (searchTimeout) clearTimeout(searchTimeout)
+
+  if (!value || value.length < 2) {
+    searchResults.value = []
+    return
+  }
+
+  searchTimeout = setTimeout(async () => {
+    loading.value = true
+    try {
+      searchResults.value = await searchService.search(value)
+    } catch (e) {
+      console.error('Search failed:', e)
+      searchResults.value = []
+    } finally {
+      loading.value = false
     }
-  } catch (e) {
-    // Keep silent failure for defaults so search still works
-    defaultSuggestions.value = [];
+  }, 300)
+}
+
+function onSelect(value: Suggestion | null) {
+  selected.value = value
+
+  if (value) {
+    emit('update:modelValue', value.label)
+    emit('select', value)
+    emit('search')
+  } else {
+    emit('update:modelValue', '')
+    emit('clear')
   }
-};
+}
 
-onMounted(() => {
-  fetchDefaultSuggestions();
-});
-
-const onSearchUpdate = (val: string) => {
-  search.value = val;
-  emit('update:modelValue', val);
-
-  if (debounceId) clearTimeout(debounceId);
-  debounceId = setTimeout(() => fetchSuggestions(val), 300);
-};
-
-const emitSearch = () => {
-  emit('search');
-};
-
-watch(selected, (val) => {
-  if (val && !isUpdatingExternally) {
-    emit('update:modelValue', val.label);
-    emit('select', val);
-    emit('search');
+function updateSelection(suburb: Suggestion | null) {
+  selected.value = suburb
+  if (suburb) {
+    searchText.value = suburb.label
   }
-});
+}
 
-let isUpdatingExternally = false;
-
-const updateSelection = (suburb: Suggestion | null) => {
-  isUpdatingExternally = true;
-  selected.value = suburb;
-  isUpdatingExternally = false;
-};
-
-defineExpose({ updateSelection });
+defineExpose({ updateSelection })
 </script>

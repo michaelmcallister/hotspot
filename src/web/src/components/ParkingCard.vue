@@ -12,7 +12,22 @@
         {{ submission.address }}
       </v-card-title>
 
+      <v-card-subtitle class="text-body-2">
+        {{ submission.postcode }}
+      </v-card-subtitle>
+
       <template v-slot:append>
+        <v-btn
+          icon
+          variant="plain"
+          size="small"
+          @click.stop="copyAddress"
+          :color="copied ? 'success' : 'grey-lighten-1'"
+        >
+          <v-icon>
+            {{ copied ? 'mdi-check' : 'mdi-content-copy' }}
+          </v-icon>
+        </v-btn>
         <v-btn
           icon
           variant="plain"
@@ -62,9 +77,9 @@
     </v-card-text>
 
     <v-card-actions class="d-flex justify-space-between align-center px-4">
-      <div v-if="submission.facilities && submission.facilities.length > 0" class="d-flex flex-wrap gap-1">
+      <div v-if="submission.facilities && submission.facilities.length > 0" class="d-flex flex-wrap gap-1 flex-grow-1">
         <v-chip
-          v-for="facility in submission.facilities"
+          v-for="(facility, index) in visibleFacilities"
           :key="facility.facility_id"
           size="small"
           variant="text"
@@ -73,6 +88,20 @@
           <v-icon start size="14">{{ getFacilityIcon(facility.facility_name) }}</v-icon>
           {{ facility.facility_name }}
         </v-chip>
+
+        <v-btn
+          v-if="submission.facilities.length > 2"
+          size="small"
+          variant="text"
+          color="primary"
+          @click="toggleFacilities"
+          class="px-2"
+        >
+          {{ facilitiesExpanded ? 'Show less' : `+${submission.facilities.length - 2} more` }}
+          <v-icon end size="14">
+            {{ facilitiesExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+          </v-icon>
+        </v-btn>
       </div>
       <v-spacer v-else></v-spacer>
       <v-btn
@@ -121,6 +150,8 @@ const emit = defineEmits<{
 }>();
 
 const favourites = ref<Set<number>>(new Set());
+const copied = ref(false);
+const facilitiesExpanded = ref(false);
 
 const loadFavourites = () => {
   const favouriteIds = getFavouriteIds();
@@ -135,6 +166,32 @@ onMounted(() => {
 const isFavourite = computed(() => {
   return favourites.value.has(props.submission.parking_id);
 });
+
+const visibleFacilities = computed(() => {
+  if (!props.submission.facilities) return [];
+  if (props.submission.facilities.length <= 2 || facilitiesExpanded.value) {
+    return props.submission.facilities;
+  }
+  return props.submission.facilities.slice(0, 2);
+});
+
+const toggleFacilities = () => {
+  facilitiesExpanded.value = !facilitiesExpanded.value;
+};
+
+const copyAddress = async () => {
+  const fullAddress = `${props.submission.address}, ${props.submission.suburb} ${props.submission.postcode}`;
+
+  try {
+    await navigator.clipboard.writeText(fullAddress);
+    copied.value = true;
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy address:', error);
+  }
+};
 
 const toggleFavouriteHandler = () => {
   const wasAdded = toggleFavourite(props.submission.parking_id);
@@ -191,12 +248,22 @@ const navigateToSuburb = () => {
   router.push({ name: 'suburb', params: { slug } });
 };
 
-//  This works surprisingly well, Google will fill in the blanks on your current location
+//  This works surprisingly well both providers don't need specifically formatted addresses.
 const openDirections = () => {
   const fullAddress = `${props.submission.address}, ${props.submission.suburb}, ${props.submission.postcode}`;
   const encodedAddress = encodeURIComponent(fullAddress);
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-  window.open(googleMapsUrl, '_blank');
+
+  const navigationApp = localStorage.getItem('navigationApp') || 'google';
+
+  let directionsUrl: string;
+
+  if (navigationApp === 'waze') {
+    directionsUrl = `https://waze.com/ul?q=${encodedAddress}&navigate=yes`;
+  } else {
+    directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+  }
+
+  window.open(directionsUrl, '_blank');
 };
 </script>
 

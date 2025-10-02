@@ -1,11 +1,12 @@
 <template>
-  <v-dialog :model-value="show" @update:model-value="onUpdate" max-width="600">
-    <v-card>
-      <v-card-title class="text-h6 d-flex align-center justify-space-between">
-        <span id="resources-modal-title">Safety Resources</span>
-        <v-btn icon="mdi-close" variant="text" @click="$emit('close')" aria-label="Close resources" />
-      </v-card-title>
-      <v-card-text>
+  <BaseModal
+    :show="show"
+    title="Safety Resources"
+    max-width="600"
+    title-id="resources-modal-title"
+    close-aria-label="Close resources"
+    @close="$emit('close')"
+  >
         <div class="mb-4">
           <div class="text-subtitle-1 font-weight-medium mb-2">Emergency Contacts</div>
           <v-list density="comfortable" lines="one">
@@ -78,26 +79,18 @@
             </v-list-item>
           </v-list>
         </div>
-      </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn color="primary" @click="$emit('close')">Close</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
+import BaseModal from './BaseModal.vue';
+
 const props = defineProps<{
   show: boolean
-  suburb: string
+  suburb?: string
 }>();
 
 const emit = defineEmits<{
   close: []
 }>();
-
-const onUpdate = (val: boolean) => {
-  // When dialog requests to close
-  if (!val) emit('close');
-};
 </script>
