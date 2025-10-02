@@ -1,96 +1,94 @@
-from fastapi.testclient import TestClient
-from main import app
-import os
-os.environ["SQLITE_DB_PATH"] = "/Users/samanthamarriott/Documents/hotspot/src/data/hotspot.db"
+import requests
 
-client = TestClient(app)
+BASE_URL = "http://localhost:8000"
 
-def test_search_basic():
-    response = client.get("/api/v1/search?q=Richmond")
+def test_search_by_suburb():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "Richmond"})
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    if data:  # only check keys if data exists
-        assert "suburb" in data[0]
-        assert "risk_score" in data[0]
+    assert any("richmond" in item["label"].lower() for item in data)
 
-def test_search_empty_query():
-    response = client.get("/api/v1/search?q=")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
-    assert len(data) > 0
-    if data:
-        assert "label" in data[0]
-        assert "postcode" in data[0]
-        assert "risk_score" in data[0]
 
-def test_search_multiple_valid_queries():
-    queries = ["Richmond", "Fitzroy", "Abbotsford", "Melbourne"]
+def test_search_by_suburb_case_insensitive():
+    queries = ["richmond", "RICHMOND", "RiChMoNd"]
+    results = []
     for q in queries:
-        response = client.get(f"/api/v1/search?q={q}")
+        response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": q})
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
-        if data:
-            assert "suburb" in data[0]
-            assert "risk_score" in data[0]
-            
-def test_search_case_insensitive():
-    response_lower = client.get("/api/v1/search?q=richmond")
-    response_upper = client.get("/api/v1/search?q=RICHMOND")
-    response_mixed = client.get("/api/v1/search?q=RiChMoNd")
+        results.append({item["label"] for item in data})
+    assert all(r == results[0] for r in results[1:])
 
-    assert response_lower.status_code == 200
-    assert response_upper.status_code == 200
-    assert response_mixed.status_code == 200
-
-    # Compare results are identical
-    assert response_lower.json() == response_upper.json() == response_mixed.json()
 
 def test_search_partial_match():
-    response = client.get("/api/v1/search?q=Rich")
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "Rich"})
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    if data:
-        assert any("richmond" in d["label"].lower() for d in data)
-
-def test_search_nonexistent():
-    response = client.get("/api/v1/search?q=THISDOESNOTEXIST")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == 0  # Should return empty list
-
-def test_search_limit():
-    response = client.get("/api/v1/search?q=Richmond")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
-    assert len(data) > 0
-
-def test_search_special_characters():
-    response = client.get("/api/v1/search?q=St Kilda")
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, list)
-    if data:
-        assert any("st kilda" in d["label"].lower() for d in data)
-
-def test_search_response_schema():
-    response = client.get("/api/v1/search?q=Melbourne")
-    data = response.json()
-    required_keys = {"label", "suburb", "postcode", "risk_score"}
     for item in data:
-        assert required_keys.issubset(item.keys())
+        assert "rich" in item["label"].lower()
 
 
+def test_search_by_postcode():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "3000"})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert any(item["postcode"] == "3000" for item in data)
 
 
+def test_search_empty_query():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": ""})
+    assert response.status_code == 422
 
 
+def test_search_invalid_query():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": ""})
+    assert response.status_code == 422
 
 
+def test_search_nonexistent_suburb():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "NotASuburb"})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 0
 
 
+def test_search_risk_score_range():
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "Richmond"})
+    data = response.json()
+    for item in data:
+        assert 0 <= item["risk_score"] <= 1
+
+
+def test_search_edge_cases():
+    invalid_queries = ["@#$", "!!!", "123abc!"]
+    for q in invalid_queries:
+        response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": q})
+        assert response.status_code in (200, 422)
+
+
+def test_search_sorting():
+    params = {"q": "Richmond", "sortBy": "risk_score", "sortOrder": "desc"}
+    response = requests.get(f"{BASE_URL}/api/v1/search", params=params)
+    assert response.status_code == 200
+    data = response.json()
+    risk_scores = [item["risk_score"] for item in data]
+    assert risk_scores == sorted(risk_scores, reverse=True)
+
+
+def test_search_lga_consistency():
+    expected_lga = {
+        "RICHMOND": "Yarra",
+        "MELBOURNE": "Melbourne",
+    }
+    response = requests.get(f"{BASE_URL}/api/v1/search", params={"q": "RICHMOND"})
+    assert response.status_code == 200
+    data = response.json()
+    for item in data:
+        suburb = item["suburb"]
+        expected = expected_lga.get(suburb)
+        if expected:
+            assert item["lga"].strip().lower() == expected.strip().lower()
