@@ -193,7 +193,6 @@ const fetchAddressSuggestions = async (query: string) => {
       postcode: item.postcode
     }));
   } catch (error) {
-    console.error('Address search error:', error);
     addressSuggestions.value = [];
   } finally {
     addressLoading.value = false;

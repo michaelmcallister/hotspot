@@ -6,7 +6,7 @@ export function getFavouriteIds(): number[] {
     const stored = localStorage.getItem(FAVOURITES_KEY);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.error('Error reading favourites from localStorage:', error);
+    // ignore storage read errors in production
     return [];
   }
 }
@@ -44,7 +44,7 @@ function saveFavourites(favourites: number[]): void {
   try {
     localStorage.setItem(FAVOURITES_KEY, JSON.stringify(favourites));
   } catch (error) {
-    console.error('Error saving favourites to localStorage:', error);
+    // ignore storage write errors
   }
 }
 
@@ -53,7 +53,7 @@ export function getCachedParkingData(): Record<number, any> {
     const stored = localStorage.getItem(CACHE_KEY);
     return stored ? JSON.parse(stored) : {};
   } catch (error) {
-    console.error('Error reading cached parking data:', error);
+    // ignore storage read errors
     return {};
   }
 }
@@ -62,7 +62,7 @@ export function setCachedParkingData(data: Record<number, any>): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch (error) {
-    console.error('Error saving cached parking data:', error);
+    // ignore storage write errors
   }
 }
 
@@ -71,6 +71,6 @@ export function clearAllFavouriteData(): void {
     localStorage.removeItem(FAVOURITES_KEY);
     localStorage.removeItem(CACHE_KEY);
   } catch (error) {
-    console.error('Error clearing favourite data:', error);
+    // ignore storage clear errors
   }
 }
