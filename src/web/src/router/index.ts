@@ -9,7 +9,7 @@ import NotFound from '../NotFound.vue'
 const routes = [
   { path: '/', name: 'home', component: Homepage },
   { path: '/suburb/:slug', name: 'suburb', component: Homepage, props: true },
-  { path: '/top-suburbs', name: 'top-suburbs', component: TopSuburbs },
+  { path: '/explore', name: 'explore', component: TopSuburbs },
   { path: '/saved', name: 'saved', component: Saved },
   { path: '/contact', name: 'contact', component: Contact },
   { path: '/settings', name: 'settings', component: Settings },
@@ -25,4 +25,3 @@ const router = createRouter({
 })
 
 export default router
-
