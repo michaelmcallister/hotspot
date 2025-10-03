@@ -171,12 +171,12 @@ const HEADERS_CONFIG = {
   postcode: [
     { title: 'Postcode', key: 'postcode' },
     { title: 'Suburb', key: 'suburb' },
-    { title: 'LGA', key: 'lga' },
+    { title: 'Council', key: 'lga' },
     { title: 'Safety Score', key: 'safety_score', align: 'center' },
     { title: '', key: 'actions', sortable: false },
   ],
   lga: [
-    { title: 'LGA', key: 'lga' },
+    { title: 'Council', key: 'lga' },
     { title: 'Average Safety', key: 'avg_safety', align: 'center' },
     { title: 'Postcodes', key: 'postcode_count' },
     { title: '', key: 'actions', sortable: false },
