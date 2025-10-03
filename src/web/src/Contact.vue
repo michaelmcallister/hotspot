@@ -1,6 +1,5 @@
 <template>
-  <v-main>
-    <v-container class="pt-1 pt-md-3 pb-1 pb-md-2">
+  <v-container class="pt-1 pt-md-3 pb-20 pb-md-24" style="padding-bottom:200px">
       <PageHero
         title="Contact Us"
         subtitle="Get in touch with us for support, feedback, or questions"
@@ -59,7 +58,7 @@
               class="mb-4"
             />
 
-            <div class="recaptcha-send-container mb-4">
+            <div class="recaptcha-send-container d-flex align-center justify-space-between flex-column flex-sm-row mb-12 mb-md-16">
               <div class="recaptcha-wrapper">
                 <div id="recaptcha-widget" v-show="recaptchaReady"></div>
                 <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
@@ -80,8 +79,6 @@
           </v-form>
         </v-col>
       </v-row>
-    </v-container>
-
     <v-dialog v-model="showLoadingDialog" max-width="400" persistent>
       <v-card>
         <v-card-text class="text-center pa-8">
@@ -115,7 +112,7 @@
       button-text="OK"
       @close="showErrorDialog = false"
     />
-  </v-main>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -266,9 +263,6 @@ const handleSubmit = async (event?: Event) => {
 
 <style scoped>
 .recaptcha-send-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 2rem;
 }
 
@@ -301,4 +295,3 @@ const handleSubmit = async (event?: Event) => {
   }
 }
 </style>
-

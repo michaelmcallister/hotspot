@@ -1,5 +1,5 @@
 <template>
-  <v-card class="parking-feed" color="white" elevation="1">
+  <v-card class="parking-feed mx-auto" color="white" elevation="1">
     <v-tabs
       v-model="tab"
       color="primary"
@@ -245,7 +245,6 @@ defineExpose({
 <style scoped>
 .parking-feed {
   max-width: 800px;
-  margin: 0 auto;
 }
 
 .scroll-container {

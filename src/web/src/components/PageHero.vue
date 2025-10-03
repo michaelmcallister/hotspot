@@ -5,7 +5,7 @@
         rounded="xl"
         elevation="2"
         color="grey-lighten-5"
-        class="pt-3 pt-sm-4 pt-md-6 px-6 px-sm-8 px-md-12 pb-4 pb-sm-6 pb-md-8 mb-3 mb-md-5 text-center"
+        class="pt-3 pt-sm-4 pt-md-6 px-6 px-sm-8 px-md-12 pb-4 pb-sm-6 pb-md-8 mt-3 mt-sm-5 mb-3 mb-md-5 text-center"
       >
         <v-card-title class="pa-0 mb-4">
           <div class="d-flex d-sm-none flex-column align-center">

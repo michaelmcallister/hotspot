@@ -1,6 +1,5 @@
 <template>
-  <v-main>
-    <v-container class="pt-0 pt-md-1 pb-2 pb-md-8 px-0 px-sm-3">
+  <v-container class="pt-0 pt-md-1 pb-16 pb-md-20 px-0 px-sm-3">
 
     <PageHero
       title="Search Suburb"
@@ -14,11 +13,11 @@
         @search="showStaticReport"
         @select="handleSuburbSelect"
         @clear="handleSearchClear"
-        class="hero-search-bar"
+        class="hero-search-bar mx-auto"
       />
     </PageHero>
 
-    <div v-if="!selectedSuburb" class="illustration-section">
+    <div v-if="!selectedSuburb" class="mt-12 mb-8" style="padding-bottom: 200px;">
       <v-container>
         <v-row class="justify-center align-center">
           <v-col cols="12" lg="5" xl="4" class="text-center">
@@ -55,7 +54,7 @@
       </v-container>
     </div>
 
-    <v-row v-if="selectedSuburb" class="mx-auto" style="max-width: 1200px;">
+    <v-row v-if="selectedSuburb" class="mx-auto" style="max-width: 1200px; padding-bottom: 100px;">
         <v-col cols="12" lg="5" xl="4">
           <v-sheet rounded="lg" class="pa-4" color="white">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
@@ -73,8 +72,7 @@
           </v-sheet>
         </v-col>
       </v-row>
-    </v-container>
-  </v-main>
+  </v-container>
 
   <StatusDialog
     :show="showSuccessDialog"
@@ -237,17 +235,12 @@ onMounted(() => {
 <style scoped>
 .hero-search-bar {
   max-width: 600px;
-  margin: 0 auto;
 }
 
 .hero-search-bar :deep(.v-field) {
   font-size: 1.1rem;
 }
 
-.illustration-section {
-  margin-top: 3rem;
-  margin-bottom: 2rem;
-}
 
 .dude-illustration {
   max-width: 300px;
