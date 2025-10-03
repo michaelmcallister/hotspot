@@ -147,43 +147,32 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import validator from 'validator'
 import { contactService } from './services'
-
-// Add this type declaration for reCAPTCHA
-declare global {
-  interface Window {
-    grecaptcha: {
-      ready: (callback: () => void) => void;
-      render: (container: string | HTMLElement, parameters: {
-        sitekey: string;
-        callback: (response: string) => void;
-        'expired-callback': () => void;
-        'error-callback': () => void;
-      }) => number;
-      reset: (widgetId: number) => void;
-    };
-  }
-}
 
 const recaptchaReady = ref(false)
 let recaptchaWidgetId: number | null = null
 
 onMounted(() => {
+  // Yes there are libraries and you'd think they would be easy to use, but I couldn't get it to work (and I tried a few...)
   const checkRecaptcha = () => {
     if (window.grecaptcha && window.grecaptcha.ready) {
       window.grecaptcha.ready(() => {
         recaptchaWidgetId = window.grecaptcha.render('recaptcha-widget', {
+          // This sitekey is not a secret, it's safe to commit to git.
           sitekey: '6LcA4dIrAAAAAJLNNCHqH4Xsmqz52_Kq5tgZecjs',
           callback: handleLoadCallback,
           'expired-callback': handleExpiredCallback,
-          'error-callback': handleErrorCallback
+          'error-callback': handleErrorCalback
         });
+
         recaptchaReady.value = true;
       });
     } else {
       setTimeout(checkRecaptcha, 500);
     }
   };
+
   checkRecaptcha();
 })
 
@@ -210,13 +199,9 @@ const categoryItems = [
   'Other'
 ]
 
-// Fixed validation rules without validator
 const emailRules = [
   (v: string) => !!v || 'Email is required',
-  (v: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(v) || 'Email must be valid'
-  },
+  (v: string) => validator.isEmail(v) || 'Email must be valid',
 ]
 
 const categoryRules = [
@@ -234,17 +219,16 @@ const detailsRules = [
 const postcodeRules = [
   (v: string) => {
     if (!v) return true
-    // Australian postcode validation (4 digits)
-    const postcodeRegex = /^\d{4}$/
-    return postcodeRegex.test(v) || 'Postcode must be a valid 4-digit Australian postcode'
+    return validator.isPostalCode(v, 'AU')
   }
 ]
+
 
 const resetRecaptcha = () => {
   recaptchaToken.value = ''
 }
 
-const handleErrorCallback = resetRecaptcha
+const handleErrorCalback = resetRecaptcha
 const handleExpiredCallback = resetRecaptcha
 
 const handleLoadCallback = (response: string) => {
@@ -267,6 +251,7 @@ const resetRecaptchaWidget = () => {
   recaptchaToken.value = ''
 }
 
+
 const handleSubmit = async (event?: Event) => {
   if (event) {
     event.preventDefault()
@@ -279,6 +264,7 @@ const handleSubmit = async (event?: Event) => {
 
   showLoadingDialog.value = true
 
+  // Form data ready for submission
   const formData = {
     email: email.value,
     category: category.value,
@@ -294,6 +280,7 @@ const handleSubmit = async (event?: Event) => {
     successMessage.value = 'Your message has been sent successfully.'
     showSuccessDialog.value = true
     resetForm()
+
   } catch (error) {
     showLoadingDialog.value = false
     errorMessage.value = 'Failed to submit form. Please check your connection and try again.'
@@ -302,6 +289,9 @@ const handleSubmit = async (event?: Event) => {
     resetRecaptchaWidget()
   }
 }
+
+
+
 </script>
 
 <style scoped>
