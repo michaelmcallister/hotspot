@@ -1,14 +1,9 @@
 <template>
   <v-main>
-    <v-container class="pt-1 pt-md-3 pb-1 pb-md-2">
-      <PageHero
-        title="Contact Us"
-        subtitle="Get in touch with us for support, feedback, or questions"
-        icon="mdi-email"
-      />
-
+    <v-container class="pa-6">
       <v-row justify="center">
         <v-col cols="12" md="8" lg="6">
+          <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Contact Us</h1>
 
           <v-form ref="form" v-model="valid">
             <v-text-field
@@ -18,7 +13,7 @@
               variant="outlined"
               :rules="emailRules"
               required
-              class="mb-3"
+              class="mb-4"
             />
 
             <v-select
@@ -28,7 +23,7 @@
               variant="outlined"
               :rules="categoryRules"
               required
-              class="mb-3"
+              class="mb-4"
             />
 
             <v-text-field
@@ -37,7 +32,7 @@
               variant="outlined"
               :rules="subjectRules"
               required
-              class="mb-3"
+              class="mb-4"
             />
 
             <v-text-field
@@ -46,7 +41,7 @@
               variant="outlined"
               type="text"
               :rules="postcodeRules"
-              class="mb-3"
+              class="mb-4"
             />
 
             <v-textarea
@@ -56,14 +51,12 @@
               rows="6"
               :rules="detailsRules"
               required
-              class="mb-4"
+              class="mb-6"
             />
 
-            <div class="recaptcha-send-container mb-4">
-              <div class="recaptcha-wrapper">
-                <div id="recaptcha-widget" v-show="recaptchaReady"></div>
-                <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
-              </div>
+            <div class="recaptcha-send-container mb-6">
+              <div id="recaptcha-widget" v-show="recaptchaReady"></div>
+              <div v-show="!recaptchaReady">Loading reCAPTCHA...</div>
               <v-btn
                 color="primary"
                 variant="flat"
@@ -98,56 +91,99 @@
       </v-card>
     </v-dialog>
 
-    <StatusDialog
-      :show="showSuccessDialog"
-      type="success"
-      title="Thank you!"
-      :message="successMessage"
-      button-text="Got it"
-      @close="showSuccessDialog = false"
-    />
+    <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="success"
+            size="80"
+            class="mb-4"
+          >
+            mdi-check-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Thank you!</h3>
+          <p class="text-body-1">{{ successMessage }}</p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showSuccessDialog = false"
+          >
+            Got it
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-    <StatusDialog
-      :show="showErrorDialog"
-      type="error"
-      title="Error"
-      :message="errorMessage"
-      button-text="OK"
-      @close="showErrorDialog = false"
-    />
+    <v-dialog v-model="showErrorDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="error"
+            size="80"
+            class="mb-4"
+          >
+            mdi-alert-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Error</h3>
+          <p class="text-body-1">{{ errorMessage }}</p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showErrorDialog = false"
+          >
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-main>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import validator from 'validator'
-import PageHero from './components/PageHero.vue'
-import StatusDialog from './components/StatusDialog.vue'
 import { contactService } from './services'
+
+// Add this type declaration for reCAPTCHA
+declare global {
+  interface Window {
+    grecaptcha: {
+      ready: (callback: () => void) => void;
+      render: (container: string | HTMLElement, parameters: {
+        sitekey: string;
+        callback: (response: string) => void;
+        'expired-callback': () => void;
+        'error-callback': () => void;
+      }) => number;
+      reset: (widgetId: number) => void;
+    };
+  }
+}
 
 const recaptchaReady = ref(false)
 let recaptchaWidgetId: number | null = null
 
 onMounted(() => {
-  // Yes there are libraries and you'd think they would be easy to use, but I couldn't get it to work (and I tried a few...)
   const checkRecaptcha = () => {
     if (window.grecaptcha && window.grecaptcha.ready) {
       window.grecaptcha.ready(() => {
         recaptchaWidgetId = window.grecaptcha.render('recaptcha-widget', {
-          // This sitekey is not a secret, it's safe to commit to git.
           sitekey: '6LcA4dIrAAAAAJLNNCHqH4Xsmqz52_Kq5tgZecjs',
           callback: handleLoadCallback,
           'expired-callback': handleExpiredCallback,
-          'error-callback': handleErrorCalback
+          'error-callback': handleErrorCallback
         });
-
         recaptchaReady.value = true;
       });
     } else {
       setTimeout(checkRecaptcha, 500);
     }
   };
-
   checkRecaptcha();
 })
 
@@ -174,9 +210,13 @@ const categoryItems = [
   'Other'
 ]
 
+// Fixed validation rules without validator
 const emailRules = [
   (v: string) => !!v || 'Email is required',
-  (v: string) => validator.isEmail(v) || 'Email must be valid',
+  (v: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(v) || 'Email must be valid'
+  },
 ]
 
 const categoryRules = [
@@ -194,7 +234,9 @@ const detailsRules = [
 const postcodeRules = [
   (v: string) => {
     if (!v) return true
-    return validator.isPostalCode(v, 'AU')
+    // Australian postcode validation (4 digits)
+    const postcodeRegex = /^\d{4}$/
+    return postcodeRegex.test(v) || 'Postcode must be a valid 4-digit Australian postcode'
   }
 ]
 
@@ -202,7 +244,7 @@ const resetRecaptcha = () => {
   recaptchaToken.value = ''
 }
 
-const handleErrorCalback = resetRecaptcha
+const handleErrorCallback = resetRecaptcha
 const handleExpiredCallback = resetRecaptcha
 
 const handleLoadCallback = (response: string) => {
@@ -237,7 +279,6 @@ const handleSubmit = async (event?: Event) => {
 
   showLoadingDialog.value = true
 
-  // Form data ready for submission
   const formData = {
     email: email.value,
     category: category.value,
@@ -253,7 +294,6 @@ const handleSubmit = async (event?: Event) => {
     successMessage.value = 'Your message has been sent successfully.'
     showSuccessDialog.value = true
     resetForm()
-
   } catch (error) {
     showLoadingDialog.value = false
     errorMessage.value = 'Failed to submit form. Please check your connection and try again.'
@@ -272,33 +312,7 @@ const handleSubmit = async (event?: Event) => {
   gap: 2rem;
 }
 
-.recaptcha-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 78px;
-}
-
 .send-button {
   flex-shrink: 0;
 }
-
-@media (max-width: 600px) {
-  .recaptcha-send-container {
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
-  }
-
-  .recaptcha-wrapper {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .send-button {
-    width: 100%;
-    flex-shrink: 1;
-  }
-}
 </style>
-
