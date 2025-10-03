@@ -25,10 +25,10 @@
               </template>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title>Victoria Police Non-Emergency</v-list-item-title>
+              <v-list-item-title>Police Assistance Line</v-list-item-title>
               <v-list-item-subtitle>Non-urgent police matters</v-list-item-subtitle>
               <template #append>
-                <v-chip color="primary" variant="tonal" class="font-weight-bold">03 9247 6666</v-chip>
+                <v-chip color="primary" variant="tonal" class="font-weight-bold">131 444</v-chip>
               </template>
             </v-list-item>
           </v-list>
