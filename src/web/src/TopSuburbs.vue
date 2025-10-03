@@ -26,7 +26,7 @@
           >
             <strong>Quick tip:</strong> Green zones are your safest bet for overnight parking.
             Check the community submissions in each area to find spots other riders trust.
-            Remember, even in safer suburbs, always use a disc lock and park in well-lit areas.
+            Remember, even in safer suburbs, always use a disc lock or chain your bike to an immovable object and park in well-lit areas.
           </v-alert>
         </v-col>
       </v-row>
