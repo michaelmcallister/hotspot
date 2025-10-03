@@ -17,7 +17,9 @@ export interface ParkingSubmission {
 
 export const parkingService = {
   async getParkingByPostcode(postcode: string): Promise<ParkingSubmission[]> {
-    return apiRequest(`/parking/${postcode}`);
+    // Fetch the postcode feed and return only the parking submissions list
+    const feed = await apiRequest<any>(`/postcode/${postcode}/feed`);
+    return Array.isArray(feed?.parking_submissions) ? feed.parking_submissions : [];
   },
 
   async submitParking(data: any): Promise<any> {

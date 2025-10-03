@@ -1,15 +1,16 @@
 <template>
   <v-app>
+    <v-layout>
     <v-app-bar app :elevation="1">
       <v-app-bar-title>
         <div class="d-sm-inline">
-          <AppLogo />
+          <AppLogo compact />
         </div>
       </v-app-bar-title>
       <v-spacer />
-      <v-btn variant="text" color="primary" to="/">Home</v-btn>
+      <v-btn class="d-none d-sm-inline-flex" variant="text" color="primary" to="/">Home</v-btn>
       <v-btn variant="text" color="primary" to="/explore">Explore</v-btn>
-      <v-btn variant="text" color="primary" to="/saved">Saved</v-btn>
+      <v-btn variant="text" color="primary" to="/saved">Your Spots</v-btn>
 
       <template v-slot:append>
         <v-menu>
@@ -31,29 +32,34 @@
       </template>
     </v-app-bar>
 
-    <v-main>
-      <v-container fluid>
-        <router-view />
-      </v-container>
+    <v-main class="pb-12 pb-sm-14">
+      <router-view />
     </v-main>
 
-    <v-footer class="bg-grey-lighten-4 text-center pa-4" style="max-height: 120px;">
-      <v-container>
-        <div class="d-flex flex-column align-center">
-          <AppLogo grey class="mb-2" />
-          <div class="text-body-2 text-medium-emphasis mb-2">
-            Information provided for guidance only. Always use your own judgement when parking.
-          </div>
-          <div class="d-flex align-center text-body-2">
-            <router-link to="/contact" class="text-decoration-none text-grey">
+    <v-footer app color="grey-lighten-5" border="t" class="py-3">
+      <v-container max-width="lg">
+        <v-row>
+          <v-col cols="12" class="d-flex justify-center">
+            <AppLogo grey class="mb-1" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="text-center">
+            <div class="text-body-2 text-medium-emphasis mb-1">
+              Information provided for guidance only. Always use your own judgement when parking.
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="d-flex justify-center">
+            <v-btn to="/contact" variant="text" density="compact" size="small" class="text-grey-darken-1" aria-label="Contact">
               Contact
-            </router-link>
-            <span class="mx-2 text-grey">•</span>
-            <span @click="showResources = true" class="text-decoration-none text-grey" style="cursor: pointer;">
+            </v-btn>
+            <v-btn variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" @click="showResources = true" aria-label="Resources">
               Resources
-            </span>
-          </div>
-        </div>
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-container>
     </v-footer>
 
@@ -61,6 +67,7 @@
       :show="showResources"
       @close="showResources = false"
     />
+    </v-layout>
   </v-app>
 </template>
 
@@ -71,19 +78,3 @@ import AppLogo from './components/AppLogo.vue';
 
 const showResources = ref(false);
 </script>
-
-<style>
-.v-application {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.v-main {
-  flex: 1;
-}
-
-.v-footer {
-  margin-top: auto !important;
-}
-</style>

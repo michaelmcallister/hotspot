@@ -1,14 +1,37 @@
 <template>
-  <v-main>
-    <v-container class="pt-1 pt-md-3 pb-2 pb-md-8">
+  <v-container class="pt-0 pb-16 pb-md-20" style="padding-bottom: 200px;">
     <PageHero
-      title="Saved Parking"
-      subtitle="Your favourite parking locations"
-      icon="mdi-star"
+      title="Your Spots"
+      subtitle="Bookmark trusted places to park and get there fast"
+      icon="mdi-bookmark-outline"
     />
 
-    <div v-if="loading" class="parking-feed-container">
-      <v-card class="parking-feed">
+    <v-row class="mb-2" justify="center">
+      <v-col cols="12" md="10" lg="8">
+        <v-toolbar density="comfortable" color="transparent" class="px-0">
+          <v-spacer></v-spacer>
+          <v-chip-group v-model="selectedFilters" multiple filter class="mr-1">
+            <v-chip value="wellLit" variant="outlined" pill size="small">
+              <v-icon start size="16">mdi-lightbulb</v-icon>
+              Well‑lit
+            </v-chip>
+            <v-chip value="cctv" variant="outlined" pill size="small">
+              <v-icon start size="16">mdi-cctv</v-icon>
+              CCTV
+            </v-chip>
+            <v-chip value="secure" variant="outlined" pill size="small">
+              <v-icon start size="16">mdi-shield-lock</v-icon>
+              Secure/Off‑street
+            </v-chip>
+          </v-chip-group>
+          <v-btn v-if="selectedFilters.length" size="small" variant="text" @click="selectedFilters = []">Clear</v-btn>
+        </v-toolbar>
+        <v-divider></v-divider>
+      </v-col>
+    </v-row>
+
+    <div v-if="loading" class="parking-feed-container mt-8">
+      <v-card class="parking-feed mx-auto">
         <v-card-title class="d-flex align-center">
           <v-icon size="20" class="mr-2">mdi-star</v-icon>
           <span>Saved Parking Locations</span>
@@ -31,29 +54,36 @@
 
    <v-empty-state v-else-if="savedParkingData.length === 0">
       <template v-slot:media>
-        <v-icon size="64" color="grey-lighten-1">mdi-star-outline</v-icon>
+        <v-icon size="64" color="grey-lighten-1">mdi-bookmark-outline</v-icon>
       </template>
       <template v-slot:title>
-        <h3 class="text-grey">No saved parking locations yet</h3>
+        <h3 class="text-grey">No spots yet</h3>
       </template>
       <template v-slot:text>
-        <p class="text-grey">Star parking locations to save them here</p>
+        <p class="text-grey">Find a safe place, then tap the star to save it here</p>
+      </template>
+      <template v-slot:actions>
+        <div class="d-flex justify-center">
+          <v-btn color="primary" variant="outlined" to="/explore" prepend-icon="mdi-map-search">
+            Explore Spots
+          </v-btn>
+        </div>
       </template>
     </v-empty-state> 
 
-    <div v-else class="parking-feed-container">
-      <v-card class="parking-feed">
+    <div v-else class="parking-feed-container mt-4" style="padding-bottom:200px;">
+      <v-card class="parking-feed mx-auto">
         <v-card-title class="d-flex align-center">
-          <v-icon size="20" class="mr-2">mdi-star</v-icon>
-          <span>Saved Parking Locations</span>
-          <v-chip size="small" class="ml-auto">{{ savedParkingData.length }}</v-chip>
+          <v-icon size="20" class="mr-2">mdi-bookmark</v-icon>
+          <span>Your Spots</span>
+          <v-chip size="small" class="ml-auto">{{ filteredSpots.length }}</v-chip>
         </v-card-title>
 
         <v-divider></v-divider>
 
         <v-card-text class="pa-3">
           <ParkingCard
-            v-for="parking in savedParkingData"
+            v-for="parking in filteredSpots"
             :key="parking.parking_id"
             :submission="parking"
             @update:favourite="handleFavouriteUpdate"
@@ -61,12 +91,11 @@
         </v-card-text>
       </v-card>
     </div>
-    </v-container>
-  </v-main>
+  </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import ParkingCard from './components/ParkingCard.vue';
 import PageHero from './components/PageHero.vue';
 import { parkingService } from './services';
@@ -91,6 +120,24 @@ interface ParkingSubmission {
 
 const savedParkingData = ref<ParkingSubmission[]>([]);
 const loading = ref(false);
+const selectedFilters = ref<string[]>([]);
+
+const filteredSpots = computed(() => {
+  if (!selectedFilters.value.length) return savedParkingData.value;
+  return savedParkingData.value.filter(p => {
+    return selectedFilters.value.every(f => {
+      if (f === 'wellLit') return p.lighting !== null && Number(p.lighting) > 0;
+      if (f === 'cctv') return p.cctv === true || (p.cctv as any) === 1;
+      if (f === 'secure') {
+        const hasGuard = Array.isArray(p.facilities) && p.facilities.some(
+          (fac: any) => String(fac?.facility_name || '').toLowerCase() === 'security guard'
+        );
+        return p.type === 'secure' || p.type === 'off-street' || hasGuard;
+      }
+      return true;
+    });
+  });
+});
 
 const fetchSavedParking = async () => {
   loading.value = true;
@@ -170,18 +217,7 @@ watch(() => localStorage.getItem('parkingFavourites'), () => {
 </script>
 
 <style scoped>
-.saved-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.parking-feed-container {
-  margin-top: 2rem;
-}
-
 .parking-feed {
   max-width: 800px;
-  margin: 0 auto;
 }
 </style>

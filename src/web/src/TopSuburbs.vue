@@ -1,6 +1,5 @@
 <template>
-  <v-main>
-    <v-container class="pt-0 pb-1 pb-md-4">
+  <v-container class="pt-0" style="padding-bottom: 200px;">
       <PageHero
         title="Explore"
         subtitle="Find safer parking spots near work, uni, or your favourite ride destinations"
@@ -33,7 +32,7 @@
 
       <v-row>
         <v-col cols="12">
-          <v-card elevation="1">
+          <v-card elevation="1" class="mb-24">
             <template v-slot:text>
               <v-row class="ma-2">
                 <v-col cols="12" sm="8" md="9">
@@ -146,8 +145,7 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-container>
-  </v-main>
+  </v-container>
 </template>
 
 <script setup lang="ts">

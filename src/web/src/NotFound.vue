@@ -1,6 +1,5 @@
 <template>
-  <v-main>
-    <v-container class="not-found-container">
+  <v-container class="not-found-container d-flex align-center justify-center pa-8">
       <v-empty-state class="not-found-empty-state">
         <template v-slot:media>
           <v-icon size="120" color="grey-lighten-1">mdi-map-marker-question-outline</v-icon>
@@ -18,8 +17,7 @@
           </v-btn>
         </template>
       </v-empty-state>
-    </v-container>
-  </v-main>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -31,7 +29,6 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  padding: 2rem;
 }
 
 

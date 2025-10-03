@@ -1,6 +1,5 @@
 <template>
-  <v-main>
-    <v-container class="pt-1 pt-md-3 pb-2 pb-md-8">
+  <v-container class="pt-1 pt-md-3 pb-28 pb-md-24" style="padding-bottom:200px;" >
       <PageHero
         title="Settings"
         subtitle="Customize your preferences and app behaviour"
@@ -45,8 +44,6 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-container>
-
     <v-snackbar
       v-model="showSaveMessage"
       timeout="3000"
@@ -56,14 +53,14 @@
     >
       <p>Settings saved successfully!</p>
     </v-snackbar>
-  </v-main>
+  </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import PageHero from './components/PageHero.vue'
 
-const navigationApp = ref('google')
+const navigationApp = ref('waze')
 const showSaveMessage = ref(false)
 
 onMounted(() => {
