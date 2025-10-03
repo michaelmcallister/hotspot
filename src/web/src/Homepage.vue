@@ -1,98 +1,149 @@
 <template>
   <v-main>
-    <v-container class="pt-0 pt-md-1 pb-2 pb-md-8 px-0 px-sm-3">
+    <v-container>
+      <v-row>
+        <v-col cols="12" class="text-center">
+          <h1 class="text-h3 font-weight-bold text-primary mb-2">Search Suburb</h1>
+          <p class="subtitle text-body-1 text-grey-darken-1 mb-6">
+            Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike.
+          </p>
 
-    <PageHero
-      title="Search Suburb"
-      subtitle="Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike"
-      icon="mdi-map-search"
-      class="mt-n3 mt-sm-n2 mt-md-0"
-    >
-      <SearchBar
-        ref="searchBarRef"
-        v-model="searchQuery"
-        @search="showStaticReport"
-        @select="handleSuburbSelect"
-        @clear="handleSearchClear"
-        class="hero-search-bar"
-      />
-    </PageHero>
+          <SearchBar
+            ref="searchBarRef"
+            v-model="searchQuery"
+            @search="showStaticReport"
+            @select="handleSuburbSelect"
+          />
+        </v-col>
+      </v-row>
 
-    <div v-if="!selectedSuburb" class="illustration-section">
-      <v-container>
-        <v-row class="justify-center align-center">
-          <v-col cols="12" lg="5" xl="4" class="text-center">
-            <div class="d-inline-block">
-              <img
-                src="/dude.png"
-                alt="Rider with motorbike"
-                class="dude-illustration"
-              />
-            </div>
-          </v-col>
-          <v-col cols="12" md="8" lg="6" xl="6" class="mx-auto">
-            <v-sheet rounded="lg" class="pa-4" color="primary-lighten-5" border>
-              <h3 class="text-h5 text-primary font-weight-bold mb-3 text-center text-lg-left">Find Safe Parking Spots</h3>
-              <p class="text-body-1 mb-3 text-center text-lg-left">
-                Discover the safest places to park your motorbike in Melbourne.
-                Get safety scores based on real data and contribute to the community
-                by sharing your favourite secure parking locations
-              </p>
-              <div class="text-center text-lg-right">
-                <v-btn
-                  @click="handleStartTutorial"
-                  color="primary"
-                  variant="outlined"
-                  prepend-icon="mdi-help-circle"
-                  size="large"
-                >
-                  Take a Tour
-                </v-btn>
-              </div>
-            </v-sheet>
-          </v-col>
-        </v-row>
-      </v-container>
-    </div>
-
-    <v-row v-if="selectedSuburb" class="mx-auto" style="max-width: 1200px;">
-        <v-col cols="12" lg="5" xl="4">
-          <v-sheet rounded="lg" class="pa-4" color="white">
-            <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
+      <v-row v-if="selectedSuburb">
+        <v-col
+          cols="12"
+          md="3"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4"
+            color="white"
+          >
+            <ScoreCard
+              :suburb="selectedSuburb.suburb"
+              :score="safetyScore"
+            />
           </v-sheet>
         </v-col>
 
-        <v-col cols="12" lg="7" xl="8">
-          <v-sheet rounded="lg" class="pa-4" color="white">
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4"
+            color="white"
+          >
             <ParkingFeed
               ref="parkingFeedRef"
               :postcode="selectedSuburb.postcode"
               :suburb="selectedSuburb.suburb"
-              @parking-submit="handleParkingSubmit"
             />
+          </v-sheet>
+        </v-col>
+
+        <v-col
+          cols="12"
+          md="3"
+        >
+          <v-sheet
+            rounded="lg"
+            class="pa-4 mb-4"
+            color="white"
+          >
+            <ParkingLocationForm
+              :postcode="selectedSuburb.postcode"
+              :suburb="selectedSuburb.suburb"
+              @submit="handleParkingSubmit"
+            />
+          </v-sheet>
+
+          <v-sheet
+            rounded="lg"
+            class="pa-4 text-center"
+            color="white"
+          >
+            <v-btn color="primary" variant="flat" size="large" rounded="lg" @click="showResources = true">
+              Resources & Contacts
+            </v-btn>
           </v-sheet>
         </v-col>
       </v-row>
     </v-container>
   </v-main>
 
-  <StatusDialog
-    :show="showSuccessDialog"
-    type="success"
-    title="Thank you!"
-    :message="successMessage"
-    button-text="Got it"
-    @close="showSuccessDialog = false"
-  />
+    <ResourcesModal
+      v-if="selectedSuburb"
+      :show="showResources"
+      :suburb="selectedSuburb.suburb"
+      @close="showResources = false"
+    />
 
-  <StatusDialog
-    :show="showErrorDialog"
-    type="error"
-    title="Error"
-    :message="errorMessage"
-    button-text="OK"
-    @close="showErrorDialog = false"
-  />
+    <v-dialog v-model="showSuccessDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="success"
+            size="80"
+            class="mb-4"
+          >
+            mdi-check-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Thank you!</h3>
+          <p class="text-body-1 mb-0">
+            {{ successMessage }}
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showSuccessDialog = false"
+          >
+            Got it
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showErrorDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-text class="text-center pa-6">
+          <v-icon
+            color="error"
+            size="80"
+            class="mb-4"
+          >
+            mdi-alert-circle
+          </v-icon>
+          <h3 class="text-h5 mb-2">Error</h3>
+          <p class="text-body-1 mb-0">
+            {{ errorMessage }}
+          </p>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            color="primary"
+            variant="flat"
+            rounded="lg"
+            @click="showErrorDialog = false"
+          >
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
 </template>
 
 <script setup lang="ts">
@@ -100,12 +151,11 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import SearchBar from './components/SearchBar.vue';
 import ScoreCard from './components/ScoreCard.vue';
+import ResourcesModal from './components/ResourcesModal.vue';
+import ParkingLocationForm from './components/ParkingLocationForm.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
-import PageHero from './components/PageHero.vue';
-import StatusDialog from './components/StatusDialog.vue';
 import { searchService, parkingService } from './services';
-import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
-import { useTutorial } from './composables/useTutorial';
+import { createSlug, riskToSafetyScore } from './utils';
 
 const props = defineProps<{
   slug?: string;
@@ -113,7 +163,6 @@ const props = defineProps<{
 
 const router = useRouter();
 const route = useRoute();
-const { startTutorial } = useTutorial();
 
 interface Suburb {
   label: string;
@@ -125,6 +174,7 @@ interface Suburb {
 
 const searchQuery = ref('');
 const selectedSuburb = ref<Suburb | null>(null);
+const showResources = ref(false);
 const showSuccessDialog = ref(false);
 const showErrorDialog = ref(false);
 const successMessage = ref('');
@@ -137,16 +187,45 @@ const safetyScore = computed(() => {
   return riskToSafetyScore(selectedSuburb.value.risk_score);
 });
 
+
+const lookupSuburbBySlug = async (slug: string): Promise<Suburb | null> => {
+  try {
+    let searchTerm = slug.replace(/-/g, ' ');
+    let results = await searchService.search(searchTerm);
+
+    if (results.length > 0) {
+      const targetSlug = slug.toLowerCase();
+      const match = results.find((suburb: Suburb) => {
+        const suburbSlug = createSlug(suburb.suburb, suburb.postcode);
+        return suburbSlug === targetSlug;
+      });
+
+      if (match) return match;
+    }
+
+    const parts = slug.split('-');
+    if (parts.length > 1) {
+      const suburbOnly = parts.slice(0, -1).join(' ');
+      results = await searchService.search(suburbOnly);
+
+      if (results.length > 0) {
+        const targetPostcode = parts[parts.length - 1];
+        const postcodeMatch = results.find((suburb: Suburb) =>
+          suburb.postcode === targetPostcode
+        );
+        return postcodeMatch || results[0];
+      }
+    }
+  } catch (error) {
+    console.error('Error looking up suburb by slug:', error);
+  }
+  return null;
+};
+
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
   const slug = createSlug(suburb.suburb, suburb.postcode);
   router.push({ name: 'suburb', params: { slug } });
-};
-
-const handleSearchClear = () => {
-  selectedSuburb.value = null;
-  searchQuery.value = '';
-  router.push({ name: 'home' });
 };
 
 const showStaticReport = async () => {
@@ -198,33 +277,6 @@ const handleRouteChange = async () => {
   }
 };
 
-const handleStartTutorial = () => {
-  const performSearch = async (query: string) => {
-    selectedSuburb.value = null;
-    searchQuery.value = '';
-    await router.push({ name: 'home' });
-
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    searchQuery.value = query;
-
-    try {
-      const results = await searchService.search(query);
-
-      if (results.length > 0) {
-        selectedSuburb.value = results[0];
-
-        const slug = createSlug(results[0].suburb, results[0].postcode);
-        await router.push({ name: 'suburb', params: { slug } });
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
-
-  startTutorial(performSearch);
-};
-
 watch(() => [props.slug, route.params.slug], handleRouteChange);
 watch(() => route.name, handleRouteChange);
 
@@ -235,30 +287,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-search-bar {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.hero-search-bar :deep(.v-field) {
-  font-size: 1.1rem;
-}
-
-.illustration-section {
-  margin-top: 3rem;
-  margin-bottom: 2rem;
-}
-
-.dude-illustration {
-  max-width: 300px;
-  height: auto;
-  object-fit: contain;
-}
-
-@media (max-width: 768px) {
-  .dude-illustration {
-    max-width: 250px;
-  }
-}
-
 </style>

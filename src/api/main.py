@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from db_interface import get_database
-from routes import health, search, bikes, stats, addresses, parking, contact, postcodes
+from routes import health, search, bikes, lgas, risk, stats, addresses, parking, contact, postcodes
 
 
 logging.basicConfig(
@@ -60,17 +60,13 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down...")
 
 
-app = FastAPI(
-    title="Hotspot API",
-    version="1.0.0",
-    description="Community driven motorcycle parking suggestions for Victoria, Australia",
-    servers=[{"url": "https://hotspot.sknk.ws", "description": "Production server"}],
-    lifespan=lifespan
-)
+app = FastAPI(title="Hotspot API", version="0.0.1", lifespan=lifespan)
 app.state.db = db
 
 app.include_router(health.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
+app.include_router(lgas.router, prefix="/api")
+app.include_router(risk.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(bikes.router, prefix="/api")
 app.include_router(addresses.router, prefix="/api")
@@ -90,8 +86,10 @@ if static_path.exists():
     # This must be defined last to avoid catching API routes
     @app.get("/{full_path:path}")
     async def catch_all(full_path: str):
+        # Don't catch API routes
         if full_path.startswith("api/"):
             return {"detail": "Not found"}
+        # Check if the path is a static file
         file_path = static_path / full_path
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)

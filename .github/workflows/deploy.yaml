@@ -3,11 +3,6 @@ name: CI/CD to App Runner
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'Dockerfile'
-      - 'Makefile'
-      - '.github/workflows/deploy.yaml'
 
 env:
   AWS_REGION: ap-southeast-2

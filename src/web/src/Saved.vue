@@ -1,32 +1,14 @@
 <template>
   <v-main>
-    <v-container class="pt-1 pt-md-3 pb-2 pb-md-8">
-    <PageHero
-      title="Saved Parking"
-      subtitle="Your favourite parking locations"
-      icon="mdi-star"
-    />
+    <v-container class="saved-page">
+    <h1 class="text-h3 font-weight-bold text-primary mb-2 text-center">Saved Parking</h1>
+    <p class="subtitle text-body-1 text-grey-darken-1 mb-6 text-center">
+      Your favourite parking locations
+    </p>
 
-    <div v-if="loading" class="parking-feed-container">
-      <v-card class="parking-feed">
-        <v-card-title class="d-flex align-center">
-          <v-icon size="20" class="mr-2">mdi-star</v-icon>
-          <span>Saved Parking Locations</span>
-          <v-chip size="small" class="ml-auto">0</v-chip>
-        </v-card-title>
-
-        <v-divider />
-
-        <v-card-text class="pa-3">
-          <v-skeleton-loader
-            v-for="n in 2"
-            :key="n"
-            type="list-item-three-line"
-            class="mb-2"
-          />
-        </v-card-text>
-      </v-card>
-    </div>
+    <v-card-text v-if="loading" class="text-center py-4">
+      <v-progress-circular indeterminate size="32"></v-progress-circular>
+    </v-card-text>
 
 
    <v-empty-state v-else-if="savedParkingData.length === 0">
@@ -68,7 +50,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import ParkingCard from './components/ParkingCard.vue';
-import PageHero from './components/PageHero.vue';
 import { parkingService } from './services';
 import { getFavouriteIds, getCachedParkingData, setCachedParkingData } from './utils';
 

@@ -23,12 +23,6 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # Crime data
 crime_data = pd.read_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_crime_data.csv')
 
-# Yearly trend crime data for motor vehicle theft
-trend_crime_data = (pd.read_excel(f'{SCRIPT_DIR}/Source data/Data_Tables_LGA_Recorded_Offences_Year_Ending_March_2025.xlsx', sheet_name = 'Table 03').
-    loc[lambda df: 
-            (df['Offence Subgroup'] == 'B41 Motor vehicle theft') & 
-            (df['Year'] >= pd.Timestamp.today().year - 4)])
-
 # Car park data
 carpark_data = pd.read_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_carpark_data.csv')
 
@@ -38,16 +32,12 @@ street_light_data = pd.read_csv(f'{SCRIPT_DIR}/Cleaned data/cleaned_postcode_str
 # Selected postcode
 selected_postcode = 3000
 
-
 ######################################################################################
 ####                               Data Cleaning                                  ####
 
 # Filtering to the selected postcode--------------------------------------------------
 # Filtering crime data
 filtered_crime_data = crime_data.loc[lambda df: df['postcode'] == selected_postcode]
-
-# Filtering trend crime data
-filtered_trend_crime_data = trend_crime_data.loc[lambda df: df['Postcode'] == selected_postcode]
 
 # Filtering car park data
 filtered_carpark_data = carpark_data.loc[lambda df: df['postcode'] == selected_postcode]
@@ -56,16 +46,9 @@ filtered_carpark_data = carpark_data.loc[lambda df: df['postcode'] == selected_p
 filtered_street_light_data = street_light_data.loc[lambda df: df['postcode'] == selected_postcode]
 
 # Creating aggregated metrics---------------------------------------------------------
-# Aggregate single year metrics
 agg_crime_data_subdivision = (filtered_crime_data.
     groupby('offence_subdivision').
     agg(yearly_offences = ('offence_count', 'sum')).
-    reset_index())
-
-# Aggregate trend metrics
-agg_crime_data_trend = (filtered_trend_crime_data.
-    groupby(['Year', 'Postcode']).
-    agg(yearly_offences = ('Offence Count', 'sum')).
     reset_index())
 
 # Pulling car park and street coverage values-----------------------------------------
@@ -180,21 +163,6 @@ else:
     plot_light_coverage.update_layout(paper_bgcolor='white', height=200, width=500, margin=dict(l=0,r=0,t=30,b=0))
 
     plot_light_coverage.show()
-    
-# Creating a trend plot for yearly offences in the selected postcode------------------
-plot_off_subgroup_trend = px.bar(agg_crime_data_trend.sort_values('Year', ascending=True), 
-    x='Year',
-    y='yearly_offences',
-    color_discrete_sequence=['#07A377'],
-    labels={'yearly_offences':'Offences', 'Year':''})
-
-plot_off_subgroup_trend.update_layout(
-    xaxis=dict(title='', tickfont=dict(size=16)),
-    yaxis=dict(title='Offences', title_font=dict(size=16), tickfont=dict(size=14)))
-
-plot_off_subgroup_trend.update_traces(hovertemplate=("Theft Offences: %{y:.0f}<br>" "<extra></extra>")) #Updating tooltips
-
-plot_off_subgroup_trend.show()
 
 
 ######################################################################################
@@ -205,9 +173,6 @@ Path(f'{SCRIPT_DIR}/Visuals/subgroup.json').write_text(plot_off_subgroup.to_json
 
 # Saving the subdivision chart----------------------------------------------------------
 Path(f'{SCRIPT_DIR}/Visuals/subdivision.json').write_text(plot_off_subdivision.to_json(), encoding='utf-8')
-
-# Saving the trend chart---------------------------------------------------------------
-Path(f'{SCRIPT_DIR}/Visuals/trend.json').write_text(plot_off_subgroup_trend.to_json(), encoding='utf-8')
 
 # Saving the car park card--------------------------------------------------------------
 plot_car_parks.write_image(f'{SCRIPT_DIR}/Visuals/carparks.png', scale=2)

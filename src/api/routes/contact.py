@@ -2,14 +2,24 @@ import os
 import time
 import logging
 import requests
-from typing import Optional, Dict
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, EmailStr
 from github import Github, GithubException, GithubIntegration
-from models import ContactFormSubmission, ContactFormResponse
 
-router = APIRouter(tags=["Contact"])
+
+router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+#TODO: Validat the categories from the front-end? 
+class ContactForm(BaseModel):
+    email: EmailStr
+    category: str
+    subject: str
+    postcode: Optional[str] = None
+    details: str
+    recaptchaToken: str
 
 
 def verify_recaptcha(token: str) -> bool:
@@ -68,7 +78,7 @@ def _get_installation_token(private_key_pem: str) -> str:
         logger.error(f"Failed to get GitHub App token: {e}")
         raise HTTPException(status_code=500, detail="Contact form unavailable")
 
-def create_github_issue(form_data: ContactFormSubmission) -> str:
+def create_github_issue(form_data: ContactForm) -> str:
     private_key_pem = os.environ.get("GITHUB_APP_PEM")
     if not private_key_pem:
         raise HTTPException(status_code=500, detail="Contact form unavailable")
@@ -110,14 +120,8 @@ def create_github_issue(form_data: ContactFormSubmission) -> str:
         raise HTTPException(status_code=500, detail=f"Failed to capture submission")
 
 
-@router.post(
-    "/v1/contact",
-    summary="Submit contact form",
-    description="Submit feedback or report issues. Creates GitHub issue for tracking. Requires reCAPTCHA verification.",
-    response_description="Success confirmation",
-    response_model=ContactFormResponse
-)
-async def submit_contact_form(form_data: ContactFormSubmission, request: Request) -> ContactFormResponse:
+@router.post("/v1/contact")
+async def submit_contact_form(form_data: ContactForm, request: Request):
     try:
         if not verify_recaptcha(form_data.recaptchaToken):
             raise HTTPException(status_code=400, detail="reCAPTCHA verification failed")
@@ -126,7 +130,9 @@ async def submit_contact_form(form_data: ContactFormSubmission, request: Request
 
         logger.info(f"Contact form submitted successfully from {form_data.email}")
 
-        return ContactFormResponse(success=True)
+        return {
+            "success": True
+        }
 
     except HTTPException:
         raise
