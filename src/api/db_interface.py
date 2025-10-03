@@ -28,6 +28,10 @@ class DatabaseInterface(ABC):
         pass
 
     @abstractmethod
+    def upsert_parking_contribution(self, data: Dict[str, Any], facilities: List[int] = None) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
     def insert_parking_facility(self, parking_id: int, facility_id: int):
         pass
 
@@ -37,6 +41,10 @@ class DatabaseInterface(ABC):
 
     @abstractmethod
     def get_facilities_for_parking(self, parking_id: int) -> List[Dict[str, Any]]:
+        pass
+
+    @abstractmethod
+    def get_parking_submissions_count(self) -> int:
         pass
 
 
@@ -107,6 +115,68 @@ class SQLiteDatabase(DatabaseInterface):
             VALUES (:address, :suburb, :postcode, :type, :lighting, :cctv)
         """, data)
 
+    def upsert_parking_contribution(self, data: Dict[str, Any], facilities: List[int] = None) -> Dict[str, Any]:
+        facilities = facilities or []
+
+        existing = self.fetch_all("""
+            SELECT parking_id, type, lighting, cctv
+            FROM user_contribution
+            WHERE address = :address AND suburb = :suburb AND postcode = :postcode
+        """, {
+            "address": data["address"],
+            "suburb": data["suburb"],
+            "postcode": data["postcode"]
+        })
+
+        if not existing:
+            parking_id = self.insert_parking_contribution(data)
+
+            for facility_id in facilities:
+                self.insert_parking_facility(parking_id, facility_id)
+
+            return {"parking_id": parking_id, "action": "inserted"}
+
+        existing_record = existing[0]
+        parking_id = existing_record["parking_id"]
+
+        needs_update = (
+            existing_record["type"] != data["type"] or
+            existing_record["lighting"] != data.get("lighting") or
+            existing_record["cctv"] != data.get("cctv")
+        )
+
+        existing_facilities = self.get_facilities_for_parking(parking_id)
+        existing_facility_ids = {f["facility_id"] for f in existing_facilities}
+        new_facility_ids = set(facilities)
+
+        facilities_changed = existing_facility_ids != new_facility_ids
+
+        if needs_update:
+            self.execute("""
+                UPDATE user_contribution
+                SET type = :type, lighting = :lighting, cctv = :cctv, created_at = CURRENT_TIMESTAMP
+                WHERE parking_id = :parking_id
+            """, {
+                **data,
+                "parking_id": parking_id
+            })
+            action = "updated"
+        else:
+            action = "no_change"
+
+        if facilities_changed:
+            self.execute("""
+                DELETE FROM user_contribution_facilities WHERE parking_id = :parking_id
+            """, {"parking_id": parking_id})
+
+            for facility_id in facilities:
+                self.insert_parking_facility(parking_id, facility_id)
+
+            if action == "no_change":
+                action = "updated"
+
+        return {"parking_id": parking_id, "action": action}
+
     def insert_parking_facility(self, parking_id: int, facility_id: int):
         self.execute("""
             INSERT INTO user_contribution_facilities (parking_id, facility_id)
@@ -132,6 +202,13 @@ class SQLiteDatabase(DatabaseInterface):
             JOIN facilities f ON ucf.facility_id = f.facility_id
             WHERE ucf.parking_id = :parking_id
         """, {"parking_id": parking_id})
+
+    def get_parking_submissions_count(self) -> int:
+        result = self.fetch_all("""
+            SELECT COUNT(*) as count
+            FROM user_contribution
+        """)
+        return result[0]['count'] if result else 0
 
 
 class PersistentDatabase(DatabaseInterface):
@@ -242,6 +319,80 @@ class PersistentDatabase(DatabaseInterface):
 
         return parking_id
 
+    def upsert_parking_contribution(self, data: Dict[str, Any], facilities: List[int] = None) -> Dict[str, Any]:
+        from boto3.dynamodb.conditions import Attr
+        facilities = facilities or []
+
+        response = self.table.scan(
+            FilterExpression=Attr('address').eq(data['address']) &
+                           Attr('suburb').eq(data['suburb']) &
+                           Attr('postcode').eq(data['postcode'])
+        )
+
+        if not response['Items']:
+            parking_id = self.insert_parking_contribution(data)
+
+            if facilities:
+                self.table.update_item(
+                    Key={
+                        'postcode': data['postcode'],
+                        'parking_id': parking_id
+                    },
+                    UpdateExpression='SET facility_ids = :facilities',
+                    ExpressionAttributeValues={
+                        ':facilities': facilities
+                    }
+                )
+
+            return {"parking_id": parking_id, "action": "inserted"}
+
+        existing_item = response['Items'][0]
+        parking_id = int(existing_item['parking_id'])
+
+        needs_update = (
+            existing_item.get('type') != data['type'] or
+            existing_item.get('lighting') != data.get('lighting') or
+            existing_item.get('cctv') != data.get('cctv')
+        )
+
+        existing_facilities = set(existing_item.get('facility_ids', []))
+        new_facilities = set(facilities)
+        facilities_changed = existing_facilities != new_facilities
+
+        if needs_update or facilities_changed:
+            update_expression = 'SET #type = :type'
+            expression_attribute_names = {'#type': 'type'}
+            expression_attribute_values = {':type': data['type']}
+
+            if data.get('lighting') is not None:
+                update_expression += ', lighting = :lighting'
+                expression_attribute_values[':lighting'] = data['lighting']
+
+            if data.get('cctv') is not None:
+                update_expression += ', cctv = :cctv'
+                expression_attribute_values[':cctv'] = data['cctv']
+
+            if facilities_changed:
+                update_expression += ', facility_ids = :facilities'
+                expression_attribute_values[':facilities'] = facilities
+
+            update_expression += ', created_at = :created_at'
+            expression_attribute_values[':created_at'] = datetime.now().isoformat()
+
+            self.table.update_item(
+                Key={
+                    'postcode': data['postcode'],
+                    'parking_id': parking_id
+                },
+                UpdateExpression=update_expression,
+                ExpressionAttributeNames=expression_attribute_names,
+                ExpressionAttributeValues=expression_attribute_values
+            )
+
+            return {"parking_id": parking_id, "action": "updated"}
+
+        return {"parking_id": parking_id, "action": "no_change"}
+
     def insert_parking_facility(self, parking_id: int, facility_id: int):
         from boto3.dynamodb.conditions import Key, Attr
 
@@ -285,7 +436,6 @@ class PersistentDatabase(DatabaseInterface):
             if 'lighting' in item:
                 item['lighting'] = int(item['lighting'])
 
-        # Sort by created_at if available, otherwise by parking_id
         items.sort(key=lambda x: x.get('created_at', x.get('parking_id', 0)), reverse=True)
 
         return items[:20]
@@ -319,6 +469,9 @@ class PersistentDatabase(DatabaseInterface):
 
         return facilities_list
 
+    def get_parking_submissions_count(self) -> int:
+        response = self.dynamodb.describe_table(TableName=self.table_name)
+        return response['Table']['ItemCount']
 
 def get_database() -> DatabaseInterface:
     """Factory function to get the appropriate database implementation based on environment"""

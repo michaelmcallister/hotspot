@@ -7,8 +7,8 @@ export interface Address {
 export const addressService = {
   async getAddresses(postcode: string, query?: string): Promise<Address[]> {
     const url = query
-      ? `/addresses/${postcode}?q=${encodeURIComponent(query)}`
-      : `/addresses/${postcode}`;
+      ? `/postcode/${postcode}/addresses?q=${encodeURIComponent(query)}`
+      : `/postcode/${postcode}/addresses`;
     return apiRequest(url);
   },
 };
