@@ -12,9 +12,9 @@ def test_thefts_valid_postcode():
 
     data = response.json()
     assert isinstance(data, list)
-    if data:  # only check structure if list not empty
+    if data:
         assert "year" in data[0]
-        assert "thefts" in data[0]  # API uses "thefts" not "theft_count"
+        assert "thefts" in data[0]
         assert isinstance(data[0]["year"], int)
         assert isinstance(data[0]["thefts"], int)
 
@@ -57,13 +57,11 @@ def test_thefts_postcode_numeric_edge_cases():
         assert response.status_code == 404
 
 def test_thefts_large_numeric_postcode():
-    """Unrealistically large postcode returns 422."""
     response = requests.get(f"{BASE_URL}/api/v1/postcode/99999/thefts")
     assert response.status_code == 422
 
 
 def test_thefts_boundary_postcode():
-    """Known lowest VIC postcode (3000) should work (already tested, but explicit)."""
     response = requests.get(f"{BASE_URL}/api/v1/postcode/3000/thefts")
     assert response.status_code == 200
     data = response.json()
@@ -73,15 +71,13 @@ def test_thefts_boundary_postcode():
 def test_thefts_malformed_symbols():
     """Malformed postcode returns structured error response."""
     response = requests.get(f"{BASE_URL}/api/v1/postcode/30@#/thefts")
-    assert response.status_code == 200  # API returns 200 even for malformed
+    assert response.status_code == 200
     data = response.json()
-    # The response should have 'detail' key
     assert isinstance(data, dict)
     assert "detail" in data
 
 
 def test_thefts_schema_validation():
-    """Ensure schema keys match API: 'year' and 'thefts'."""
     response = requests.get(f"{BASE_URL}/api/v1/postcode/3000/thefts")
     assert response.status_code == 200
     data = response.json()

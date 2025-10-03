@@ -3,7 +3,6 @@ import requests
 BASE_URL = "http://localhost:8000"
 
 def check_address_fields(item):
-    """Helper to validate address dict structure and types"""
     assert "address" in item
     assert "postcode" in item
     assert "suburb" in item
@@ -11,9 +10,6 @@ def check_address_fields(item):
     assert isinstance(item["postcode"], str)
     assert isinstance(item["suburb"], str)
 
-# ----------------------
-# Success cases
-# ----------------------
 def test_address_valid_postcode():
     """Valid postcode should return a list of addresses with correct fields"""
     postcode = "3000"
@@ -33,9 +29,6 @@ def test_address_postcode_with_spaces():
     for item in data:
         check_address_fields(item)
 
-# ----------------------
-# Edge / invalid input
-# ----------------------
 def test_address_nonexistent_postcode():
     """Nonexistent postcode should return empty list or 404 with detail"""
     postcode = "9999"

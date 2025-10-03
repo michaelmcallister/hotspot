@@ -7,9 +7,9 @@ def test_valid_parking_submission():
         "address": "1838 ABBEYARDS ROAD",
         "suburb": "ABBEYARD",
         "postcode": "3737",
-        "parking_type": "off-street",  # corrected
-        "lighting": "good",            # corrected
-        "CCTV": True,                  # corrected
+        "parking_type": "off-street",
+        "lighting": "good",
+        "CCTV": True,
         "facilities": []
     }
     response = requests.post(f"{BASE_URL}/api/v1/parking", json=payload)
@@ -17,7 +17,7 @@ def test_valid_parking_submission():
     print("Status code:", response.status_code)
     print("Response body:", response.text)
 
-    assert response.status_code in (200, 201, 422)  # 201 is standard for created
+    assert response.status_code in (200, 201, 422)
 
     if response.status_code in (200, 201):
         data = response.json()
@@ -28,7 +28,6 @@ def test_parking_missing_fields():
     """Missing required fields should return 422"""
     payload = {
         "address": "1838 ABBEYARDS ROAD"
-        # missing postcode, suburb, parking_type, etc.
     }
     response = requests.post(f"{BASE_URL}/api/v1/parking", json=payload)
     assert response.status_code == 422
@@ -101,9 +100,9 @@ def test_parking_duplicate_submission():
         "lat": -37.8136,
         "lng": 144.9631
     }
-    requests.post(f"{BASE_URL}/api/v1/parking", json=payload)  # first submission
+    requests.post(f"{BASE_URL}/api/v1/parking", json=payload)
     second_response = requests.post(f"{BASE_URL}/api/v1/parking", json=payload)
-    assert second_response.status_code in (200, 201, 422)  # include 422
+    assert second_response.status_code in (200, 201, 422)
 
 def test_parking_max_field_lengths():
     """Very long address/suburb strings handled"""
@@ -162,10 +161,8 @@ def test_parking_optional_fields_omitted():
         "type": "street",
         "lighting": 3,
         "cctv": True
-        # facilities omitted
     }
     response = requests.post(f"{BASE_URL}/api/v1/parking", json=payload)
-    # If facilities are required, this should return 422
     assert response.status_code in (200, 201, 422)
 
 def test_parking_empty_required_fields():

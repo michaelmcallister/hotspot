@@ -2,13 +2,7 @@ import requests
 
 BASE_URL = "http://localhost:8000"
 
-import requests
-
-BASE_URL = "http://localhost:8000"
-
-
 def test_feed_valid_postcode():
-    """Valid postcode should return a feed with parking submissions structure"""
     postcode = "3737"
     response = requests.get(f"{BASE_URL}/api/v1/postcode/{postcode}/feed")
     assert response.status_code == 200
@@ -26,7 +20,6 @@ def test_feed_valid_postcode():
 
 
 def test_feed_nonexistent_postcode():
-    """Nonexistent postcode returns correct structure with empty submissions"""
     postcode = "9999"
     response = requests.get(f"{BASE_URL}/api/v1/postcode/{postcode}/feed")
     assert response.status_code == 200
@@ -48,7 +41,6 @@ def test_feed_invalid_postcode_format():
 
 
 def test_feed_empty_postcode():
-    """Empty postcode segment should return 200 with 'detail: Not found'"""
     response = requests.get(f"{BASE_URL}/api/v1/postcode//feed")
     assert response.status_code == 200
     data = response.json()
@@ -56,7 +48,6 @@ def test_feed_empty_postcode():
     assert data["detail"] == "Not found"
 
 def test_feed_missing_postcode():
-    """Missing postcode segment should return 200 with 'detail: Not found'"""
     response = requests.get(f"{BASE_URL}/api/v1/postcode/feed")
     assert response.status_code == 200
     data = response.json()
@@ -64,7 +55,6 @@ def test_feed_missing_postcode():
     assert data["detail"] == "Not found"
 
 def test_feed_postcode_with_spaces():
-    """Postcode with spaces should be stripped and handled"""
     postcode = " 3737 "
     response = requests.get(f"{BASE_URL}/api/v1/postcode/{postcode.strip()}/feed")
     assert response.status_code == 200
@@ -74,7 +64,6 @@ def test_feed_postcode_with_spaces():
 
 
 def test_feed_postcode_numeric_edge_cases():
-    """Edge numeric postcodes (0000, 9999) handled"""
     for postcode in ["0000", "9999"]:
         response = requests.get(f"{BASE_URL}/api/v1/postcode/{postcode}/feed")
         if postcode == "0000":

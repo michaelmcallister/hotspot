@@ -3,10 +3,6 @@ from urllib.parse import quote
 
 BASE_URL = "http://localhost:8000"
 
-# ----------------------------
-# Tests for GET /api/v1/models
-# ----------------------------
-
 def test_list_models_default():
     """Default list of models"""
     response = requests.get(f"{BASE_URL}/api/v1/models")
@@ -62,33 +58,25 @@ def test_list_models_invalid_params():
     response = requests.get(f"{BASE_URL}/api/v1/models", params=params)
     assert response.status_code in (200, 422)
 
-# --------------------------------
-# Tests for GET /api/v1/models/{brand}/{model}
-# --------------------------------
-
 def test_model_details_nonexistent():
     response = requests.get(f"{BASE_URL}/api/v1/models/NotABrand/NotAModel")
     assert response.status_code == 404
 
 def test_model_details_valid():
-    # dynamically fetch first model
     list_response = requests.get(f"{BASE_URL}/api/v1/models", params={"limit": 1})
     assert list_response.status_code == 200
     models = list_response.json()
     if not models:
-        return  # skip if no models exist
-
+        return
     first_model = models[0]
     brand = first_model["brand"]
     model = first_model["model"]
 
-    # URL encode brand and model
     brand_encoded = quote(brand)
     model_encoded = quote(model)
 
     response = requests.get(f"{BASE_URL}/api/v1/models/{brand_encoded}/{model_encoded}")
     if response.status_code == 404:
-        # Skip test if API does not support details
         return
     assert response.status_code == 200
     data = response.json()

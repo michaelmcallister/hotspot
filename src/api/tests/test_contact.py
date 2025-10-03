@@ -15,7 +15,6 @@ def test_contact_form_success():
     response = requests.post(f"{BASE_URL}/api/v1/contact", json=payload)
     assert response.status_code in (200, 400, 422, 500)
     data = response.json()
-    # Success or detail field must be present
     assert "success" in data or "detail" in data
 
 def test_contact_missing_fields():
