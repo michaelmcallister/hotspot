@@ -1,16 +1,32 @@
 <template>
   <v-main>
-    <v-container class="pt-1 pt-md-3 pb-1 pb-md-4">
+    <v-container class="pt-0 pb-1 pb-md-4">
       <PageHero
-        title="Top Suburbs"
-        subtitle="Explore suburbs and LGAs ranked by safety score"
-        icon="mdi-trophy"
+        title="Explore"
+        subtitle="Find safer parking spots near work, uni, or your favourite ride destinations"
+        icon="mdi-map-search"
       />
 
       <v-row v-if="error">
         <v-col cols="12">
           <v-alert type="error" density="compact">
             {{ error }}
+          </v-alert>
+        </v-col>
+      </v-row>
+
+      <v-row class="mb-3">
+        <v-col cols="12">
+          <v-alert
+            type="info"
+            variant="tonal"
+            density="comfortable"
+            icon="mdi-lightbulb"
+            closable
+          >
+            <strong>Quick tip:</strong> Green zones are your safest bet for overnight parking.
+            Check the community submissions in each area to find spots other riders trust.
+            Remember, even in safer suburbs, always use a disc lock and park in well-lit areas.
           </v-alert>
         </v-col>
       </v-row>
@@ -23,7 +39,7 @@
                 <v-col cols="12" sm="8" md="9">
                   <v-text-field
                     v-model="search"
-                    label="Search"
+                    :label="searchPlaceholder"
                     prepend-inner-icon="mdi-magnify"
                     variant="outlined"
                     hide-details
@@ -33,7 +49,7 @@
                 </v-col>
                 <v-col cols="12" sm="4" md="3">
                   <v-select
-                    label="Scope"
+                    label="View by"
                     :items="SCOPE_OPTIONS"
                     v-model="scope"
                     density="comfortable"
@@ -73,29 +89,57 @@
                 </v-empty-state>
               </template>
               <template #item.safety_score="{ item }">
-                <div class="d-inline-flex align-center">
-                  <span class="mr-2">{{ item.safety_score }}</span>
-                  <v-chip :color="safetyColour(item.safety_score)" variant="tonal" size="small" label>
-                    {{ safetyLabel(item.safety_score) }}
-                  </v-chip>
+                <div class="d-flex align-center justify-center">
+                  <div style="width: 140px;">
+                    <v-progress-linear
+                      :model-value="item.safety_score"
+                      :color="safetyColour(item.safety_score)"
+                      height="24"
+                      rounded
+                      :max="100"
+                    >
+                      <template v-slot:default>
+                        <strong :class="progressTextClass(item.safety_score)">{{ item.safety_score }}%</strong>
+                      </template>
+                    </v-progress-linear>
+                  </div>
                 </div>
               </template>
               <template #item.avg_safety="{ item }">
-                <div class="d-inline-flex align-center">
-                  <span class="mr-2">{{ item.avg_safety }}</span>
-                  <v-chip :color="safetyColour(item.avg_safety)" variant="tonal" size="small" label>
-                    {{ safetyLabel(item.avg_safety) }}
-                  </v-chip>
+                <div class="d-flex align-center justify-center">
+                  <div style="width: 140px;">
+                    <v-progress-linear
+                      :model-value="item.avg_safety"
+                      :color="safetyColour(item.avg_safety)"
+                      height="24"
+                      rounded
+                      :max="100"
+                    >
+                      <template v-slot:default>
+                        <strong :class="progressTextClass(item.avg_safety)">{{ item.avg_safety }}%</strong>
+                      </template>
+                    </v-progress-linear>
+                  </div>
                 </div>
               </template>
               <template #item.actions="{ item }">
                 <v-btn
+                  v-if="scope === 'postcode'"
                   color="primary"
                   variant="outlined"
                   size="small"
                   @click="viewSuburbDetails(item)"
                 >
                   View Details
+                </v-btn>
+                <v-btn
+                  v-else-if="scope === 'lga'"
+                  color="primary"
+                  variant="outlined"
+                  size="small"
+                  @click="searchByLGA(item.lga)"
+                >
+                  View Postcodes
                 </v-btn>
               </template>
             </v-data-table-server>
@@ -119,8 +163,8 @@ const router = useRouter()
 type Scope = 'postcode' | 'lga'
 
 const SCOPE_OPTIONS = [
-  { title: 'Postcode', value: 'postcode' as Scope },
-  { title: 'LGA', value: 'lga' as Scope },
+  { title: 'Suburbs', value: 'postcode' as Scope },
+  { title: 'Councils', value: 'lga' as Scope },
 ]
 
 const HEADERS_CONFIG = {
@@ -128,13 +172,14 @@ const HEADERS_CONFIG = {
     { title: 'Postcode', key: 'postcode' },
     { title: 'Suburb', key: 'suburb' },
     { title: 'LGA', key: 'lga' },
-    { title: 'Safety Score', key: 'safety_score' },
+    { title: 'Safety Score', key: 'safety_score', align: 'center' },
     { title: '', key: 'actions', sortable: false },
   ],
   lga: [
     { title: 'LGA', key: 'lga' },
-    { title: 'Average Safety', key: 'avg_safety' },
+    { title: 'Average Safety', key: 'avg_safety', align: 'center' },
     { title: 'Postcodes', key: 'postcode_count' },
+    { title: '', key: 'actions', sortable: false },
   ]
 }
 
@@ -153,6 +198,11 @@ const tableKey = ref(0)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const headers = computed(() => HEADERS_CONFIG[scope.value])
+const searchPlaceholder = computed(() =>
+  scope.value === 'postcode'
+    ? 'Try "Melbourne" or "3000"'
+    : 'Try "Melbourne" or "Yarra"'
+)
 
 async function loadItems({ page, itemsPerPage: perPage, sortBy }: any) {
   loading.value = true
@@ -190,6 +240,11 @@ function viewSuburbDetails(item: any) {
   router.push({ name: 'suburb', params: { slug: createSlug(item.suburb, item.postcode) } })
 }
 
+function searchByLGA(lgaName: string) {
+  scope.value = 'postcode'
+  search.value = lgaName
+}
+
 watch(scope, () => {
   serverItems.value = []
   totalItems.value = 0
@@ -204,4 +259,9 @@ watch(search, (newValue) => {
     tableKey.value++
   }, 300)
 })
+
+function progressTextClass(value: number) {
+  // Use lighter text when the centre is mostly unfilled
+  return value >= 60 ? 'text-white' : 'text-medium-emphasis'
+}
 </script>

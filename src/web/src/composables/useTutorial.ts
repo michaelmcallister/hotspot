@@ -182,9 +182,9 @@ export function useTutorial() {
     })
 
     tour.addStep({
-      title: 'Top Suburbs',
+      title: 'Explore',
       text: 'View suburbs ranked by safety score to find the safest places to park your bike.',
-      attachTo: createAttachment('a[href="/top-suburbs"]', 'bottom'),
+      attachTo: createAttachment('a[href="/explore"]', 'bottom'),
       buttons: [
         {
           text: 'Back',
@@ -195,7 +195,7 @@ export function useTutorial() {
           text: 'Visit Page',
           classes: 'shepherd-button-primary',
           action: () => {
-            router.push('/top-suburbs')
+            router.push('/explore')
             tour.next()
           }
         }
@@ -234,7 +234,7 @@ export function useTutorial() {
           text: 'Back',
           classes: 'shepherd-button-secondary',
           action: () => {
-            router.push('/top-suburbs')
+            router.push('/explore')
             tour.back()
           }
         },

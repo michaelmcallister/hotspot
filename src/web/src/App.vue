@@ -8,7 +8,7 @@
       </v-app-bar-title>
       <v-spacer />
       <v-btn variant="text" color="primary" to="/">Home</v-btn>
-      <v-btn variant="text" color="primary" to="/top-suburbs">Top Suburbs</v-btn>
+      <v-btn variant="text" color="primary" to="/explore">Explore</v-btn>
       <v-btn variant="text" color="primary" to="/saved">Saved</v-btn>
 
       <template v-slot:append>
