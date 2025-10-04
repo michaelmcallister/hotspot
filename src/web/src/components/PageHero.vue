@@ -17,7 +17,7 @@
             >
               <v-icon size="28" color="primary">{{ icon }}</v-icon>
             </v-avatar>
-            <span class="text-h4 text-sm-h3 font-weight-bold text-high-emphasis text-center">
+            <span class="hero-title text-h4 text-sm-h3 font-weight-bold text-high-emphasis text-center">
               {{ title }}
             </span>
           </div>
@@ -31,7 +31,7 @@
             >
               <v-icon size="28" color="primary">{{ icon }}</v-icon>
             </v-avatar>
-            <span class="text-h3 font-weight-bold text-high-emphasis">
+            <span class="hero-title text-h3 font-weight-bold text-high-emphasis">
               {{ title }}
             </span>
           </div>
@@ -65,3 +65,10 @@ defineProps<{
   icon: string
 }>()
 </script>
+
+<style scoped>
+.hero-title {
+  white-space: normal;
+  word-break: break-word;
+}
+</style>
