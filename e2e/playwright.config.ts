@@ -7,15 +7,21 @@ export default defineConfig({
   outputDir: path.join(__dirname, 'artefacts'),
   use: {
     baseURL: 'http://localhost:5173',
-
     screenshot: 'on',
     video: 'on',
+    launchOptions: {
+      slowMo: 200,
+    },
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        deviceScaleFactor: 1,
+      },
     },
   ],
 
@@ -26,4 +32,3 @@ export default defineConfig({
     timeout: 120000,
   },
 });
-
