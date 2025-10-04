@@ -18,6 +18,12 @@
             <v-btn icon="mdi-dots-vertical" color="primary" v-bind="props"></v-btn>
           </template>
           <v-list>
+            <v-list-item @click="showResources = true">
+              <v-list-item-title class="text-button text-primary">Resources</v-list-item-title>
+            </v-list-item>
+            <v-list-item :to="{ name: 'faq' }">
+              <v-list-item-title class="text-button text-primary">FAQ</v-list-item-title>
+            </v-list-item>
             <v-list-item to="/settings">
               <v-list-item-title class="text-button text-primary">Settings</v-list-item-title>
             </v-list-item>
@@ -30,6 +36,8 @@
     </v-app-bar>
 
     <v-main class="pb-12 pb-sm-14">
+      
+      <TipsBanner />
       <router-view />
     </v-main>
 
@@ -79,6 +87,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ResourcesModal from './components/ResourcesModal.vue';
 import AppLogo from './components/AppLogo.vue';
+import TipsBanner from './components/TipsBanner.vue';
 
 const router = useRouter();
 const showResources = ref(false);
