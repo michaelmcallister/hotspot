@@ -111,21 +111,10 @@ interface FAQItem {
 
 const faqItems = ref<FAQItem[]>([
   {
-     id: 1,
+    id: 1,
     question: "What is the Safety Score and how is it calculated?",
-    answer: "The Safety Score is a numerical rating from 1-100 that represents the relative safety of a suburb. Our safety score is based on an estimated risk of motorbike theft for each suburb. We start with official motor vehicle theft statistics for each Local Government Area (LGA) in Victoria. Using data on the proportion of motorbike riders in each LGA, we estimate the number of motorbike thefts. This creates a relative risk score that we then normalize to a simple 0-1 scale for easy comparison, where lower scores indicate safer areas.",
-    category: "safety",
-    resources: [
-        {
-            text: "Crime Statistics Victoria - LGA Criminal Incidents",
-            link: "https://files.crimestatistics.vic.gov.au/2025-06/Data_Tables_LGA_Criminal_Incidents_Year_Ending_March_2025.xlsx"
-        },
-        {
-            text: "Transport Victoria - Travel and Activity Survey",
-            link: "https://opendata.transport.vic.gov.au/dataset/victorian-integrated-survey-of-travel-and-activity-vista"
-        }
-    ]
-    
+    answer: "The Safety Score is a numerical rating from 0-100 that represents the relative safety of a suburb. Our safety score is based on an estimated risk of motorbike theft for each suburb. We start with official motor vehicle theft statistics for each Local Government Area (LGA) in Victoria. Using data on the proportion of motorbike riders in each LGA, we estimate the number of motorbike thefts. This creates a relative risk score that we then normalize to a simple 0-1 scale for easy comparison, where lower scores indicate safer areas..",
+    category: "safety"
   },
 
   {
@@ -138,13 +127,13 @@ const faqItems = ref<FAQItem[]>([
   {
     id: 3,
     question: "How accurate is the parking availability information?",
-    answer: "Parking information is sourced from official datasets and while we strive for accuracy, availability can change rapidly. We recommend using this as a guide and verifying on-site when possible.",
+    answer: "Parking information is sourced from both official datasets and community contributions. While we strive for accuracy, availability can change rapidly. We recommend using this as a guide and verifying on-site when possible.",
     category: "parking"
   },
   {
     id: 4,
     question: "What do the different risk levels mean?",
-    answer: "Risk levels are categorized as: <strong>Low Risk</strong>(100-75), <strong>medium Risk</strong>(74-50) and <strong>High Risk</strong>(50-1). Suburbs within the same Local Government Area (LGA) often have similar scores because the initial risk calculation is done at the LGA level using Victoria-wide crime and road user data. This LGA-level score is then applied to all postcodes and suburbs within that LGA. The score represents the overall risk level for the broader local government area rather than individual street-level risk..",
+    answer: "Risk levels are categorized as: <strong>Low Risk</strong> (80-100), <strong>Moderate Risk</strong> (60-79), <strong>Elevated Risk</strong> (40-59), and <strong>High Risk</strong> (0-39). Suburbs within the same Local Government Area (LGA) often have similar scores because the initial risk calculation is done at the LGA level using Victoria-wide crime and road user data. This LGA-level score is then applied to all postcodes and suburbs within that LGA. The score represents the overall risk level for the broader local government area rather than individual street-level risk..",
     category: "safety"
   },
  

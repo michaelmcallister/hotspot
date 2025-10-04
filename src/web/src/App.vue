@@ -36,8 +36,6 @@
     </v-app-bar>
 
     <v-main class="pb-12 pb-sm-14">
-      <!-- Tips Banner added here -->
-      <TipsBanner />
       <router-view />
     </v-main>
 
@@ -84,7 +82,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ResourcesModal from './components/ResourcesModal.vue';
 import AppLogo from './components/AppLogo.vue';
-import TipsBanner from './components/Tipsbanner.vue'; 
 
 const router = useRouter();
 const showResources = ref(false);
