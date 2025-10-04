@@ -54,9 +54,12 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" class="d-flex justify-center">
+          <v-col cols="12" class="d-flex justify-center flex-wrap">
             <v-btn to="/contact" variant="text" density="compact" size="small" class="text-grey-darken-1" aria-label="Contact">
               Contact
+            </v-btn>
+            <v-btn to="/privacy" variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" aria-label="Privacy Policy">
+              Privacy Policy
             </v-btn>
             <v-btn variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" @click="showResources = true" aria-label="Resources">
               Resources
