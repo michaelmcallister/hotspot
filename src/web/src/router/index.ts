@@ -5,6 +5,7 @@ import Saved from '../Saved.vue'
 import Contact from '../Contact.vue'
 import Settings from '../Settings.vue'
 import NotFound from '../NotFound.vue'
+import Privacy from '../Privacy.vue'
 import FAQ from '../components/FAQ.vue'
 
 const routes = [
@@ -13,6 +14,7 @@ const routes = [
   { path: '/explore', name: 'explore', component: TopSuburbs },
   { path: '/saved', name: 'saved', component: Saved },
   { path: '/contact', name: 'contact', component: Contact },
+  { path: '/privacy', name: 'privacy', component: Privacy },
   { path: '/faq', name: 'faq', component: FAQ },
   { path: '/settings', name: 'settings', component: Settings },
   { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound },
