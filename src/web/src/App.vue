@@ -84,7 +84,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ResourcesModal from './components/ResourcesModal.vue';
 import AppLogo from './components/AppLogo.vue';
-import TipsBanner from './components/Tipsbanner.vue'; 
+import TipsBanner from './components/TipsBanner.vue'; 
 
 const router = useRouter();
 const showResources = ref(false);
