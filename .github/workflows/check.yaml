@@ -1,6 +1,5 @@
 name: Build
-
-on:
+'on':
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
@@ -8,20 +7,18 @@ on:
       - 'Dockerfile'
       - 'Makefile'
       - '.github/workflows/deploy.yaml'
-
+      - '.github/workflows/check.yaml'
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: true
-
       - name: Build
         run: |
           make docker-build
