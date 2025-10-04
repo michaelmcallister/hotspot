@@ -62,6 +62,7 @@
         </v-chip>
       </div>
 
+      
     </v-card-text>
   </v-card>
 </template>
