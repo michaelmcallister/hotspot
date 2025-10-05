@@ -31,7 +31,7 @@
 
       <v-main class="pb-12 pb-sm-14">
         <!-- Full width TipsBanner container -->
-        <div v-if="route.path === '/'" class="full-width-banner">
+        <div v-if="$route.path === '/'" class="full-width-banner">
           <TipsBanner />
         </div>
         <router-view />
@@ -80,13 +80,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import ResourcesModal from './components/ResourcesModal.vue';
 import AppLogo from './components/AppLogo.vue';
 import TipsBanner from './components/TipsBanner.vue';
 
 const router = useRouter();
-const route = useRoute();
 const showResources = ref(false);
 
 const goToFAQ = () => {
