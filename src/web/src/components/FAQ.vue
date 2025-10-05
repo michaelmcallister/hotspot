@@ -32,6 +32,27 @@
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <div v-html="faq.answer" class="faq-answer text-body-1"></div>
+                <!-- Resources Section -->
+                <div v-if="faq.resources && faq.resources.length > 0" class="mt-4 pt-3 border-t">
+                  <h4 class="text-subtitle-2 font-weight-bold mb-2">Data Sources:</h4>
+                  <v-list density="compact" class="bg-transparent">
+                    <v-list-item
+                      v-for="(resource, idx) in faq.resources"
+                      :key="idx"
+                      :href="resource.link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="pa-0 mb-1"
+                    >
+                      <template v-slot:prepend>
+                        <v-icon size="small" color="primary">mdi-open-in-new</v-icon>
+                      </template>
+                      <v-list-item-title class="text-caption text-primary">
+                        {{ resource.text }}
+                      </v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </div>
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -86,6 +107,10 @@ interface FAQItem {
   question: string
   answer: string
   category: string
+  resources?: {
+    text: string
+    link: string
+  }[]
 }
 
 const faqItems = ref<FAQItem[]>([
@@ -93,15 +118,23 @@ const faqItems = ref<FAQItem[]>([
     id: 1,
     question: "What is the Safety Score and how is it calculated?",
     answer: "The Safety Score is a numerical rating from 0-100 that represents the relative safety of a suburb. Our safety score is based on an estimated risk of motorbike theft for each suburb. We start with official motor vehicle theft statistics for each Council area in Victoria. Using data on the proportion of motorbike riders in each Council, we estimate the number of motorbike thefts. This creates a relative risk score that we then normalize to a simple 0-100 scale for easy comparison, where higher scores indicate safer areas.",
-    category: "safety"
+    category: "safety",
+    resources: [
+      {
+        text: "Crime Statistics Victoria - LGA Criminal Incidents",
+        link: "https://files.crimestatistics.vic.gov.au/2025-06/Data_Tables_LGA_Criminal_Incidents_Year_Ending_March_2025.xlsx"
+      },
+      {
+        text: "Transport Victoria - Travel and Activity Survey",
+        link: "https://opendata.transport.vic.gov.au/dataset/victorian-integrated-survey-of-travel-and-activity-vista"
+      }
+    ]
   },
-
   {
     id: 2,
     question: "Can I contribute parking information to Hotspot?",
     answer: "Yes! We encourage users to contribute parking information. You can add new parking locations, rate existing ones, and provide details about lighting, CCTV, and nearby facilities.",
-    category: "contribution",
-
+    category: "contribution"
   },
   {
     id: 3,
@@ -115,7 +148,6 @@ const faqItems = ref<FAQItem[]>([
     answer: "Risk levels are categorized as: <strong>Low Risk</strong> (80-100 safety score), <strong>Medium Risk</strong> (50-79 safety score), and <strong>High Risk</strong> (0-49 safety score). Suburbs within the same Council area often have similar scores because the initial risk calculation is done at the Council level using Victoria-wide crime and road user data. This Council-level score is then applied to all postcodes and suburbs within that Council. The score represents the overall risk level for the broader Council area rather than individual street-level risk.",
     category: "safety"
   },
- 
   {
     id: 5,
     question: "How can I report incorrect information?",
