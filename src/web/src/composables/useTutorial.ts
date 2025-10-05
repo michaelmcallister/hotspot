@@ -204,7 +204,7 @@ export function useTutorial() {
 
     tour.addStep({
       title: 'Explore Safety Rankings',
-      text: 'Here you can filter by postcode or LGA, sort by safety score, and explore the safest areas in Victoria.',
+      text: 'Here you can filter by postcode or Council, sort by safety score, and explore the safest areas in Victoria.',
       attachTo: createAttachment('.v-data-table', 'top'),
       buttons: [
         {
