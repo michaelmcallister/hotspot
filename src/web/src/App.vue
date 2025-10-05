@@ -34,6 +34,7 @@
         <router-view />
       </v-main>
 
+<<<<<<< HEAD
       <v-footer app color="grey-lighten-5" border="t" class="py-3">
         <v-container max-width="lg">
           <v-row>
@@ -72,6 +73,40 @@
         @close="showResources = false"
       />
     </v-layout> <!-- Added closing tag here -->
+=======
+    <v-footer color="grey-lighten-5" border="t" class="py-3">
+      <v-container max-width="lg">
+        <v-row>
+          <v-col cols="12" class="d-flex justify-center">
+            <AppLogo grey class="mb-1" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="text-center">
+            <div class="text-body-2 text-medium-emphasis mb-1">
+              Information provided for guidance only. Always use your own judgement when parking.
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="d-flex justify-center flex-wrap">
+            <v-btn to="/contact" variant="text" density="compact" size="small" class="text-grey-darken-1" aria-label="Contact">
+              Contact
+            </v-btn>
+            <v-btn to="/privacy" variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" aria-label="Privacy Policy">
+              Privacy Policy
+            </v-btn>
+            <v-btn variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" @click="showResources = true" aria-label="Resources">
+              Resources
+            </v-btn>
+            <v-btn variant="text" density="compact" size="small" class="text-grey-darken-1 ml-2" @click="goToFAQ" aria-label="FAQ">
+              FAQ
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-footer>
+>>>>>>> 4d5abd7fcf78d6c88f3dc6d47266fac76e28e4cd
   </v-app>
 </template>
 

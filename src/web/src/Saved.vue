@@ -177,7 +177,6 @@ const fetchSavedParking = async () => {
               }
             }
           } catch (error) {
-            console.error(`Failed to fetch parking for postcode ${postcode}:`, error);
             const cachedPostcodeData = parkingByPostcode.get(postcode);
             if (cachedPostcodeData) {
               allParkingData.push(...cachedPostcodeData);
@@ -190,7 +189,6 @@ const fetchSavedParking = async () => {
       }
   } catch (error) {
     // Fine for now, TODO: proper error handling (show a popup?)
-    console.error('Failed to fetch saved parking:', error);
   } finally {
     loading.value = false;
   }

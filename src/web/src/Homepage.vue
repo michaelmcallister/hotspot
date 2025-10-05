@@ -1,96 +1,88 @@
 <template>
-  <v-container class="pt-0 pt-md-1 pb-16 pb-md-20 px-0 px-sm-3">
-
-    <PageHero
-      title="Search Suburb"
-      subtitle="Discover motorbike theft hotspots in Melbourne suburbs and find the safest places to park your bike"
-      icon="mdi-map-search"
-      class="mt-n3 mt-sm-n2 mt-md-0"
-    >
-      <SearchBar
-        ref="searchBarRef"
-        v-model="searchQuery"
-        @search="showStaticReport"
-        @select="handleSuburbSelect"
-        @clear="handleSearchClear"
-        class="hero-search-bar mx-auto"
-      />
-    </PageHero>
-
-    <div v-if="!selectedSuburb" class="mt-12 mb-8" style="padding-bottom: 200px;">
-      <v-container>
-        <v-row class="justify-center align-center">
-          <v-col cols="12" lg="5" xl="4" class="text-center">
-            <div class="d-inline-block">
-              <img
-                src="/dude.png"
-                alt="Rider with motorbike"
-                class="dude-illustration"
-              />
-            </div>
-          </v-col>
-          <v-col cols="12" md="8" lg="6" xl="6" class="mx-auto">
-            <v-sheet rounded="lg" class="pa-4" color="primary-lighten-5" border>
-              <h3 class="text-h5 text-primary font-weight-bold mb-3 text-center text-lg-left">Find Safe Parking Spots</h3>
-              <p class="text-body-1 mb-3 text-center text-lg-left">
-                Discover the safest places to park your motorbike in Melbourne.
-                Get safety scores based on real data and contribute to the community
-                by sharing your favourite secure parking locations
-              </p>
-              <div class="text-center text-lg-right">
-                <v-btn
-                  @click="handleStartTutorial"
-                  color="primary"
-                  variant="outlined"
-                  prepend-icon="mdi-help-circle"
-                  size="large"
-                >
-                  Take a Tour
-                </v-btn>
-              </div>
-            </v-sheet>
+  <v-container fluid class="pa-0">
+    <v-container class="pt-0 pb-4 pb-sm-8 pb-md-12 px-3 px-sm-4">
+      <PageHero
+        title="Find Safe Spots"
+        subtitle="Simple, rider‑friendly safety scores and trusted places to park around Melbourne"
+        icon="mdi-map-search"
+      >
+        <v-row justify="center">
+          <v-col cols="12" sm="11" md="10" lg="8">
+            <SearchBar
+              ref="searchBarRef"
+              v-model="searchQuery"
+              @search="showStaticReport"
+              @select="handleSuburbSelect"
+              @clear="handleSearchClear"
+              style="font-size: 1rem;"
+            />
           </v-col>
         </v-row>
-      </v-container>
-    </div>
+      </PageHero>
 
-    <v-row v-if="selectedSuburb" class="mx-auto" style="max-width: 1200px; padding-bottom: 100px;">
-        <v-col cols="12" lg="5" xl="4">
-          <v-sheet rounded="lg" class="pa-4" color="white">
+      <v-fade-transition>
+        <div v-if="!selectedSuburb">
+          <v-row class="mt-4 mt-sm-6 mt-md-8" justify="center">
+            <v-col cols="12" sm="11" md="10" lg="8" xl="6">
+              <HomeCtaCard @start-tutorial="handleStartTutorial" />
+            </v-col>
+          </v-row>
+
+          <v-row class="mt-4 mt-sm-6 mt-md-8" justify="center">
+            <v-col cols="12" sm="11" md="10" lg="8">
+              <StatsStrip
+                :total-postcodes="statsDisplay.total_postcodes"
+                :total-lgas="statsDisplay.total_lgas"
+                :formatted-addresses="formattedAddresses"
+                :total-submissions="statsDisplay.total_submissions"
+              />
+            </v-col>
+          </v-row>
+        </div>
+      </v-fade-transition>
+    </v-container>
+
+    <v-fade-transition>
+      <v-container
+        v-if="selectedSuburb"
+        fluid
+        class="pa-3 pa-sm-4 pa-md-6"
+        :class="{ 'grey lighten-5': $vuetify.display.mdAndUp }"
+      >
+        <v-row class="mx-auto" :style="{ maxWidth: $vuetify.display.xlAndUp ? '1680px' : '100%' }">
+          <v-col cols="12" md="4" lg="3" class="mb-3 mb-md-0">
             <ScoreCard :suburb="selectedSuburb.suburb" :score="safetyScore" />
-          </v-sheet>
-        </v-col>
-
-        <v-col cols="12" lg="7" xl="8">
-          <v-sheet rounded="lg" class="pa-4" color="white">
+          </v-col>
+          <v-col cols="12" md="8" lg="9">
             <ParkingFeed
               ref="parkingFeedRef"
               :postcode="selectedSuburb.postcode"
               :suburb="selectedSuburb.suburb"
               @parking-submit="handleParkingSubmit"
             />
-          </v-sheet>
-        </v-col>
-      </v-row>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-fade-transition>
+
+    <StatusDialog
+      :show="showSuccessDialog"
+      type="success"
+      title="Thank you!"
+      :message="successMessage"
+      button-text="Got it"
+      @close="showSuccessDialog = false"
+    />
+
+    <StatusDialog
+      :show="showErrorDialog"
+      type="error"
+      title="Error"
+      :message="errorMessage"
+      button-text="OK"
+      @close="showErrorDialog = false"
+    />
   </v-container>
-
-  <StatusDialog
-    :show="showSuccessDialog"
-    type="success"
-    title="Thank you!"
-    :message="successMessage"
-    button-text="Got it"
-    @close="showSuccessDialog = false"
-  />
-
-  <StatusDialog
-    :show="showErrorDialog"
-    type="error"
-    title="Error"
-    :message="errorMessage"
-    button-text="OK"
-    @close="showErrorDialog = false"
-  />
 </template>
 
 <script setup lang="ts">
@@ -101,9 +93,13 @@ import ScoreCard from './components/ScoreCard.vue';
 import ParkingFeed from './components/ParkingFeed.vue';
 import PageHero from './components/PageHero.vue';
 import StatusDialog from './components/StatusDialog.vue';
+import HomeCtaCard from './components/HomeCtaCard.vue';
+import StatsStrip from './components/StatsStrip.vue';
 import { searchService, parkingService } from './services';
-import { createSlug, lookupSuburbBySlug, riskToSafetyScore } from './utils';
+import { statsService } from './services/statsService';
+import { createSlug, lookupSuburbBySlug, riskToSafetyScore, formatCompactCount } from './utils';
 import { useTutorial } from './composables/useTutorial';
+import type { SearchResult } from './services/searchService';
 
 const props = defineProps<{
   slug?: string;
@@ -113,13 +109,7 @@ const router = useRouter();
 const route = useRoute();
 const { startTutorial } = useTutorial();
 
-interface Suburb {
-  label: string;
-  suburb: string;
-  postcode: string;
-  lga: string;
-  risk_score: number;
-}
+type Suburb = SearchResult;
 
 const searchQuery = ref('');
 const selectedSuburb = ref<Suburb | null>(null);
@@ -129,11 +119,21 @@ const successMessage = ref('');
 const errorMessage = ref('');
 const parkingFeedRef = ref<any>(null);
 const searchBarRef = ref<any>(null);
+const stats = ref<any | null>(null);
 
 const safetyScore = computed(() => {
   if (!selectedSuburb.value) return 0;
   return riskToSafetyScore(selectedSuburb.value.risk_score);
 });
+
+const statsDisplay = computed(() => ({
+  total_postcodes: stats.value?.total_postcodes ?? '—',
+  total_lgas: stats.value?.total_lgas ?? '—',
+  total_addresses: stats.value?.total_addresses ?? 0,
+  total_submissions: stats.value?.total_submissions ?? '—',
+}));
+
+const formattedAddresses = computed(() => formatCompactCount(statsDisplay.value.total_addresses));
 
 const handleSuburbSelect = (suburb: Suburb) => {
   selectedSuburb.value = suburb;
@@ -154,9 +154,7 @@ const showStaticReport = async () => {
       if (results.length > 0) {
         selectedSuburb.value = results[0];
       }
-    } catch (error) {
-      console.error('Search error:', error);
-    }
+    } catch (error) { }
   }
 };
 
@@ -169,7 +167,6 @@ const handleParkingSubmit = async (data: any) => {
       parkingFeedRef.value.fetchSubmissions();
     }
   } catch (error: any) {
-    console.error('Network error:', error);
     errorMessage.value = error.message || 'Failed to submit parking location. Please check your connection and try again.';
     showErrorDialog.value = true;
   }
@@ -216,7 +213,7 @@ const handleStartTutorial = () => {
         await router.push({ name: 'suburb', params: { slug } });
       }
     } catch (error) {
-      console.error('Search error:', error);
+      // ignore tutorial search errors in production console
     }
   };
 
@@ -228,30 +225,10 @@ watch(() => route.name, handleRouteChange);
 
 onMounted(() => {
   handleRouteChange();
+  statsService.getSummary().then((s) => {
+    stats.value = s;
+  }).catch(() => {
+    stats.value = null;
+  });
 });
-
 </script>
-
-<style scoped>
-.hero-search-bar {
-  max-width: 600px;
-}
-
-.hero-search-bar :deep(.v-field) {
-  font-size: 1.1rem;
-}
-
-
-.dude-illustration {
-  max-width: 300px;
-  height: auto;
-  object-fit: contain;
-}
-
-@media (max-width: 768px) {
-  .dude-illustration {
-    max-width: 250px;
-  }
-}
-
-</style>

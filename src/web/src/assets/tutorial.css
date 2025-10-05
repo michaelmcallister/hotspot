@@ -74,6 +74,29 @@
   border-color: #bdbdbd;
 }
 
+.shepherd-theme-hotspot .shepherd-cancel-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: white !important;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  z-index: 10;
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+.shepherd-theme-hotspot .shepherd-cancel-icon:hover {
+  opacity: 1;
+  color: #f5f5f5 !important;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
 @media (max-width: 767px) {
   .shepherd-theme-hotspot {
     max-width: calc(100vw - 32px);

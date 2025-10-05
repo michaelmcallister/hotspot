@@ -151,7 +151,7 @@ onMounted(() => {
 const form = ref()
 const valid = ref(false)
 const email = ref('')
-const category = ref('')
+const category = ref('General Inquiry')
 const subject = ref('')
 const postcode = ref('')
 const details = ref('')
@@ -209,7 +209,7 @@ const handleLoadCallback = (response: string) => {
 const resetForm = () => {
   form.value?.reset()
   email.value = ''
-  category.value = ''
+  category.value = 'General Inquiry'
   subject.value = ''
   postcode.value = ''
   details.value = ''
