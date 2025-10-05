@@ -12,7 +12,10 @@ export function useTutorial() {
       defaultStepOptions: {
         classes: 'shepherd-theme-hotspot',
         scrollTo: false,
-        modalOverlayOpeningPadding: 8
+        modalOverlayOpeningPadding: 8,
+        cancelIcon: {
+          enabled: true
+        }
       }
     })
 
@@ -43,11 +46,18 @@ export function useTutorial() {
     tour.addStep({
       title: 'Welcome to Hotspot',
       text: 'This tutorial will guide you through the key features of Hotspot - your guide to safe motorbike parking in Victoria',
-      buttons: createButtons(false, undefined, 'Skip', () => tour.complete()).concat([{
-        text: 'Next',
-        classes: 'shepherd-button-primary',
-        action: () => tour.next()
-      }])
+      buttons: [
+        {
+          text: 'Skip',
+          classes: 'shepherd-button-secondary',
+          action: () => tour.complete()
+        },
+        {
+          text: 'Start Tour',
+          classes: 'shepherd-button-primary',
+          action: () => tour.next()
+        }
+      ]
     })
 
     tour.addStep({
