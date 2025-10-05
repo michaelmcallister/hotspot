@@ -18,9 +18,6 @@
             <v-btn icon="mdi-dots-vertical" color="primary" v-bind="props"></v-btn>
           </template>
           <v-list>
-            <v-list-item @click="showResources = true">
-              <v-list-item-title class="text-button text-primary">Resources</v-list-item-title>
-            </v-list-item>
             <v-list-item to="/settings">
               <v-list-item-title class="text-button text-primary">Settings</v-list-item-title>
             </v-list-item>
@@ -33,10 +30,9 @@
     </v-app-bar>
 
     <v-main class="pb-12 pb-sm-14">
-      
-      <TipsBanner />
-      <router-view />
-    </v-main>
+  <TipsBanner v-if="$route.path === '/'" />
+  <router-view />
+</v-main>
 
     <v-footer app color="grey-lighten-5" border="t" class="py-3">
       <v-container max-width="lg">
