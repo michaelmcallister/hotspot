@@ -24,6 +24,8 @@ export function useTutorial() {
       return isMobile() ? undefined : { element, on: position }
     }
 
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
     const createButtons = (showBack = true, backAction?: () => void, nextText = 'Next', nextAction?: () => void) => [
       ...(showBack ? [{
         text: 'Back',
@@ -37,15 +39,6 @@ export function useTutorial() {
       }
     ]
 
-    const navigateAndBack = (path: string) => () => {
-      router.push(path)
-      tour.back()
-    }
-
-    const navigateAndNext = (path: string) => () => {
-      router.push(path)
-      tour.next()
-    }
 
     tour.addStep({
       title: 'Welcome to Hotspot',
@@ -147,59 +140,52 @@ export function useTutorial() {
 
     tour.addStep({
       title: 'Share Your Parking Spot',
-      text: 'Found a great secure spot? Use this form to share it with the community. Add details about lighting, security, and nearby facilities.',
-      attachTo: createAttachment('.v-sheet:has([data-testid="parking-form"])', 'left'),
-      buttons: [
-        {
-          text: 'Back',
-          classes: 'shepherd-button-secondary',
-          action: () => tour.back()
-        },
-        {
-          text: 'Next',
-          classes: 'shepherd-button-primary',
-          action: () => tour.next()
+      text: 'Found a great secure spot? Click here to share it with the community. Add details about lighting, security, and nearby facilities.',
+      attachTo: createAttachment('[data-testid="parking-add-button"]', 'left'),
+      beforeShowPromise: async () => {
+        // Make sure we're on a suburb page (Melbourne from step 2)
+        const currentPath = router.currentRoute.value.path
+        if (!currentPath.includes('/suburb/')) {
+          // Go back to Melbourne which was searched in step 2
+          await router.push('/suburb/melbourne-3000')
+          await wait(500)
         }
-      ]
+
+        // Click the Parking Feed tab to ensure we're on the right tab
+        const parkingFeedTab = document.querySelector('[data-testid="parking-feed-tab"]') as HTMLElement | null
+        if (parkingFeedTab) {
+          parkingFeedTab.click()
+          await wait(300)
+        }
+
+        // Wait for the Add Location button to appear and scroll to it
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const addButton = document.querySelector('[data-testid="parking-add-button"]') as HTMLElement | null
+          if (addButton && addButton.offsetParent !== null) {
+            addButton.scrollIntoView({ block: 'center', behavior: 'smooth' })
+            break
+          }
+          await wait(200)
+        }
+      },
+      buttons: createButtons()
     })
 
     tour.addStep({
       title: 'Navigate the App',
       text: 'Use the navigation bar to access different sections. Home brings you back to the search page.',
       attachTo: createAttachment('a[href="/"]', 'bottom'),
-      buttons: [
-        {
-          text: 'Back',
-          classes: 'shepherd-button-secondary',
-          action: () => tour.back()
-        },
-        {
-          text: 'Next',
-          classes: 'shepherd-button-primary',
-          action: () => tour.next()
-        }
-      ]
+      buttons: createButtons()
     })
 
     tour.addStep({
       title: 'Explore',
       text: 'View suburbs ranked by safety score to find the safest places to park your bike.',
       attachTo: createAttachment('a[href="/explore"]', 'bottom'),
-      buttons: [
-        {
-          text: 'Back',
-          classes: 'shepherd-button-secondary',
-          action: () => tour.back()
-        },
-        {
-          text: 'Visit Page',
-          classes: 'shepherd-button-primary',
-          action: () => {
-            router.push('/explore')
-            tour.next()
-          }
-        }
-      ]
+      buttons: createButtons(true, undefined, 'Visit Page', () => {
+        router.push('/explore')
+        tour.next()
+      })
     })
 
     tour.addStep({
@@ -253,38 +239,34 @@ export function useTutorial() {
       title: 'More Options',
       text: 'Click here to access additional features like Resources, Settings, and Contact information.',
       attachTo: createAttachment('button[aria-haspopup="menu"]', 'left'),
-      buttons: [
-        {
-          text: 'Back',
-          classes: 'shepherd-button-secondary',
-          action: () => {
-            router.push('/saved')
-            tour.back()
-          }
-        },
-        {
-          text: 'Next',
-          classes: 'shepherd-button-primary',
-          action: () => tour.next()
-        }
-      ]
+      buttons: createButtons(true, () => {
+        router.push('/saved')
+        tour.back()
+      })
     })
 
     tour.addStep({
       title: 'You\'re Ready!',
-      text: 'You\'ve seen how to search suburbs, explore the navigation, and view safety data. Start exploring Victorias safest parking spots and contribute to the community by sharing your discoveries.',
-      buttons: [
-        {
-          text: 'Back',
-          classes: 'shepherd-button-secondary',
-          action: () => tour.back()
-        },
-        {
-          text: 'Get Started',
-          classes: 'shepherd-button-primary',
-          action: () => tour.complete()
-        }
-      ]
+      text: 'Start exploring Victoria\'s safest parking spots and contribute to the community by sharing your discoveries.',
+      buttons: createButtons(true, undefined, 'Get Started', () => tour.complete())
+    })
+
+    const totalSteps = tour.steps.length
+    tour.steps.forEach((step, index) => {
+      const originalTitle = step.options?.title
+      const numberedTitle = () => {
+        const resolvedTitle =
+          typeof originalTitle === 'function'
+            ? originalTitle.call(step)
+            : originalTitle ?? ''
+        return resolvedTitle
+          ? `${index + 1}/${totalSteps} ${resolvedTitle}`
+          : `${index + 1}/${totalSteps}`
+      }
+
+      step.updateStepOptions({
+        title: numberedTitle
+      })
     })
 
     tour.on('complete', () => {
