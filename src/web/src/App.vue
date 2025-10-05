@@ -29,11 +29,16 @@
       </template>
     </v-app-bar>
 
-    <v-main class="pb-12 pb-sm-14">
+    <v-main>
       <router-view />
     </v-main>
+    <ResourcesModal
+      :show="showResources"
+      @close="showResources = false"
+    />
+    </v-layout>
 
-    <v-footer app color="grey-lighten-5" border="t" class="py-3">
+    <v-footer color="grey-lighten-5" border="t" class="py-3">
       <v-container max-width="lg">
         <v-row>
           <v-col cols="12" class="d-flex justify-center">
@@ -65,12 +70,6 @@
         </v-row>
       </v-container>
     </v-footer>
-
-    <ResourcesModal
-      :show="showResources"
-      @close="showResources = false"
-    />
-    </v-layout>
   </v-app>
 </template>
 

@@ -470,8 +470,24 @@ class PersistentDatabase(DatabaseInterface):
         return facilities_list
 
     def get_parking_submissions_count(self) -> int:
-        response = self.dynamodb.describe_table(TableName=self.table_name)
-        return response['Table']['ItemCount']
+        try:
+            resp = self.table.get_item(
+                Key={"postcode": "COUNTER", "parking_id": 0},
+                ConsistentRead=True,
+                ProjectionExpression="#c",
+                ExpressionAttributeNames={"#c": "counter"}
+            )
+            counter = resp.get("Item", {}).get("counter")
+            if isinstance(counter, (int, float)):
+                return int(counter)
+        except Exception:
+            pass
+
+        try:
+            response = self.dynamodb.meta.client.describe_table(TableName=self.table_name)
+            return int(response.get("Table", {}).get("ItemCount", 0))
+        except Exception:
+            return 0
 
 def get_database() -> DatabaseInterface:
     """Factory function to get the appropriate database implementation based on environment"""
