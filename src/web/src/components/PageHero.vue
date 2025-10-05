@@ -1,53 +1,67 @@
 <template>
-  <v-row justify="center">
-    <v-col cols="12" lg="10" xl="8">
+  <v-row justify="center" class="mb-0">
+    <v-col cols="12" sm="11" md="10" lg="10" xl="8">
       <v-card
         rounded="xl"
-        elevation="2"
-        color="grey-lighten-5"
-        class="pt-3 pt-sm-4 pt-md-6 px-6 px-sm-8 px-md-12 pb-4 pb-sm-6 pb-md-8 mt-3 mt-sm-5 mb-3 mb-md-5 text-center"
+        elevation="0"
+        variant="flat"
+        :class="{
+          'pa-4 pa-sm-6 pa-md-8': true,
+          'mt-2 mb-1': $vuetify.display.xs,
+          'mt-3 mb-2': $vuetify.display.smAndUp,
+          'text-center': true
+        }"
       >
-        <v-card-title class="pa-0 mb-4">
-          <div class="d-flex d-sm-none flex-column align-center">
+        <v-card-title class="pa-0 mb-3 mb-sm-4 d-flex justify-center">
+          <div class="d-flex flex-column flex-sm-row align-center">
             <v-avatar
-              size="48"
-              class="mb-3"
+              :size="$vuetify.display.xs ? 48 : 56"
+              :class="{
+                'mb-2': $vuetify.display.xs,
+                'mr-3': $vuetify.display.smAndUp
+              }"
               color="primary"
               variant="tonal"
             >
-              <v-icon size="28" color="primary">{{ icon }}</v-icon>
+              <v-icon
+                :size="$vuetify.display.xs ? 28 : 32"
+                color="primary"
+              >
+                {{ icon }}
+              </v-icon>
             </v-avatar>
-            <span class="hero-title text-h4 text-sm-h3 font-weight-bold text-high-emphasis text-center">
-              {{ title }}
-            </span>
-          </div>
-
-          <div class="d-none d-sm-flex align-center justify-center">
-            <v-avatar
-              size="48"
-              class="mr-4"
-              color="primary"
-              variant="tonal"
+            <h1
+              :class="{
+                'text-h5': $vuetify.display.xs,
+                'text-h4': $vuetify.display.sm,
+                'text-h3': $vuetify.display.mdAndUp,
+                'font-weight-bold': true
+              }"
             >
-              <v-icon size="28" color="primary">{{ icon }}</v-icon>
-            </v-avatar>
-            <span class="hero-title text-h3 font-weight-bold text-high-emphasis">
               {{ title }}
-            </span>
+            </h1>
           </div>
         </v-card-title>
 
-        <div class="text-caption text-sm-body-1 text-medium-emphasis mb-3 mb-sm-4 px-2">
-          {{ subtitle }}
-        </div>
+        <v-card-subtitle
+          class="pa-0 mb-3 mb-sm-4"
+          :class="{
+            'text-body-2': $vuetify.display.xs,
+            'text-body-1': $vuetify.display.smAndUp,
+            'text-medium-emphasis': true
+          }"
+        >
+          <div class="mx-auto px-2" :style="{ maxWidth: $vuetify.display.xs ? '100%' : '700px' }">
+            {{ subtitle }}
+          </div>
+        </v-card-subtitle>
 
         <v-divider
-          class="mx-auto mb-4 mb-sm-6"
-          :class="{ 'mb-sm-8': !$slots.default }"
+          v-if="showDivider && !$vuetify.display.xs"
+          class="mx-auto mb-3 mb-sm-4"
           color="primary"
           thickness="3"
-          length="100"
-          style="max-width: 140px;"
+          style="max-width: 100px; opacity: 0.5;"
         />
 
         <v-card-text v-if="$slots.default" class="pa-0">
@@ -59,16 +73,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed, useSlots } from 'vue'
+
 defineProps<{
   title: string
   subtitle: string
   icon: string
 }>()
-</script>
 
-<style scoped>
-.hero-title {
-  white-space: normal;
-  word-break: break-word;
-}
-</style>
+const slots = useSlots()
+const showDivider = computed(() => !!slots.default)
+</script>

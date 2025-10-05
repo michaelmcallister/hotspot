@@ -34,7 +34,7 @@
   <router-view />
 </v-main>
 
-    <v-footer app color="grey-lighten-5" border="t" class="py-3">
+    <v-footer color="grey-lighten-5" border="t" class="py-3">
       <v-container max-width="lg">
         <v-row>
           <v-col cols="12" class="d-flex justify-center">
@@ -66,12 +66,6 @@
         </v-row>
       </v-container>
     </v-footer>
-
-    <ResourcesModal
-      :show="showResources"
-      @close="showResources = false"
-    />
-    </v-layout>
   </v-app>
 </template>
 

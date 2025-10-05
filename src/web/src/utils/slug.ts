@@ -35,7 +35,7 @@ export async function lookupSuburbBySlug(slug: string): Promise<any | null> {
     const results = await searchService.search(searchTerm);
     return results.length > 0 ? results[0] : null;
   } catch (error) {
-    console.error('Error looking up suburb by slug:', error);
+    // ignore lookup errors and return null
     return null;
   }
 }

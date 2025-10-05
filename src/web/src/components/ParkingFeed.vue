@@ -5,7 +5,10 @@
       color="primary"
       grow
     >
-      <v-tab value="Parking Feed">
+      <v-tab
+        value="Parking Feed"
+        data-testid="parking-feed-tab"
+      >
         <v-icon size="20">mdi-parking</v-icon>
         <span class="d-none d-sm-inline ml-2">Parking Feed</span>
         <v-spacer class="d-none d-sm-flex" />
@@ -46,6 +49,7 @@
               <template v-slot:text>
                 <div class="text-center mt-4">
                   <v-btn
+                    data-testid="parking-add-button"
                     color="primary"
                     variant="elevated"
                     @click="showAddParkingModal = true"
@@ -64,6 +68,7 @@
           <div class="scroll-container pa-3" @scroll="(e) => handleScroll(e, loadMoreSubmissions)">
             <div class="d-flex justify-end align-center mb-3">
               <v-btn
+                data-testid="parking-add-button"
                 color="primary"
                 variant="tonal"
                 size="small"

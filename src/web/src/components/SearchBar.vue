@@ -10,13 +10,13 @@
     clearable
     variant="outlined"
     bg-color="white"
-    density="comfortable"
-    rounded="lg"
+    :density="$vuetify.display.xs ? 'compact' : 'comfortable'"
+    :rounded="$vuetify.display.xs ? 'lg' : 'xl'"
     hide-no-data
     hide-details
     prepend-inner-icon="mdi-magnify"
     placeholder="Enter suburb or postcode (e.g., Toorak, 3142)"
-    class="mx-auto mb-8"
+    class="mx-auto mb-6 mb-sm-8 hero-search-bar"
     style="max-width: 1200px;"
     @update:model-value="onSelect"
     @update:search="onSearchUpdate"
@@ -78,7 +78,7 @@ onMounted(async () => {
       risk_score: Number(r.risk_score || 0)
     }))
   } catch (e) {
-    console.warn('Failed to load default suggestions:', e)
+    // silently ignore default suggestions errors in production
     defaultSuggestions.value = []
   }
 })
@@ -98,7 +98,7 @@ async function onSearchUpdate(value: string) {
     try {
       searchResults.value = await searchService.search(value)
     } catch (e) {
-      console.error('Search failed:', e)
+      // ignore search errors
       searchResults.value = []
     } finally {
       loading.value = false

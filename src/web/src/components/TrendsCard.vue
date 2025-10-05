@@ -131,7 +131,6 @@ const fetchTheftData = async () => {
   try {
     theftData.value = await postcodeService.getTheftData(props.postcode);
   } catch (error) {
-    console.warn(`Failed to fetch theft data for ${props.postcode}:`, error);
     theftData.value = [];
   } finally {
     loading.value = false;

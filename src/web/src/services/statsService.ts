@@ -6,6 +6,6 @@ export interface StatsSummary {
 
 export const statsService = {
   async getSummary(): Promise<StatsSummary> {
-    return apiRequest('/stats/summary');
+    return apiRequest('/statistics/summary');
   },
 };

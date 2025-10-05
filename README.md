@@ -19,8 +19,7 @@ You can try out **Hotspot - Motorbike Theft Web App** here:
 *Iteration 1 is no longer updated and is frozen at commit [336fd28](https://github.com/michaelmcallister/hotspot/tree/336fd28919edad49d9133a57412ab5a945a90fe8)
 
 Below is a preview of the app interface:
-![Hotspot Screenshot](docs/pc.png?raw=true)
-![Hotspot Screenshot](docs/mobile.png?raw=true)
+![Hotspot Screenshot](docs/app.png?raw=true)
 
 ## Project Structure
 
