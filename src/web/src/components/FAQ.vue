@@ -117,7 +117,7 @@ const faqItems = ref<FAQItem[]>([
   {
     id: 1,
     question: "What is the Safety Score and how is it calculated?",
-    answer: "The Safety Score is a numerical rating from 0-100 that represents the relative safety of a suburb. Our safety score is based on an estimated risk of motorbike theft for each suburb. We start with official motor vehicle theft statistics for each Local Government Area (LGA) in Victoria. Using data on the proportion of motorbike riders in each LGA, we estimate the number of motorbike thefts. This creates a relative risk score that we then normalize to a simple 0-1 scale for easy comparison, where lower scores indicate safer areas.",
+    answer: "The Safety Score is a numerical rating from 1-100 that represents the relative safety of a suburb. Our safety score is based on an estimated risk of motorbike theft for each suburb. We start with official motor vehicle theft statistics for each Local Government Area (LGA) in Victoria. Using data on the proportion of motorbike riders in each LGA, we estimate the number of motorbike thefts. This creates a relative risk score that we then normalize to a simple 0-1 scale for easy comparison, where lower scores indicate safer areas.",
     category: "safety",
     resources: [
       {
@@ -145,7 +145,7 @@ const faqItems = ref<FAQItem[]>([
   {
     id: 4,
     question: "What do the different risk levels mean?",
-    answer: "Risk levels are categorized as: <strong>Low Risk</strong> (100-75 safety score), <strong>Medium Risk</strong> (75-50 safety score), and <strong>High Risk</strong> (49-0 safety score). Suburbs within the same Council area often have similar scores because the initial risk calculation is done at the Council level using Victoria-wide crime and road user data. This Council-level score is then applied to all postcodes and suburbs within that Council. The score represents the overall risk level for the broader Council area rather than individual street-level risk.",
+    answer: "Risk levels are categorized as: <strong>Low Risk</strong> (100-75 safety score), <strong>Medium Risk</strong> (75-50 safety score), and <strong>High Risk</strong> (49-1 safety score). Suburbs within the same Council area often have similar scores because the initial risk calculation is done at the Council level using Victoria-wide crime and road user data. This Council-level score is then applied to all postcodes and suburbs within that Council. The score represents the overall risk level for the broader Council area rather than individual street-level risk.",
     category: "safety"
   },
   {
