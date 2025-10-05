@@ -31,8 +31,10 @@ const tips = ref([
   "🎯 Don't park by chance - park with purpose."
 ]);
 
-const currentTipIndex = ref(0);
-const currentTip = ref({ text: tips.value[0] });
+// Start with a random tip
+const randomStartIndex = Math.floor(Math.random() * tips.value.length);
+const currentTipIndex = ref(randomStartIndex);
+const currentTip = ref({ text: tips.value[randomStartIndex] });
 let rotationInterval: number | null = null;
 
 const nextTip = () => {
